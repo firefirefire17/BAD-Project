@@ -14,7 +14,7 @@
                     <th scope="col"></th>
                 </thead>
                 <tbody>
-                    {% for product_data in product_materials_list %}
+                    {% for product_data in product_materials_list %} <!-- check views to see full breakdown of product_data -->
                     <tr style="height: 75px;">
                         <td>{{ product_data.product.pk }}</td>
                         <td>{{ product_data.product.name }}</td>
@@ -25,7 +25,7 @@
                         </td>
                     </tr>
                     
-                    <!-- Edit Product -->
+                    <!-- modal to edit products -->
                     <div class="modal-container fade-in" id="editProduct{{ product_data.product.pk }}">
                         <div class="modal-content modal-content-product fade-in">
                             <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
@@ -53,11 +53,11 @@
                                             <div class="col-1"></div>
                                         </div>
                                         <div id="{{product_data.product.pk}}_productMaterialContainer">
-                                            {% for y in product_data.materials %}
+                                            {% for product_material in product_data.materials %}
                                             <div class="row align-items-center mt-2" id="{{product_data.product.pk}}_productMaterial_row{{ forloop.counter }}">
-                                                <input type="hidden" name="{{product_data.product.pk}}_productMaterial_pk{{ forloop.counter }}" id="{{product_data.product.pk}}_productMaterial_pk{{ forloop.counter }}" value="{{ y.pk }}">
+                                                <input type="hidden" name="{{product_data.product.pk}}_productMaterial_pk{{ forloop.counter }}" id="{{product_data.product.pk}}_productMaterial_pk{{ forloop.counter }}" value="{{ product_material.pk }}">
                                                 <div class="col-4">
-                                                    <select class="input-select" id="{{product_data.product.pk}}_product_material{{ forloop.counter }}" name="{{product_data.product.pk}}_product_material{{ forloop.counter }}" value="{{y.material.pk}}">
+                                                    <select class="input-select" id="{{product_data.product.pk}}_product_material{{ forloop.counter }}" name="{{product_data.product.pk}}_product_material{{ forloop.counter }}" value="{{product_material.material.pk}}">
                                                         <option value="delete">None</option>
                                                         {% for z in materials %}
                                                             <option value="{{z.pk}}" {% if z.pk == y.material.pk %}selected{% endif %}>{{z.name}}</option>
@@ -65,10 +65,10 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-3">
-                                                    <input type="number" class="form-control" id="quantity{{ forloop.counter }}" name="quantity{{ forloop.counter }}" value="{{y.quantity}}">
+                                                    <input type="number" class="form-control" id="quantity{{ forloop.counter }}" name="quantity{{ forloop.counter }}" value="{{product_material.quantity}}">
                                                 </div>
                                                 <div class="col-3">
-                                                    <input type="text" class="form-control" id="unit{{ forloop.counter }}" name="unit{{ forloop.counter }}" value="{{y.material.unit}}" readonly>
+                                                    <input type="text" class="form-control" id="unit{{ forloop.counter }}" name="unit{{ forloop.counter }}" value="{{product_material.material.unit}}" readonly>
                                                 </div> 
                                                 <div class="col-1">
                                                     <button type="button" class="btn dark-button delete-productMaterial" data-select-element-id="{{product_data.product.pk}}_product_material{{ forloop.counter }}" data-row-id="{{product_data.product.pk}}_productMaterial_row{{ forloop.counter }}"> &times </button>
@@ -90,7 +90,7 @@
                                         <button type="button" class="btn dark-button" onclick="toggleModal('confirmEditProduct{{product_data.product.pk}}', 'open')"> Save Edits </button>
                                     </div>
 
-                                    <!-- confirm edit product -->
+                                    <!-- modal to confirm edits to product -->
                                     <div class="modal-overlap-container fade-in" id="confirmEditProduct{{product_data.product.pk}}">
                                         <div class="modal-overlap-content fade-in">
                                             <div class="container-fluid">
@@ -119,6 +119,8 @@
                                 <div class="col-4 order-1 mr-auto text-left">
                                     <button type="button" class="btn dark-button" onclick="toggleModal('confirmDeleteProduct{{product_data.product.pk}}', 'open')"> Delete Product </button>
                                 </div>
+
+                                <!-- modal to confirm deletion of product -->
                                 <div class="modal-overlap-container fade-in" id="confirmDeleteProduct{{product_data.product.pk}}">
                                     <form method="POST" action="{% url 'products' %}"> {% csrf_token %}
                                         <div class="modal-overlap-content fade-in">
@@ -154,7 +156,7 @@
                 </tbody>
             </table>
                 
-            <!-- Add Product -->
+            <!-- modal to add product to table -->
             </div>
             <div class="row ml-auto pr-3">
                 <button type="button" class="btn light-button" onclick="toggleModal('addProduct', 'open')"> Add Product</button>
@@ -218,7 +220,7 @@
                             </div>
                         </div>
 
-                        <!-- confirm add product -->
+                        <!-- mmodal to confirm addition of product -->
                         <div class="modal-overlap-container fade-in" id="confirmAddProduct">
                             <div class="modal-overlap-content">
                                 <div class="container-fluid">

@@ -50,7 +50,7 @@ class Order(models.Model):
     payment_type = models.CharField(max_length=50)
     order_status = models.CharField(max_length=50, default="In-queue")
     order_date = models.DateField()
-    delivery_date = models.DateField()
+    delivery_date = models.DateField(null=True)
     order_price = models.FloatField(null=True, blank=True)
     address_city = models.CharField(max_length=50)
     address_street = models.CharField(max_length=50)

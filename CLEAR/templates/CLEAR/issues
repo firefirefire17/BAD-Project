@@ -1,0 +1,23 @@
+product
+1. add rows on edit product doesn't work properly back-end wise
+    cloned rows don't get caught by request.POST
+
+materials
+1. materials template is pretty messy, not sure whether all the elements are closed properly
+
+orders
+1. orders doesn't have add row utility
+2. add orders and edit orders are currently fixed to 3 items and 2 materials per item, due to the lack of adding rows
+3. does not have modals to confirm edits/deletes/adds (if we plan to add that) 
+
+back-end
+1. pricing calculation hasn't been implemented yet
+2. decide whether to store customer entities or not
+
+overall front-end
+1. need better way of adding rows on click
+2. template code is pretty messy
+2. might be better to strip ids from elements that dont need them
+3. lots of inline styling right now
+4. not sure how to dynamically show to-be created object's ids or units (might need to manually set objects ids)
+5. table heights are fixed to accommodate overflow so table rows are very large when there's only few entires

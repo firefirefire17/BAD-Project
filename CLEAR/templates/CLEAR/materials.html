@@ -26,7 +26,8 @@
                     <td> <button type="button" class="btn light-button" onclick="toggleModal('editMaterial{{x.pk}}', 'open')">Edit</button>
                     </td>
                 </tr>
-        
+            
+            <!-- modal to edit materials -->
             <div class="modal-container fade-in" id="editMaterial{{x.pk}}">
                 <div class="modal-content fade-in">
                     <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
@@ -76,6 +77,7 @@
                                 <button type="button" class="btn dark-button" onclick="toggleModal('confirmEditMaterial{{x.pk}}', 'open')"> Save Edits </button>
                             </div>
                             
+                            <!-- modal to confirm edits to material -->
                             <div class="modal-overlap-container fade-in" id="confirmEditMaterial{{x.pk}}">
                                 <div class="modal-overlap-content fade-in">
                                     <div class="container-fluid">
@@ -101,7 +103,8 @@
                                 </div>
                             </div>
                             </form>
-
+                            
+                            <!-- modal to confirm deletion of material -->
                             <div class="col-4 order-1 mr-auto text-left">
                                 <button type="button" class="btn dark-button" onclick="toggleModal('confirmDeleteMaterial{{x.pk}}', 'open')"> Delete Material </button>
                             </div>
@@ -154,7 +157,7 @@
 </tbody>
 </table>
 
-
+<!-- modal to add material -->
 <div class="modal-container fade-in" id="addMaterial">
     <div class="modal-content fade-in">
         <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:10px;">
@@ -207,6 +210,7 @@
                 </div>
              </div>
 
+             <!-- modal to confirm addition of material -->
              <div class="modal-overlap-container fade-in" id="confirmAddMaterial">
                 <div class="modal-overlap-content fade-in">
                     <div class="container-fluid">

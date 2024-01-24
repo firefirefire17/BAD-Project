@@ -63,7 +63,7 @@
                 </li>
                 </ul>
             </div>
-        <div class="col-md-10" style="background-color:#EBEBEB;">
+        <div class="col-10" style="background-color:#EBEBEB;">
             {% block content %}
             {% endblock %}
         </div>
@@ -114,6 +114,7 @@
                 console.log(formData);
             }
 
+            // this function clones rows properly, but cloned rows do not get recognized back-end wise
             function addRow_editProduct(currentRowCount, productPK) {
 
                 var rowCounter = currentRowCount + 1;

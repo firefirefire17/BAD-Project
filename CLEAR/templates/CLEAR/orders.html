@@ -14,7 +14,7 @@
                     <th scope="col"></th>
                 </thead>
                 <tbody>
-                    {% for order_data in orders %}
+                    {% for order_data in orders %} <!-- see views for order_data breakdown -->
                     <tr style="height: 75px;">
                         <td>{{ order_data.order.pk }}</td>
                         <td>{{ order_data.order.purchase_mode }}</td>
@@ -25,6 +25,7 @@
                         </td>
                     </tr>
 
+                    <!-- modal to edit an order -->
                     <div class="modal-container fade-in" id="editOrder{{ order_data.order.pk }}">
                         <div class="modal-content modal-content-order fade-in"> 
                             <div class="row ml-3 mt-0" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
@@ -64,9 +65,9 @@
                                             <div class="col-2"></div>
                                             <div class="col-1"></div>
                                         </div>
-                                        <!-- iteration through 3 product rows on the order screen here -->
+                                        <!-- iteration through all items in an order -->
                                         {% for item_data in order_data.items %}
-                                        {% with item_number=forloop.counter %}
+                                        {% with item_number=forloop.counter %} <!-- sets item_number as the counter for items -->
                                         <input type="hidden" name="hidden_item_pk{{forloop.counter}}" value="{{item_data.item.item.pk}}">
                                         <input type="hidden" name="hidden_order_item_pk{{forloop.counter}}" value="{{item_data.item.pk}}">
                                         <div class="row mt-2" id="{{order_data.order.pk}}order_item_row{{forloop.counter}}">
@@ -85,7 +86,7 @@
                                         </div>
                                         
                                     
-                                        <!-- Add Item screen  -->
+                                        <!-- modal to edit an item  -->
                                         <div class="modal-overlap-container fade-in" id="{{order_data.order.pk}}editOrderItem{{ forloop.counter }}">
                                             <div class="modal-overlap-content" style="width: 40%; height: 65%; margin: 5% auto;">
                                                 <div class="row ml-3 mt-0" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
@@ -155,6 +156,7 @@
                                                 {% endfor %}
                                                 {% endwith %}
                                                 
+                                                <!-- not sure how to push this element down the card -->
                                                 <div class="row">
                                                     <div class="col">
                                                         Item cost:
@@ -232,6 +234,8 @@
                         </div>
                     </div>
 
+
+                    <!-- modal to delete an order -->
                     <div class="modal-overlap-container fade-in" id="confirmDeleteOrder{{order_data.order.pk}}">
                         <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
                             <div class="modal-overlap-content fade-in">
@@ -268,7 +272,7 @@
                 </tbody>
             </table>
 
-            <!-- Add Order -->
+            <!-- modal to add an order -->
             </div>
             <div class="row ml-auto pr-3">
                 <button type="button" class="btn light-button" onclick="toggleModal('addOrder', 'open')"> Add Order</button>
@@ -310,7 +314,7 @@
                                     <div class="col-2"></div>
                                     <div class="col-1"></div>
                                 </div>
-                                <!-- iteration through 3 product rows on the order screen here -->
+                                <!-- fixed iteration through 3 product rows -->
                                 {% for y in "123" %}
                                 <div class="row mt-2" id="order_item_row{{forloop.counter}}">
                                     <div class="col-3 text-center">
@@ -328,7 +332,7 @@
                                 </div>
                                 
                             
-                                <!-- Add Item screen  -->
+                                <!-- modal to add an item  -->
                                 <div class="modal-overlap-container fade-in" id="addOrderItem{{ forloop.counter }}">
                                     <div class="modal-overlap-content" style="width: 40%; height: 65%; margin: 5% auto;">
                                         <div class="row ml-3 mt-0" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
@@ -371,7 +375,7 @@
                                             <div class="col-3">Unit:</div>
                                             <div class="col"></div>
                                         </div>
-                                        <!-- iteration through 2 materials of each item -->
+                                        <!-- fixed iteration through 2 item_materials -->
                                         {% for x in "12" %}
                                         <div class="row mt-2" id="{{item_number}}_item_material_row{{forloop.counter}}">
                                             <div class="col-5">
