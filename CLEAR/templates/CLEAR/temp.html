@@ -1,0 +1,79 @@
+<form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+    <input type="hidden" name="edit_form" value="1"></input>
+    <input type="hidden" name="pk" value={{ x.pk }}></input>
+    <div class="row">
+        <div class="col">
+            {{ x.name }}
+        </div>
+        <div class="col">
+            <label for="name">Material Name</label>
+            <input type="text" class="form-control" id="name" name="name" value={{x.name}}>
+        </div>
+        <div class="col">
+            <label for="type">Material Type</label>
+            <select id="type" name="type" placeholder={{x.type}}>
+                <option value="Leather">Leather</option>
+                <option value="Lining">Lining</option>
+                <option value="Accessory">Accessory</option>
+            </select>
+        </div>
+    </div>
+    <div class="row pt-3">
+        <div class="col">
+            <label for="stock">Stock</label>
+            <input type="number" class="form-control" id="stock" name="stock" value={{x.stock}}>
+        </div>
+        <div class="col">
+            <label for="cost">Cost</label>
+            <input type="number" class="form-control" id="cost" name="cost" value={{x.cost}}>
+        </div>
+        <div class="col">
+            <label for="markup">Markup</label>
+            <input type="number" class="form-control" id="markup" name="markup" value={{x.markup}}>
+        </div>
+        <div class="col">
+            placeholder
+        </div>
+    </div>
+    </div>
+
+
+
+
+<form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+    <input type="hidden" name="add_form" value="1"></input>
+    <div class="row">
+        <div class="col">
+            placeholder
+        </div>
+        <div class="col">
+            <label for="name">Material Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Material Name">
+        </div>
+        <div class="col">
+            <label for="type">Material Type</label>
+            <select id="type" name="type" placeholder="Material Type">
+                <option value="Leather">Leather</option>
+                <option value="Lining">Lining</option>
+                <option value="Accessory">Accessory</option>
+            </select>
+        </div>
+    </div>
+    <div class="row pt-3">
+        <div class="col">
+            <label for="stock">Stock</label>
+            <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock">
+        </div>
+        <div class="col">
+            <label for="cost">Cost</label>
+            <input type="number" class="form-control" id="cost" name="cost" placeholder="Cost">
+        </div>
+        <div class="col">
+            <label for="markup">Markup</label>
+            <input type="number" class="form-control" id="markup" name="markup" placeholder="X">
+        </div>
+        <div class="col">
+            placeholder
+        </div>
+    </div>
+    </div>

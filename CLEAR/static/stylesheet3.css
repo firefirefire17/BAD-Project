@@ -1,0 +1,148 @@
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    height: 180px;
+    border: none;
+}
+
+.main-card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 30px;
+    padding: 20px 20px 0px 20px;
+    height: 100%;
+    width: 100%;
+}
+
+.active {
+    background-color: white !important;
+    color: black !important;
+}
+
+.clear-colors {
+    background-color: #383838;
+    color: white;
+}
+
+.dark-button {
+    border-radius: 20px;
+    background-color: #383838;
+    color: #FFFFFF;
+    padding: 3px 10px 3px;
+}
+
+.x-button {
+    border-radius: 10px;
+    padding: 0px 10px 0px;
+}
+
+.light-button {
+    border-radius: 20px;
+    background-color: #E7E7E7;
+    color: #000000;
+    padding: 4px 30px 4px;
+    border:2px solid #D6D0D0;
+}
+
+.confirm-button {
+    padding: 3px 25px 3px; 
+    background-color: #3EA83B;
+}
+
+.delete-button {
+    padding: 3px 25px 3px; 
+    background-color: #C95057;
+}
+
+.input-select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Style for modal container */
+.modal-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.1); /* Semi-transparent black background */
+    z-index: 100;
+}
+
+
+.modal-overlap-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    z-index: 200;
+}
+
+/* Style for modal content */
+.modal-content {
+    position: relative;
+    margin: 15% auto;
+    padding: 20px;
+    background-color: #fefefe;
+    border: 1px solid #888;
+    border-radius: 25px;
+    width: 45%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+}
+
+.modal-content-product{
+    margin: 10% auto;
+}
+
+.modal-content-order{
+    width: 70%;
+    margin: 5% auto;
+}
+
+.modal-overlap-content {
+    position: relative;
+    margin: 20% auto;
+    padding: 20px;
+    background-color: #fefefe;
+    border: 1px solid #888;
+    border-radius: 25px;
+    width: 30%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 200;
+}
+
+.modal-overlap-content h2 {
+    text-align: center;
+}
+
+
+/* Fade-in animation for the modal */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+  
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+
+
+

@@ -1,0 +1,24 @@
+{% extends "CLEAR/base.html" %}
+{% load static %}
+
+{% block content %}
+
+
+<button onclick="openModal()"> Test</button>
+<div class="modal-container fade-in" id="myModal">
+    <div class="modal-content fade-in">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <!-- Your modal content goes here -->
+    </div>
+</div>
+
+<script>
+function openModal() {
+    document.getElementById("myModal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("myModal").style.display = "none";
+}
+</script>
+{% endblock %}
