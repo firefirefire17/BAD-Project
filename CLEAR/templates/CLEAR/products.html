@@ -60,7 +60,7 @@
                                                     <select class="input-select" id="{{product_data.product.pk}}_product_material{{ forloop.counter }}" name="{{product_data.product.pk}}_product_material{{ forloop.counter }}" value="{{product_material.material.pk}}">
                                                         <option value="delete">None</option>
                                                         {% for z in materials %}
-                                                            <option value="{{z.pk}}" {% if z.pk == y.material.pk %}selected{% endif %}>{{z.name}}</option>
+                                                            <option value="{{z.pk}}" {% if z.pk == product_material.material.pk %}selected{% endif %}>{{z.name}}</option>
                                                         {% endfor %}
                                                     </select>
                                                 </div>

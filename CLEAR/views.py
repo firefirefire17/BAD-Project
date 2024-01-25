@@ -33,8 +33,8 @@ def products(request):
         if 'edit_form' in request.POST:
             product_pk = request.POST.get("product_pk")
             product = get_object_or_404(Product, pk=product_pk)
-            x=1
 
+            x = 1
             while True:
                 pm_pk = request.POST.get(f"{product_pk}_productMaterial_pk{x}")
                 quantity = request.POST.get(f"quantity{x}")
@@ -66,7 +66,8 @@ def products(request):
             new_product = Product.objects.create(stock=stock, name=name)
 
             #create product_materials
-            x=1
+            x = 1
+            product_cost = 0
             while True:
                 quantity = request.POST.get(f"quantity{x}")
                 materialID = request.POST.get(f"product_material{x}")
@@ -79,8 +80,13 @@ def products(request):
                         pass
                     else:
                         material = get_object_or_404(Material, pk=materialID)
-                        Product_Material.objects.create(product=new_product, material=material, quantity=quantity)
-                x+=1
+                        product_material = Product_Material.objects.create(product=new_product, material=material, quantity=quantity)
+
+                        # add the cost of each material to the product price
+                        product_cost += material.cost*material.markup*int(product_material.quantity)
+                x += 1
+            new_product.cost = product_cost
+            new_product.save()
             return redirect('products')
 
     return render(request, 'CLEAR/products.html', {'products':product_objects, 'product_materials_list':product_material_list, 'materials':material_objects})
@@ -155,31 +161,57 @@ def orders(request):
             '''
 
             new_order = Order.objects.create(customer=customer_name, contact_number=customer_number, purchase_mode=purchase_mode, payment_type=payment_type, order_status=order_status, order_date=order_date, delivery_date=delivery_date, address_city=address_city, address_street=address_street, address_barangay=address_barangay, address_zip=address_zip)
-
-            for x in range(1,4):
-
+            
+            x = 1
+            order_price = 0 
+            while True:
                 item_number = request.POST.get(f"order_item_number{x}")
                 item_productPK = request.POST.get(f"item_productPK{x}")
                 item_type = request.POST.get(f"item_type{x}")
                 item_quantity = request.POST.get(f"item_quantity{x}")
                 
-                if item_productPK == "delete":
-                    pass
+                item_price = 0
+
+                if item_number is None:
+                    break
                 else:
-                    item_product = get_object_or_404(Product, pk = item_productPK)
-                    new_item = Item.objects.create(product=item_product, type=item_type)
-                    Order_Item.objects.create(order=new_order, item=new_item, quantity=item_quantity)
-
-                for y in range(1,3):
-                    item_material_materialPK = request.POST.get(f"{x}_item_material_materialPK{y}")
-                    item_material_quantity = request.POST.get(f"{x}_item_material_quantity{y}")
-
-                    if item_material_materialPK == "delete":
+                    if item_productPK == "delete":
                         pass
                     else:
-                        item_material = get_object_or_404(Material, pk = item_material_materialPK)
-                        Item_Material.objects.create(item=new_item, quantity=item_material_quantity, material=item_material)
+                        item_product = get_object_or_404(Product, pk = item_productPK)
+                        new_item = Item.objects.create(product=item_product, type=item_type)
+                        order_item = Order_Item.objects.create(order=new_order, item=new_item, quantity=item_quantity)
+                        
+                        # add the cost of each product in an item
+                        item_price += float(item_product.cost)
+                    
+                        y = 1
+                        while True:
+                            item_material_materialPK = request.POST.get(f"{x}_item_material_materialPK{y}")
+                            item_material_quantity = request.POST.get(f"{x}_item_material_quantity{y}")
+
+                            if item_material_materialPK is None:
+                                break
+                            else:
+                                if item_material_materialPK == "delete":
+                                    pass
+                                else:
+                                    item_material_material = get_object_or_404(Material, pk = item_material_materialPK)
+                                    item_material = Item_Material.objects.create(item=new_item, quantity=item_material_quantity, material=item_material_material)
+
+                                    # add the cost of each additional material
+                                    item_price += item_material.material.cost*int(item_material.quantity)*item_material.material.markup
+                            y += 1
+
+                # multiply the price of item_product + item_materials by item quantity, then add to order_price
+                item_price = item_price * int(order_item.quantity)
+                order_price += item_price
+                x += 1
+
+            new_order.order_price = order_price
+            new_order.save()
             return redirect('orders')
+        
         elif 'edit_form' in request.POST:
             '''
             current_customer_pk = request.POST.get("current_customer_pk")
@@ -188,44 +220,63 @@ def orders(request):
             '''
 
             Order.objects.filter(pk=order_pk).update(customer=customer_name, contact_number=customer_number, purchase_mode=purchase_mode, payment_type=payment_type, order_status=order_status, order_date=order_date, delivery_date=delivery_date, address_city=address_city, address_street=address_street, address_barangay=address_barangay, address_zip=address_zip)
-            with transaction.atomic():
-                x=1
-                while True:
-                    item_number = request.POST.get(f'order_item_number{x}')
-                    item_pk = request.POST.get(f'hidden_item_pk{x}')
-                    order_item_pk = request.POST.get(f'hidden_order_item_pk{x}')
-                    item_productPK = request.POST.get(f"{order_pk}item_productPK{x}")
-                    item_type = request.POST.get(f"item_type{x}")
-                    item_quantity = request.POST.get(f"item_quantity{x}")
+            order = Order.objects.filter(pk=order_pk).get()
+            
+            x = 1
+            order_price = 0
+            while True:
+                item_number = request.POST.get(f'order_item_number{x}')
+                item_pk = request.POST.get(f'hidden_item_pk{x}')
+                order_item_pk = request.POST.get(f'hidden_order_item_pk{x}')
+                item_productPK = request.POST.get(f"{order_pk}item_productPK{x}")
+                item_type = request.POST.get(f"item_type{x}")
+                item_quantity = request.POST.get(f"item_quantity{x}")
 
-                    if item_number is None:
-                        break
+                item_price = 0
+
+                if item_number is None:
+                    break
+                else:
+                    if item_productPK == "delete":
+                        order_item = Order_Item.objects.filter(pk=order_item_pk).delete()
                     else:
-                        if item_productPK == "delete":
-                            Order_Item.objects.filter(pk=order_item_pk).delete()
-                        else:
-                            item_product = get_object_or_404(Product, pk=item_productPK)
-                            Item.objects.filter(pk=item_pk).update(product=item_product, type=item_type)
-                            Order_Item.objects.filter(pk=order_item_pk).update(quantity=item_quantity)
-                            y = 1
-                            while True:
-                                item_material_number = request.POST.get(f"{x}_item_material_number{y}")
-                                item_materialPK = request.POST.get(f"{x}_item_materialPK{y}")
-                                item_material_materialPK = request.POST.get(f"{order_pk}_{x}_item_material_materialPK{y}")
-                                item_material_quantity = request.POST.get(f"{x}_item_material_quantity{y}")
+                        item_product = get_object_or_404(Product, pk=item_productPK)
+                        Item.objects.filter(pk=item_pk).update(product=item_product, type=item_type)
+                        Order_Item.objects.filter(pk=order_item_pk).update(quantity=item_quantity)
+                        order_item = Order_Item.objects.get(pk=order_item_pk)
 
-                                if item_material_number is None:
-                                    break
+                        item_price += item_product.cost
+
+                        y = 1
+                        while True:
+                            item_material_number = request.POST.get(f"{x}_item_material_number{y}")
+                            item_materialPK = request.POST.get(f"{x}_item_materialPK{y}")
+                            item_material_materialPK = request.POST.get(f"{order_pk}_{x}_item_material_materialPK{y}")
+                            item_material_quantity = request.POST.get(f"{x}_item_material_quantity{y}")
+
+                            if item_material_number is None:
+                                break
+                            else:
+                                if item_material_materialPK == "delete":
+                                    item_material = Item_Material.objects.filter(pk=item_materialPK).delete()
                                 else:
-                                    if item_material_materialPK == "delete":
-                                        Item_Material.objects.filter(pk=item_materialPK).delete()
-                                    else:
-                                        item_material_material = get_object_or_404(Material, pk=item_material_materialPK)
-                                        Item_Material.objects.filter(pk=item_materialPK).update(quantity=item_material_quantity, material=item_material_material)
+                                    item_material_material = get_object_or_404(Material, pk=item_material_materialPK)
+                                    Item_Material.objects.filter(pk=item_materialPK).update(quantity=item_material_quantity, material=item_material_material)
+                                    item_material = Item_Material.objects.get(pk=item_materialPK)
 
-                                y += 1
-                    x += 1
+                                    item_price += item_material.material.cost*int(item_material.quantity)*item_material.material.markup
+
+                            y += 1
+                            
+                item_price = item_price * int(order_item.quantity)
+                order_price += item_price
+                x += 1
+
+            order.order_price = order_price
+            order.save()
+
             return redirect('orders')
+        
         elif 'delete_form' in request.POST:
             Order.objects.filter(pk=order_pk).delete()
             return redirect('orders')
