@@ -13,9 +13,66 @@
     width: 100%;
 }
 
+a {
+    transition: 0.15s;
+}
+
+a:hover {
+    background-color: rgb(216, 216, 216) !important;
+    border-radius: 7px;
+    color: rgb(0, 0, 0) !important;
+    transition: 0.15s;
+}
+
+a:active {
+    transform: translateY(1.5px);
+}
+
 .active {
     background-color: white !important;
+    border-radius: 10px;
     color: black !important;
+    box-shadow: inset;
+    pointer-events: none;
+}
+
+.profile {
+    pointer-events: none;
+}
+
+img.pfp {
+    height: 60px;
+    border-radius: 50%;
+    margin-left: 15px;
+}
+
+img.logo {
+    max-height: 60px;
+    margin-left: 15px;
+    margin-right: 88px;
+}
+
+img.searchnav {
+    margin-top: 3px;
+    max-height: 50px;
+}
+
+img.navicon {
+    height: 20px;
+    margin-top: 2px;
+    margin-left: 15px;
+    margin-right: 13px;
+}
+
+.search>input:focus {
+    outline: none;
+}
+
+.table-responsive {
+    overflow-y: scroll;
+    border-radius: 15px;
+    box-shadow: none;
+    height: auto;
 }
 
 .clear-colors {
@@ -30,6 +87,14 @@
     padding: 3px 10px 3px;
 }
 
+.dark-button:hover {
+    box-shadow: 0 1px 2px #a7a9a9;
+}
+
+.dark-button:active {
+    transform: translateY(1px);
+}
+
 .x-button {
     border-radius: 10px;
     padding: 0px 10px 0px;
@@ -40,16 +105,28 @@
     background-color: #E7E7E7;
     color: #000000;
     padding: 4px 30px 4px;
-    border:2px solid #D6D0D0;
+    border: 2px solid #D6D0D0;
+}
+
+.light-button:hover {
+    box-shadow: 0 1px 2px #a7a9a9;
+}
+
+.light-button:active {
+    transform: translateY(2px);
+}
+
+.light-button:focus {
+    outline: none;
 }
 
 .confirm-button {
-    padding: 3px 25px 3px; 
+    padding: 3px 25px 3px;
     background-color: #3EA83B;
 }
 
 .delete-button {
-    padding: 3px 25px 3px; 
+    padding: 3px 25px 3px;
     background-color: #C95057;
 }
 
@@ -71,7 +148,8 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.1); /* Semi-transparent black background */
+    background-color: rgba(0, 0, 0, 0.1);
+    /* Semi-transparent black background */
     z-index: 100;
 }
 
@@ -100,11 +178,11 @@
     z-index: 100;
 }
 
-.modal-content-product{
+.modal-content-product {
     margin: 10% auto;
 }
 
-.modal-content-order{
+.modal-content-order {
     width: 70%;
     margin: 5% auto;
 }
@@ -126,23 +204,9 @@
 }
 
 
+
+
 /* Fade-in animation for the modal */
 .fade-in {
     animation: fadeIn 0.3s ease-in-out;
 }
-  
-
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-
-
-
-
