@@ -3,6 +3,7 @@
 
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'stylesheet3.css' %}">
+    <script src="{% static 'js/styling.js' %}"></script>
 </head>
 
 
@@ -45,6 +46,7 @@
                             <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
                                 <input type="hidden" name="edit_form" value="1"></input>
                                 <input type="hidden" name="pk" value={{ x.pk }}></input>
+                                <h3 style="margin-top: -40px; margin-bottom: 30px;">Edit Material</h3>
                                 <div class="row">
                                     <div class="col">
                                         <label for="pk">Material ID</label>
@@ -59,9 +61,7 @@
                                         <label for="type">Material Type</label>
                                         <select class="input-select" id="type" name="type" placeholder={{x.type}}>
                                             <option value="leather" {% if 'leather' in x.type %}selected{% endif %}>
-                                                Leather</option>
-                                            <option value="lining" {% if 'lining' in x.type %}selected{% endif %}>Lining
-                                            </option>
+                                                Textile</option>
                                             <option value="accessory" {% if 'accessory' in x.type %}selected{% endif %}>
                                                 Accessory</option>
                                         </select>
@@ -71,17 +71,12 @@
                                     <div class="col">
                                         <label for="stock">Stock</label>
                                         <input type="number" class="form-control" id="stock" name="stock"
-                                            value="{{x.stock}}">
+                                            value="{{x.stock}}" readonly>
                                     </div>
                                     <div class="col">
                                         <label for="cost">Cost</label>
                                         <input type="number" class="form-control" id="cost" name="cost"
                                             value="{{x.cost}}">
-                                    </div>
-                                    <div class="col">
-                                        <label for="markup">Markup</label>
-                                        <input type="text" class="form-control" id="markup" name="markup"
-                                            value="{{x.markup}}">
                                     </div>
                                     <div class="col">
                                         <label for="unit">Unit</label>
@@ -194,6 +189,7 @@
         </div>
         <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
             <input type="hidden" name="add_form" value="1"></input>
+            <h3 style="margin-top: -35px; margin-bottom: 30px;">Add Material</h3>
             <div class="row">
                 <div class="col">
                     <label for="name">Material ID</label>
@@ -222,15 +218,11 @@
                     <input type="number" class="form-control" id="cost" name="cost" placeholder="Cost">
                 </div>
                 <div class="col">
-                    <label for="markup">Markup</label>
-                    <input type="text" class="form-control" id="markup" name="markup" placeholder="X">
-                </div>
-                <div class="col">
                     <label for="unit">Unit</label>
                     <input type="text" class="form-control" value="unit" readonly>
                 </div>
             </div>
-            <div class="row pt-3" style="margin: 40px 4px 12px 4px;">
+            <div class="row pt-3" style="margin-top: 15px; margin-left: 10px; margin-right: 15px;">
                 <div class="col-4 mr-auto">
                     <button type="button" class="btn dark-button" onclick="toggleModal('addMaterial', 'close')"> Cancel
                         Action</button>
@@ -270,7 +262,6 @@
         </form>
     </div>
 </div>
-
 
 
 
