@@ -9,6 +9,7 @@ orders
 1. orders doesn't have add row utility
 2. add orders and edit orders are currently fixed to 3 items and 2 materials per item, due to the lack of adding rows
 3. does not have modals to confirm edits/deletes/adds (if we plan to add that) 
+4. should probably sort completed/cancelled orders to the bottom
 
 back-end
 1. pricing calculation hasn't been implemented yet

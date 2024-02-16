@@ -1,12 +1,15 @@
 {% extends "CLEAR/base.html" %}
 {% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet3.css' %}">
+</head>
 
 {% block content %}
 <div class="row pl-3 pt-3 pr-3" style="height:700px;">
     <div class="card main-card">
-        <div class="row" style="padding: 0px 10px; height: 90%; overflow-y: scroll;">
-            <table class="table table-striped">
-                <thead style="background-color: #A7A7A7;">
+        <div class="table-responsive card" style="overflow-y: scroll; border-radius: 15px; box-shadow: none; margin-bottom: 13px;">
+            <table class="table table-hover table-striped">
+                <thead style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Product # </th>
                     <th scope="col"> Name</th>
                     <th scope="col"> Stock</th>
@@ -15,13 +18,13 @@
                 </thead>
                 <tbody>
                     {% for product_data in product_materials_list %} <!-- check views to see full breakdown of product_data -->
-                    <tr style="height: 75px;">
+                    <tr style="height: 70px;">
                         <td>{{ product_data.product.pk }}</td>
                         <td>{{ product_data.product.name }}</td>
                         <td>{{ product_data.product.stock }}</td>
                         <td>{{ product_data.product.cost }}</td>
                         <td>
-                            <button type="button" class="btn light-button" onclick="toggleModal('editProduct{{product_data.product.pk}}', 'open')">Edit</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleModal('editProduct{{product_data.product.pk}}', 'open')" style="border-radius: 30px;">Edit</button>
                         </td>
                     </tr>
                     
