@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Material, Product, Product_Material, Order, Customer, Item, Item_Material, Order_Item
-from django.db import transaction
+from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, Transaction, Transaction_Accessory, Transaction_Textile, Global_Value, Account, MaterialKey
+
 
 # Create your views here.
 def login(request):
@@ -8,10 +8,10 @@ def login(request):
 
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
-
+'''
 def products(request):
     product_objects = Product.objects.all()
-    material_objects = Material.objects.all()
+    accessory_objects = Accessory.objects.all()
     product_material_list = []
 
     # create a list of dictionaries, each dictionary pertaining to one product and its associated information
@@ -90,7 +90,9 @@ def products(request):
             return redirect('products')
 
     return render(request, 'CLEAR/products.html', {'products':product_objects, 'product_materials_list':product_material_list, 'materials':material_objects})
+'''
 
+'''
 def orders(request):
     order_objects = Order.objects.all()
     customer_objects = Customer.objects.all()
@@ -148,18 +150,6 @@ def orders(request):
 
         if 'add_form' in request.POST:
 
-            ''' 
-            if customer_pk == "new_customer":
-                existing_customer = Customer.objects.filter(name=customer_name).first()
-                if existing_customer:
-                    # customer already exists error
-                    pass
-                else:
-                    order_customer = Customer.objects.create(name=customer_name, mobile_number=customer_number)
-            else:
-                order_customer = Customer.objects.filter(pk=customer_pk).first()
-            '''
-
             new_order = Order.objects.create(customer=customer_name, contact_number=customer_number, purchase_mode=purchase_mode, payment_type=payment_type, order_status=order_status, order_date=order_date, delivery_date=delivery_date, address_city=address_city, address_street=address_street, address_barangay=address_barangay, address_zip=address_zip)
             
             x = 1
@@ -213,11 +203,6 @@ def orders(request):
             return redirect('orders')
         
         elif 'edit_form' in request.POST:
-            '''
-            current_customer_pk = request.POST.get("current_customer_pk")
-            if current_customer_pk == customer_pk:
-                Customer.objects.filter(pk=customer_pk).update(name=customer_name, mobile_number=customer_number)
-            '''
 
             Order.objects.filter(pk=order_pk).update(customer=customer_name, contact_number=customer_number, purchase_mode=purchase_mode, payment_type=payment_type, order_status=order_status, order_date=order_date, delivery_date=delivery_date, address_city=address_city, address_street=address_street, address_barangay=address_barangay, address_zip=address_zip)
             order = Order.objects.filter(pk=order_pk).get()
@@ -282,41 +267,53 @@ def orders(request):
             return redirect('orders')
                 
     return render(request, 'CLEAR/orders.html', {'orders':order_list, 'customers':customer_objects, 'products':product_objects, 'materials':material_objects, 'product_names': product_names})
-
+'''
 
 
 def materials(request):
-    material_objects = Material.objects.all()
-    last = Material.objects.last()
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_objects = []
+
+    for textile in textile_objects:
+        material_objects.append({'type': 'textile', 'material': textile, 'unit': textile.get_unit_display()})
+
+    for accessory in accessory_objects:
+        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': accessory.get_unit_display()})
+
+    print(material_objects)
+
 
     if(request.method=="POST"):
         name = request.POST.get("name")
         stock = request.POST.get("stock")
         cost = request.POST.get("cost")
         type = request.POST.get("type")
-        if type == "leather":
-            unit = "per foot"
-        elif type == "lining":
-            unit = "per inch"
-        else:
-            unit = "per piece"
+        material_key = request.POST.get("material_key")
 
         if "add_form" in request.POST:
-            markup = float(request.POST.get("markup"))
-            total_value = float(stock)*float(cost) 
-            Material.objects.create(name=name, stock=stock, cost=cost, type=type, markup=markup, unit=unit, total_value=total_value)
+            material_key = MaterialKey.objects.create()
+            if type == "textile":
+                Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
+            if type == "accessory":
+                Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
             return redirect('materials')
 
         elif "edit_form" in request.POST:
-            markup = float(request.POST.get("markup"))
-            total_value = float(stock)*float(cost)
-            pk=request.POST.get("pk")
-            Material.objects.filter(pk=pk).update(name=name, stock=stock, cost=cost, type=type, markup=markup, unit=unit, total_value=total_value)
+            material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+            if type == "textile":
+                Textile.objects.filter(material_key=material_key).update(name=name, stock=stock, cost=cost)
+            if type == "accessory":
+                Accessory.objects.filter(material_key=material_key).update(name=name, stock=stock, cost=cost)
             return redirect('materials')
 
         elif "delete_form" in request.POST:
-            pk=request.POST.get("pk")
-            Material.objects.filter(pk=pk).delete()
+            material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+            print(material_key_obj)
+            if type == "textile":
+                Textile.objects.filter(material_key=material_key_obj).delete()
+            if type == "accessory":
+                Accessory.objects.filter(material_key=material_key_obj).delete()
             return redirect('materials')
 
 
