@@ -69,13 +69,19 @@
                         <li class="nav-item pb-3">
                             <a href="{% url 'orders' %}"
                                 class="nav-link text-white {% if 'orders' in request.path %} active {% endif %}">
-                                Orders
+                                Job Orders
                             </a>
                         </li>
                         <li class="nav-item pb-3">
                             <a href="{% url 'materials' %}"
                                 class="nav-link text-white {% if 'materials' in request.path %} active {% endif %}">
                                 Materials
+                            </a>
+                        </li>
+                        <li class="nav-item pb-3">
+                            <a href="{% url 'orders' %}"
+                                class="nav-link text-white {% if '#' in request.path %} active {% endif %}">
+                                Transactions
                             </a>
                         </li>
                         <li class="nav-item pb-3">
