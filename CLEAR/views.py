@@ -8,27 +8,157 @@ def login(request):
 
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
-'''
+
+# new products
 def products(request):
     product_objects = Product.objects.all()
     accessory_objects = Accessory.objects.all()
+    textile_objects = Textile.objects.all()
+
+    product_material_list = []
+
+    # create a list of dicts
+    for product in product_objects:
+        data = {
+            'product':product,
+            'component':product.product_component_set.all(),
+            'accessories':product.product_accessory_set.all()
+        }
+        product_material_list.append(data)
+
+    if request.method == "POST":
+        if 'add_product_form' in request.POST:
+            #adding of stuff
+            name = request.POST.get("name")
+            stock = request.POST.get("stock")
+            prod_margin = request.POST.get("prod_margin")
+            labor_time = request.POST.get("labor_time")
+            misc_margin = request.POST.get("misc_margin")
+            total_cost = request.POST.get("total_cost")
+            textiles_ids = request.POST.getlist("textiles")
+            accessories_ids = request.POST.getlist("accessories")
+
+            #create new product
+            new_product = Product.objects.create(name=name, stock=stock, prod_margin=prod_margin, labor_time=labor_time, misc_margin=misc_margin, total_cost=total_cost)
+
+            #add textiles
+            for textile_id in textiles_ids:
+                textile = Textile.objects.get(pk=textile_id)
+                new_product.textiles.add(textile)
+
+            #add accs
+            for accessory_id in accessories_ids:
+                accessory = Accessory.objects.get(pk=accessory_id)
+                new_product.accessories.add(accessory)
+
+            return redirect("products")
+
+        elif 'edit_form' in request.POST:
+            #edit of stuff
+            product_pk = request.POST.get("product_pk")
+            product = get_object_or_404(Product, pk=product_pk)
+
+            #update
+            product.stock = request.POST.get("stock")
+            product.name = request.POST.get("name")
+
+            product.save()
+
+            return redirect('products')
+
+        elif 'delete_form' in request.POST:
+            #delete
+            product.pk = request.POST.get("productMaterial_pk")
+            Product.objects.filter(pk=product_pk).delete()
+
+            return redirect('products')
+        
+    return render(request, 'CLEAR/products.html', {'products':product_objects, 
+                                                   'product_material_list':product_material_list,
+                                                   'accessories':accessory_objects,
+                                                   'textiles':textile_objects})
+
+# orders used to be here
+
+def materials(request):
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_objects = []
+
+    for textile in textile_objects:
+        material_objects.append({'type': 'textile', 'material': textile, 'unit': textile.get_unit_display()})
+
+    for accessory in accessory_objects:
+        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': accessory.get_unit_display()})
+
+    print(material_objects)
+
+
+    if(request.method=="POST"):
+        name = request.POST.get("name")
+        stock = request.POST.get("stock")
+        cost = request.POST.get("cost")
+        type = request.POST.get("type")
+        material_key = request.POST.get("material_key")
+
+        if "add_form" in request.POST:
+            material_key = MaterialKey.objects.create()
+            if type == "textile": 
+                Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
+            if type == "accessory":
+                Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
+            return redirect('materials')
+
+        elif "edit_form" in request.POST:
+            material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+            if type == "textile":
+                Textile.objects.filter(material_key=material_key).update(name=name, stock=stock, cost=cost)
+            if type == "accessory":
+                Accessory.objects.filter(material_key=material_key).update(name=name, stock=stock, cost=cost)
+            return redirect('materials')
+
+        elif "delete_form" in request.POST:
+            material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+            print(material_key_obj)
+            if type == "textile":
+                Textile.objects.filter(material_key=material_key_obj).delete()
+            if type == "accessory":
+                Accessory.objects.filter(material_key=material_key_obj).delete()
+            return redirect('materials')
+
+
+    return render(request, 'CLEAR/materials.html', {'materials':material_objects})
+
+def reports(request):
+    return render(request, 'CLEAR/reports.html')
+
+
+''' old def products()
+def products(request):
+    product_objects = Product.objects.all()
+    accessory_objects = Accessory.objects.all()
+    textile_objects = Textile.objects.all()
+
+
     product_material_list = []
 
     # create a list of dictionaries, each dictionary pertaining to one product and its associated information
     for product in product_objects:
         data = {
             'product': product,
-            'materials': product.product_material_set.all(),
-            'product_materials_count': product.product_material_set.count()
+            'component': product.product_component_set.all(),
+            'accessories': product.product_accessory_set.all()
         }
         product_material_list.append(data)
     
     if(request.method=="POST"):
-        stock = request.POST.get("stock")
-        name = request.POST.get("name")
+            name = request.POST.get("name")
+            stock = request.POST.get("stock")
+            prod_margin = request.POST.get("prod_margin")
+            labor_time = request.POST.get("labor_time")
+            misc_margin = request.POST.get("misc_margin")
 
         print(request.POST)
-
         
         if 'edit_form' in request.POST:
             product_pk = request.POST.get("product_pk")
@@ -36,23 +166,7 @@ def products(request):
 
             x = 1
             while True:
-                pm_pk = request.POST.get(f"{product_pk}_productMaterial_pk{x}")
-                quantity = request.POST.get(f"quantity{x}")
-                materialID = request.POST.get(f"{product_pk}_product_material{x}")
-
-                if materialID is None:
-                    break
-                else:
-                    if pm_pk: 
-                        if materialID == "delete":
-                            Product_Material.objects.filter(pk=pm_pk).delete()
-                        else:
-                            Product_Material.objects.filter(pk=pm_pk).update(material=materialID, quantity=quantity)
-                    else:
-                        if materialID != "delete":
-                            material_object = get_object_or_404(Material, pk=materialID)
-                            Product_Material.objects.create(product=product, material=material_object, quantity=quantity)
-                x+=1
+                pass # leave it for now
             Product.objects.filter(pk=product_pk).update(stock=stock, name=name)
             return redirect('products')
 
@@ -67,30 +181,15 @@ def products(request):
 
             #create product_materials
             x = 1
-            product_cost = 0
             while True:
-                quantity = request.POST.get(f"quantity{x}")
-                materialID = request.POST.get(f"product_material{x}")
-                print(f"{materialID}")
-
-                if materialID is None:
-                    break
-                else:
-                    if materialID == "delete":
-                        pass
-                    else:
-                        material = get_object_or_404(Material, pk=materialID)
-                        product_material = Product_Material.objects.create(product=new_product, material=material, quantity=quantity)
-
-                        # add the cost of each material to the product price
-                        product_cost += material.cost*material.markup*int(product_material.quantity)
-                x += 1
+                pass
             new_product.cost = product_cost
             new_product.save()
             return redirect('products')
 
-    return render(request, 'CLEAR/products.html', {'products':product_objects, 'product_materials_list':product_material_list, 'materials':material_objects})
+    return render(request, 'CLEAR/products.html', {'products':product_objects, 'product_materials_list':product_material_list, 'accessories':accessory_objects, 'textiles':textile_objects})
 '''
+
 
 '''
 def orders(request):
@@ -268,57 +367,3 @@ def orders(request):
                 
     return render(request, 'CLEAR/orders.html', {'orders':order_list, 'customers':customer_objects, 'products':product_objects, 'materials':material_objects, 'product_names': product_names})
 '''
-
-
-def materials(request):
-    textile_objects = Textile.objects.all()
-    accessory_objects = Accessory.objects.all()
-    material_objects = []
-
-    for textile in textile_objects:
-        material_objects.append({'type': 'textile', 'material': textile, 'unit': textile.get_unit_display()})
-
-    for accessory in accessory_objects:
-        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': accessory.get_unit_display()})
-
-    print(material_objects)
-
-
-    if(request.method=="POST"):
-        name = request.POST.get("name")
-        stock = request.POST.get("stock")
-        cost = request.POST.get("cost")
-        type = request.POST.get("type")
-        material_key = request.POST.get("material_key")
-
-        if "add_form" in request.POST:
-            material_key = MaterialKey.objects.create()
-            if type == "textile":
-                Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
-            if type == "accessory":
-                Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
-            return redirect('materials')
-
-        elif "edit_form" in request.POST:
-            material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
-            if type == "textile":
-                Textile.objects.filter(material_key=material_key).update(name=name, stock=stock, cost=cost)
-            if type == "accessory":
-                Accessory.objects.filter(material_key=material_key).update(name=name, stock=stock, cost=cost)
-            return redirect('materials')
-
-        elif "delete_form" in request.POST:
-            material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
-            print(material_key_obj)
-            if type == "textile":
-                Textile.objects.filter(material_key=material_key_obj).delete()
-            if type == "accessory":
-                Accessory.objects.filter(material_key=material_key_obj).delete()
-            return redirect('materials')
-
-
-    return render(request, 'CLEAR/materials.html', {'materials':material_objects})
-
-def reports(request):
-    return render(request, 'CLEAR/reports.html')
-

@@ -17,7 +17,7 @@ class Textile(models.Model):
     name = models.CharField(max_length=50)
     cost = models.FloatField()
     unit = models.CharField(max_length=2, choices = TEXTILE_UNIT_CHOICES, default="FT")
-    stock = models.IntegerField()
+    stock = models.FloatField()
     material_key = models.OneToOneField(MaterialKey, on_delete=models.CASCADE)
 
 class Accessory(models.Model):
@@ -32,12 +32,13 @@ class Accessory(models.Model):
     material_key = models.OneToOneField(MaterialKey, on_delete=models.CASCADE)
     
 class Product(models.Model):
+    # product_number = models.AutoField(primary_key=True) 
     name = models.CharField(max_length=50)
     stock = models.IntegerField()
-    margin = models.FloatField()
-    labor_time = models.IntegerField()
+    prod_margin = models.FloatField() # renamed from 'margin'
+    labor_time = models.IntegerField() 
     misc_margin = models.IntegerField(default=50)
-    cost = models.FloatField(null=True)
+    total_cost = models.FloatField(null=True) # renamed from 'cost'
     textiles = models.ManyToManyField(Textile, through='Product_Component')
     accessories = models.ManyToManyField(Accessory, through='Product_Accessory')
     
@@ -75,14 +76,14 @@ class Job_Order(models.Model):
         return f'{self.pk}_{self.file_date}'
     
 class Item(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, db_column='product_number')
     type = models.CharField(max_length=50)
     cost = models.FloatField(null=True)
     accessories = models.ManyToManyField(Accessory, through='Item_Accessory')
     textiles = models.ManyToManyField(Textile, through='Item_Textile')
 
 class Item_Textile(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, db_column='product_number')
     textile = models.ForeignKey(Textile, on_delete=models.CASCADE)
     bespoke_rate = models.FloatField()
     quantity = models.IntegerField()
@@ -91,7 +92,7 @@ class Item_Textile(models.Model):
         return f'{self.textile.name} in Item #{self.item.pk}'
     
 class Item_Accessory(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, db_column='product_number')
     accessory = models.ForeignKey(Accessory, on_delete=models.CASCADE)
     bespoke_rate = models.FloatField()
     quantity = models.IntegerField()
