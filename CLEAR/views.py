@@ -94,15 +94,14 @@ def materials(request):
     for accessory in accessory_objects:
         material_objects.append({'type': 'accessory', 'material': accessory, 'unit': accessory.get_unit_display()})
 
-    print(material_objects)
-
-
     if(request.method=="POST"):
         name = request.POST.get("name")
         stock = request.POST.get("stock")
         cost = request.POST.get("cost")
         type = request.POST.get("type")
         material_key = request.POST.get("material_key")
+        
+        print(request.POST)
 
         if "add_form" in request.POST:
             material_key = MaterialKey.objects.create()
@@ -114,10 +113,11 @@ def materials(request):
 
         elif "edit_form" in request.POST:
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+            print(material_key_obj)
             if type == "textile":
-                Textile.objects.filter(material_key=material_key).update(name=name, stock=stock, cost=cost)
-            if type == "accessory":
-                Accessory.objects.filter(material_key=material_key).update(name=name, stock=stock, cost=cost)
+                Textile.objects.filter(material_key=material_key_obj).update(name=name, stock=stock, cost=cost)
+            else:
+                Accessory.objects.filter(material_key=material_key_obj).update(name=name, stock=stock, cost=cost)
             return redirect('materials')
 
         elif "delete_form" in request.POST:
