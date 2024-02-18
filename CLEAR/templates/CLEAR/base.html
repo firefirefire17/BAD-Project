@@ -151,18 +151,19 @@
             }
 
             function addComponent_add() {
+
+                let newRow = $('#productComponent_row_temp').clone();
+                newRow.attr('id', 'productComponent_row' + rowCounter_add_component);
+                newRow.find('[id^="component_name"]').attr('id', 'component_name' + rowCounter_add_component).attr('name', 'component_name' + rowCounter_add_component);
+                newRow.find('[id^="height"]').attr('id', 'height' + rowCounter_add_component).attr('name', 'height' + rowCounter_add_component);
+                newRow.find('[id^="width"]').attr('id', 'width' + rowCounter_add_component).attr('name', 'width' + rowCounter_add_component);
+                newRow.find('[id^="quantity"]').attr('id', 'quantity' + rowCounter_add_component).attr('name', 'quantity' + rowCounter_add_component);
+
+                newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + rowCounter_add_component);
+
+                $('#productComponent_row_temp').after(newRow.show());
+
                 rowCounter_add_component++;
-
-                var newRow = $('#productAccessory_row1').clone();
-                newRow.attr('id', 'productAccessory_row' + rowCounter_add_accessory);
-                newRow.find('[id^="product_accessory"]').attr('id', 'product_accessory' + rowCounter_add_accessory).attr('name', 'product_accessory' + rowCounter_add_accessory);
-                newRow.find('[id^="accessory_quantity"]').attr('id', 'accessory_quantity' + rowCounter_add_accessory).attr('name', 'accessory_quantity' + rowCounter_add_accessory);
-                newRow.find('[id^="accessory_unit"]').attr('id', 'accessory_unit' + rowCounter_add_accessory).attr('name', 'accessory_unit' + rowCounter_add_accessory);
-
-                newRow.find('.delete-productMaterial').attr('data-select-element-id', 'product_accessory' + rowCounter_add_accessory);
-                newRow.find('.delete-productMaterial').attr('data-row-id', 'productAccessory_row' + rowCounter_add_accessory);
-
-                $('#productAccessory_row' + (rowCounter_add_accessory - 1)).after(newRow.show());
 
             }
 
@@ -229,11 +230,20 @@
 
             $('#addTextile_add').on('click', addTextile_add);
 
+            $('#addComponent_add').on('click', addComponent_add);
+
             $(document).on('click', '.delete-productMaterial', function () {
                 var selectElementId = $(this).data('select-element-id');
                 var rowId = $(this).data('row-id');
 
                 setToDeleteAndHide(selectElementId, rowId);
+            });
+
+            $(document).on('click', '.delete-component', function () {
+                let rowId = $(this).data('row-id');
+                console.log(rowId)
+
+                $('#' + rowId).remove();
             });
 
             $('#addProduct').on('click', '[id^="editTextile_btn"]', function () {
@@ -252,14 +262,6 @@
                 addRow_editProduct(rowCount, productPK);
             });
 
-            $(document).on('click', '.addRowEditProduct', function () {
-                var productPK = $(this).data('product-pk');
-                var rowCount = $('[id^="' + productPK + '_productMaterial_row"]').length;
-
-                // console.log('rowcount', rowCount)
-
-                addRow_editProduct(rowCount, productPK);
-            });
         });
 
 

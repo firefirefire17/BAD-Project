@@ -4,6 +4,9 @@
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'stylesheet3.css' %}">
     <script src="{% static 'js/styling.js' %}"></script>
+
+
+
 </head>
 
 {% block content %}
@@ -263,6 +266,7 @@
                                 </button>
                             </div>
                         </div>
+                        <button type="button" class="btn dark-button x-button mt-4" id="addTextile_add">Add Row</button>
                     </div>
                     <div class="row" style="margin: 25px 0px 25px 0px"></div>
                     <hr>
@@ -345,21 +349,21 @@
                             <div class="col-1">
                             </div>
                         </div>
-                        <div class="row ml-2" id="productComponent_row1">
+                        <div class="row ml-2 mt-2" id="productComponent_row_temp" style="display:none;">
                             <div class="col-4">
-                                <input type="text" class="form-control" id="component_name" name="component_name">
+                                <input type="text" class="form-control" id="component_name_temp" name="">
                             </div>
                             <div class="col-2">
-                                <input type="number" class="form-control" id="height" name="height">
+                                <input type="number" class="form-control" id="height_temp" name="">
                             </div>
                             <div class="col-2">
-                                <input type="number" class="form-control" id="width" name="width">
+                                <input type="number" class="form-control" id="width_temp" name="">
                             </div>
                             <div class="col-2">
-                                <input type="number" class="form-control" id="quantity" name="quantity">
+                                <input type="number" class="form-control" id="quantity_temp" name="">
                             </div>
                             <div class="col-1">
-                                <button type="button" class="btn dark-button"> &times </button>
+                                <button type="button" class="btn dark-button delete-component" data-row-id=""> &times </button>
                             </div>
                         </div>
                         <div class="row justify-content-center mt-3">
@@ -413,4 +417,5 @@
 </div>
 </div>
 </div>
+
 {% endblock %}

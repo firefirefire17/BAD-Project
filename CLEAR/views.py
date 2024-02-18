@@ -13,6 +13,7 @@ def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
 
 #new products
+@login_required(login_url="/login")
 def products(request):
     product_objects = Product.objects.all()
     accessory_objects = Accessory.objects.all()
@@ -78,14 +79,21 @@ def products(request):
         elif 'edit_form' in request.POST:
             #edit of stuff
             product_pk = request.POST.get("product_pk")
+            accessory_pk = request.POST.get("accessory_pk")
+            quantity = request.POST.get("accessory_quantity")
             product = get_object_or_404(Product, pk=product_pk)
+            accessory = get_object_or_404(Product_Accessory, product=product, accessory__pk=accessory_pk)
 
-            #update
+            #update acc qty field
+            accessory.accessory_quantity = quantity
+            accessory.save()
+            
+            #update fields
             product.name = request.POST.get("name")
             product.stock = request.POST.get("stock")
             product.labor_time = request.POST.get("labor_time")
             product.misc_margin = request.POST.get("misc_margin")
-
+            
             product.save()
 
             return redirect('products')
@@ -104,6 +112,7 @@ def products(request):
 
 # orders used to be here
 
+@login_required(login_url="/login")
 def materials(request):
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
@@ -158,16 +167,17 @@ def materials(request):
 
     return render(request, 'CLEAR/materials.html', {'materials':material_objects})
 
+@login_required(login_url="/login")
 def reports(request):
     return render(request, 'CLEAR/reports.html')
+
 
 def sign_up(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('/dashboard')
+            form.save()
+            return redirect('login')
 
     else:
         form = RegisterForm()
