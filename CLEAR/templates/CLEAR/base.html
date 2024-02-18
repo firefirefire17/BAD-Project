@@ -44,8 +44,14 @@
                                 <img class="pfp"
                                     src="https://steamuserimages-a.akamaihd.net/ugc/98349535606942829/A061B4B921243C2CF7608D1C53BAD46530C0605E/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false">
                                 <div class="col-sm-7">
-                                    <p style="margin-bottom: 0; margin-left: 0; margin-top: -1.5px;"><b>Bryce
-                                            Collado</b></p>
+                                    <p style="margin-bottom: 0; margin-left: 0; margin-top: -1.5px;"><b>
+                                        {% if user.is_authenticated %} 
+                                        {{ user.first_name }} {{ user.last_name }}
+                                    {% else %}
+                                        No Name
+                                    {% endif %}
+                                    </b></p>
+                                    
                                     <p style="margin:0; font-size: 11px; color: #cecece;">Product Manager</p>
                                 </div>
                             </div>
