@@ -201,7 +201,8 @@ img.navicon {
 }
 
 .modal-content-product {
-    margin: 10% auto;
+    width: 60%;
+    margin: 5% auto;
 }
 
 .modal-content-order {
