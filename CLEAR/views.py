@@ -97,14 +97,13 @@ def materials(request):
     print(material_objects)
 
     if(request.method=="POST"):
-        name = request.POST.get("name")
-        stock = float(request.POST.get("stock"))
-        cost = request.POST.get("cost")
-        type = request.POST.get("type")
         material_key = request.POST.get("material_key")
-        
+        type = request.POST.get("type")
 
         if "add_form" in request.POST:
+            name = request.POST.get("name")
+            stock = float(request.POST.get("stock"))
+            cost = request.POST.get("cost")
             material_key = MaterialKey.objects.create()
             print(material_key)
             if type == "textile": 
@@ -114,6 +113,9 @@ def materials(request):
             return redirect('materials')
 
         elif "edit_form" in request.POST:
+            name = request.POST.get("name")
+            stock = float(request.POST.get("stock"))
+            cost = request.POST.get("cost")
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
             if type == "textile":
                 print(material_key_obj)
