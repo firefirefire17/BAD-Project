@@ -81,13 +81,17 @@ def products(request):
             product_pk = request.POST.get("product_pk")
             accessory_pk = request.POST.get("accessory_pk")
             quantity = request.POST.get("accessory_quantity")
+            quantity_t = request.POST.get("quantity")
+
+            #duncan if this does not work, do your method!!
             product = get_object_or_404(Product, pk=product_pk)
             accessory = get_object_or_404(Product_Accessory, product=product, accessory__pk=accessory_pk)
+            textile = get_object_or_404(Product_Component, product=product, )
 
             #update acc qty field
             accessory.accessory_quantity = quantity
             accessory.save()
-            
+
             #update fields
             product.name = request.POST.get("name")
             product.stock = request.POST.get("stock")

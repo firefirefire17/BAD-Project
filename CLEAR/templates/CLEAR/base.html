@@ -150,19 +150,19 @@
 
             }
 
-            function addComponent_add() {
+            function addComponent_add(textileId) {
 
                 let newRow = $('#productComponent_row_temp').clone();
-                newRow.attr('id', 'productComponent_row' + rowCounter_add_component);
-                newRow.find('[id^="component_name"]').attr('id', 'component_name' + rowCounter_add_component).attr('name', 'component_name' + rowCounter_add_component);
-                newRow.find('[id^="height"]').attr('id', 'height' + rowCounter_add_component).attr('name', 'height' + rowCounter_add_component);
-                newRow.find('[id^="width"]').attr('id', 'width' + rowCounter_add_component).attr('name', 'width' + rowCounter_add_component);
-                newRow.find('[id^="quantity"]').attr('id', 'quantity' + rowCounter_add_component).attr('name', 'quantity' + rowCounter_add_component);
+                newRow.attr('id', 'productComponent_row' + textileId + '_' + rowCounter_add_component);
+                newRow.find('[id^="component_name"]').attr('id', 'component_name' + textileId + '_' + rowCounter_add_component).attr('name', 'component_name' + textileId + '_' + rowCounter_add_component);
+                newRow.find('[id^="height"]').attr('id', 'height' + textileId + '_' + rowCounter_add_component).attr('name', 'height' + textileId + '_' + rowCounter_add_component);
+                newRow.find('[id^="width"]').attr('id', 'width' + textileId + '_' + rowCounter_add_component).attr('name', 'width' + textileId + '_' + rowCounter_add_component);
+                newRow.find('[id^="quantity"]').attr('id', 'quantity' + textileId + '_' + rowCounter_add_component).attr('name', 'quantity' + textileId + '_' + rowCounter_add_component);
 
-                newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + rowCounter_add_component);
+                newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + textileId + '_' + rowCounter_add_component);
 
                 $('#productComponent_row_temp').after(newRow.show());
-
+                console.log(newRow)
                 rowCounter_add_component++;
 
             }
@@ -179,7 +179,11 @@
                 newRow.find('.delete-productMaterial').attr('data-select-element-id', 'product_textile' + rowCounter_add_textile);
                 newRow.find('.delete-productMaterial').attr('data-row-id', 'productTextile_row' + rowCounter_add_textile);
 
+
+                $('#addTextile_add').attr('data-textile-id', rowCounter_add_textile);
+
                 $('#productTextile_row' + (rowCounter_add_textile - 1)).after(newRow.show());
+
 
                 let newModal = $('#editTextile1').clone();
                 newModal.attr('id', 'editTextile' + rowCounter_add_textile);
@@ -230,8 +234,13 @@
 
             $('#addTextile_add').on('click', addTextile_add);
 
-            $('#addComponent_add').on('click', addComponent_add);
-
+            $(document).on('click', '.addComponent_add', function () {
+                console.log('pass')
+                let textileId = $('#addTextile_add').data('textile-id');
+                console.log(textileId)
+                addComponent_add(textileId);
+            });
+            
             $(document).on('click', '.delete-productMaterial', function () {
                 var selectElementId = $(this).data('select-element-id');
                 var rowId = $(this).data('row-id');
@@ -249,6 +258,8 @@
             $('#addProduct').on('click', '[id^="editTextile_btn"]', function () {
                 let modalId = $(this).data('modal');
                 let action = $(this).data('modal-action');
+
+                console.log(modalId)
 
                 toggleModal(modalId, action);
             });
