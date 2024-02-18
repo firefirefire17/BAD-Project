@@ -32,7 +32,7 @@ class Accessory(models.Model):
     material_key = models.OneToOneField(MaterialKey, on_delete=models.CASCADE)
     
 class Product(models.Model):
-    # product_number = models.AutoField(primary_key=True) 
+    # product_number = models.AutoField(primary_key=True) this thing is purely fucked up
     name = models.CharField(max_length=50)
     stock = models.IntegerField()
     prod_margin = models.FloatField() # renamed from 'margin'

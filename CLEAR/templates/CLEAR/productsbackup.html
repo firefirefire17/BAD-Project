@@ -263,6 +263,7 @@
                                 </button>
                             </div>
                         </div>
+                        <button type="button" class="btn dark-button x-button mt-4" id="addTextile_add">Add Row</button>
                     </div>
                     <div class="row" style="margin: 25px 0px 25px 0px"></div>
                     <hr>
@@ -319,53 +320,22 @@
             </div>
 
             <div class="modal-overlap-container fade-in" id="editTextile1">
-                <div class="modal-overlap-content" style="width:45%">
+                <div class="modal-overlap-content" style="width:40%">
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-8">
+                            <div class="col">
                                 <h2> Edit Textile Quantity</h2>
                             </div>
                             <div class="col text-right">
                                 <span class="close" onclick="toggleModal('confirmAddProduct', 'close')">&times;</span>
                             </div>
                         </div>
-                        <div class="row ml-2 mt-4">
-                            <div class="col-4">
-                                Component
-                            </div>
-                            <div class="col-2">
-                                Height:
-                            </div>
-                            <div class="col-2">
-                                Width:
-                            </div>
-                            <div class="col-2">
-                                Qty:
-                            </div>
-                            <div class="col-1">
+                        <div class="row">
+                            <div class="col text-center">
+                                <h2> Add Product? </h2>
                             </div>
                         </div>
-                        <div class="row ml-2" id="productComponent_row1">
-                            <div class="col-4">
-                                <input type="text" class="form-control" id="component_name" name="component_name">
-                            </div>
-                            <div class="col-2">
-                                <input type="number" class="form-control" id="height" name="height">
-                            </div>
-                            <div class="col-2">
-                                <input type="number" class="form-control" id="width" name="width">
-                            </div>
-                            <div class="col-2">
-                                <input type="number" class="form-control" id="quantity" name="quantity">
-                            </div>
-                            <div class="col-1">
-                                <button type="button" class="btn dark-button"> &times </button>
-                            </div>
-                        </div>
-                        <div class="row justify-content-center mt-3">
-                            <button type="button" class="btn dark-button x-button" id="addComponent_add">Add Row</button>
-                        </div>
-                        <div class="row text-center" style="margin-top: 30px;">
+                        <div class="row text-center" style="margin-top: 15px;">
                             <div class="col">
                                 <button type="button" class="btn dark-button"
                                     onclick="toggleModal('confirmAddProduct', 'close')"> Continue Editing </button>

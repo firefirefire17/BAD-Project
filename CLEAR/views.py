@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
 
-# new products
+#new products
 def products(request):
     product_objects = Product.objects.all()
     accessory_objects = Accessory.objects.all()
@@ -20,7 +20,7 @@ def products(request):
 
     product_material_list = []
 
-    # create a list of dicts
+    #create a list of dicts
     for product in product_objects:
         data = {
             'product':product,
@@ -42,17 +42,36 @@ def products(request):
             accessories_ids = request.POST.getlist("accessories")
 
             #create new product
-            new_product = Product.objects.create(name=name, stock=stock, prod_margin=prod_margin, labor_time=labor_time, misc_margin=misc_margin, total_cost=total_cost)
+            new_product = Product.objects.create(name=name, 
+                                                 stock=stock, 
+                                                 prod_margin=prod_margin, 
+                                                 labor_time=labor_time, 
+                                                 misc_margin=misc_margin, 
+                                                 total_cost=total_cost)
 
             #add textiles
             for textile_id in textiles_ids:
                 textile = Textile.objects.get(pk=textile_id)
                 new_product.textiles.add(textile)
 
-            #add accs
+            #add textiles alt
+            '''
+            for textile_id in textiles_ids:
+                textile = Textile.objects.get(pk=textile_id)
+                <We Dont Have a Product_Textile Assoc Entity>.objects.create(product=add_product, textile=textile)
+            '''
+
+            #add accs old
+            '''
             for accessory_id in accessories_ids:
                 accessory = Accessory.objects.get(pk=accessory_id)
                 new_product.accessories.add(accessory)
+            '''
+
+            #add accs
+            for accessory_id in accessories_ids:
+                accessory = Accessory.objects.get(pk=accessory_id)
+                Product_Accessory.objects.create(product=new_product, accessory=accessory)
 
             return redirect("products")
 
@@ -62,8 +81,10 @@ def products(request):
             product = get_object_or_404(Product, pk=product_pk)
 
             #update
-            product.stock = request.POST.get("stock")
             product.name = request.POST.get("name")
+            product.stock = request.POST.get("stock")
+            product.labor_time = request.POST.get("labor_time")
+            product.misc_margin = request.POST.get("misc_margin")
 
             product.save()
 
