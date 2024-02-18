@@ -20,156 +20,155 @@
                 <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Material # </th>
                     <th scope="col"> Name</th>
-                    <th scope="col"> Type </th>
                     <th scope="col"> Stock</th>
                     <th scope="col"> Cost </th>
+                    <th scope="col"> Total Value </th>
                     <th scope="col"></th>
                 </thead>
                 <tbody>
-                    {% for material_data in materials %}
+                    {% for x in materials %}
                     <tr style="height:70px;">
-                        <td> {{ material_data.material.material_key.material_key }} </td>
-                        <td> {{ material_data.material.name }} </td>
-                        <td> {{ material_data.type|title }} </td>
-                        <td> {{ material_data.material.stock }} </td>
-                        <td> {{ material_data.material.cost }} </td>
-                        <td> <button type="button" class="btn btn-outline-secondary"
-                                onclick="toggleModal('editMaterial{{material_data.material.material_key.material_key}}', 'open')"
-                                style="border-radius: 30px;">Edit</button>
+                        <td> {{ x.pk }} </td>
+                        <td> {{ x.name }} </td>
+                        <td> {{ x.stock }} </td>
+                        <td> {{ x.cost }} </td>
+                        <td> {{ x.total_value }} </td>
+                        <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
+                                data-target="#editmat-modal" style="border-radius: 30px;">Edit</button>
                         </td>
                     </tr>
 
 
                     <!-- modal to edit materials -->
-                    <div class="modal-container fade-in" id="editMaterial{{material_data.material.material_key.material_key}}">
-                        <div class="modal-content fade-in">
-                            <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
-                                <span class="close"
-                                    onclick="toggleModal('editMaterial{{material_data.material.material_key.material_key}}', 'close')">&times;</span>
-                            </div>
-                            <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-                                <input type="hidden" name="edit_form" value="1"></input>
-                                <h3 style="margin-top: -40px; margin-bottom: 30px;">Edit Material</h3>
-                                <div class="row">
-                                    <div class="col">
-                                        <label for="pk">Material ID</label>
-                                        <input type="text" class="form-control" name="material_key" value="{{ material_data.material.material_key.material_key }}" readonly>
-                                    </div>
-                                    <div class="col">
-                                        <label for="name">Material Name</label>
-                                        <input type="text" class="form-control" id="name" name="name"
-                                            value="{{material_data.material.name}}">
-                                    </div>
-                                    <div class="col">
-                                        <label for="type">Material Type</label>
-                                        <select class="input-select" id="type" name="type" disabled>
-                                            <option value="textile" {% if 'textile' in material_data.type %}selected{% endif %}>
-                                                Textile </option>
-                                            <option value="accessory" {% if 'accessory' in material_data.type %}selected{% endif %}>
-                                                Accessory</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="row pt-3">
-                                    <div class="col">
-                                        <label for="stock">Stock</label>
-                                        <input type="number" class="form-control" id="stock" name="stock"
-                                            value="{{material_data.material.stock}}" readonly>
-                                    </div>
-                                    <div class="col">
-                                        <label for="cost">Cost</label>
-                                        <input type="number" class="form-control" id="cost" name="cost"
-                                            value="{{material_data.material.cost}}">
-                                    </div>
-                                    <div class="col">
-                                        <label for="unit">Unit</label>
-                                        <input type="text" class="form-control" id="unit" name="unit" value="{{material_data.unit}}"
-                                            readonly>
-                                    </div>
-                                </div>
-                                <div class="row" style="margin: 40px 5px 12px 5px;">
-                                    <div class="col-4 order-2 ml-auto text-right">
-                                        <button type="button" class="btn dark-button"
-                                            onclick="toggleModal('confirmEditMaterial{{material_data.material.material_key.material_key}}', 'open')"> Save Edits
-                                        </button>
-                                    </div>
-                                    <div id="confirmDeleteMaterial{{x.pk}}">
-                                        <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
 
-                                    <!-- modal to confirm edits to material -->
-                                    <div class="modal-overlap-container fade-in" id="confirmEditMaterial{{material_data.material.material_key.material_key}}">
-                                        <div class="modal-overlap-content fade-in">
-                                            <div class="container-fluid">
-                                                <div class="row">
-                                                    <div class="col text-right">
-                                                        <span class="close"
-                                                            onclick="toggleModal('confirmEditMaterial{{material_data.material.material_key.material_key}}', 'close')">&times;</span>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col text-center">
-                                                        <h2> Confirm Edits? </h2>
-                                                    </div>
-                                                </div>
-                                                <div class="row text-center" style="margin-top: 15px;">
-                                                    <div class="col">
-                                                        <button type="button" class="btn dark-button"
-                                                            onclick="toggleModal('confirmEditMaterial{{material_data.material.material_key.material_key}}', 'close')">
-                                                            Continue Editing </button>
-                                                    </div>
-                                                    <div class="col">
-                                                        <button type="submit" class="btn dark-button delete-button"
-                                                            form="delete_form" value="Submit"> Confirm </button>
-                                                    </div>
-                                                </div>
-                                        </form>
+                    <div class="modal" id="editmat-modal" tabindex="-1" role="dialog">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-11">
+                                            <h3 style="margin-bottom: 20px;">Edit Material</h3>
+                                        </div>
+                                        <div class="col-1"><button type="button" class="close btn-close"
+                                                data-dismiss="modal" aria-label="Close"><span
+                                                    aria-hidden="true">&times;</span></button></div>
                                     </div>
-                            </form>
-
-                            <!-- modal to confirm deletion of material -->
-                            <div class="col-4 order-1 mr-auto text-left">
-                                <button type="button" class="btn dark-button"
-                                    onclick="toggleModal('confirmDeleteMaterial{{material_data.material.material_key.material_key}}', 'open')"> Delete Material
-                                </button>
-                            </div>
-                            <div class="modal-overlap-container fade-in" id="confirmDeleteMaterial{{material_data.material.material_key.material_key}}">
-                                <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-                                    <div class="modal-overlap-content fade-in">
-                                        <input type="hidden" name="delete_form" value="1">
-                                        <input type="hidden" name="material_key" value="{{material_data.material.material_key.material_key}}">
-                                        <input type="hidden" name="type" value="{{material_data.type}}">
-                                        <div class="container-fluid">
-                                            <div class="row">
-                                                <div class="col text-right">
-                                                    <span class="close"
-                                                        onclick="toggleModal('confirmDeleteMaterial{{material_data.material.material_key.material_key}}', 'close')">&times;</span>
-                                                </div>
+                                    <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+                                        <input type="hidden" name="edit_form" value="1"></input>
+                                        <input type="hidden" name="pk" value={{ x.pk }}></input>
+                                        <div class="row">
+                                            <div class="col">
+                                                <label for="pk">Material ID</label>
+                                                <input type="text" class="form-control" value="{{x.pk}}" readonly>
                                             </div>
-                                            <div class="row">
-                                                <div class="col text-center">
-                                                    <h2> Delete Material? </h2>
-                                                </div>
+                                            <div class="col">
+                                                <label for="name">Material Name</label>
+                                                <input type="text" class="form-control" id="name" name="name"
+                                                    value="{{x.name}}">
                                             </div>
-                                            <div class="row text-center" style="margin-top: 15px;">
-                                                <div class="col">
-                                                    <button type="button" class="btn dark-button"
-                                                        onclick="toggleModal('confirmDeleteMaterial{{material_data.material.material_key.material_key}}', 'close')">
-                                                        Continue Editing </button>
-                                                </div>
-                                                <div class="col">
-                                                    <button type="submit" class="btn dark-button delete-button"> Confirm
-                                                    </button>
-                                                </div>
+                                            <div class="col">
+                                                <label for="type">Material Type</label>
+                                                <select class="input-select" id="type" name="type"
+                                                    placeholder={{x.type}}>
+                                                    <option value="leather" {% if 'leather' in x.type %}selected{% endif
+                                                        %}>Textile</option>
+                                                    <option value="accessory" {% if 'accessory' in x.type %}selected{%
+                                                        endif %}>Accessory</option>
+                                                </select>
                                             </div>
                                         </div>
-                                </form>
+                                        <div class="row pt-3">
+                                            <div class="col">
+                                                <label for="stock">Stock</label>
+                                                <input type="number" class="form-control" id="stock" name="stock"
+                                                    value="{{x.stock}}" readonly>
+                                            </div>
+                                            <div class="col">
+                                                <label for="cost">Cost</label>
+                                                <input type="number" class="form-control" id="cost" name="cost"
+                                                    value="{{x.cost}}">
+                                            </div>
+                                            <div class="col">
+                                                <label for="unit">Unit</label>
+                                                <input type="text" class="form-control" id="unit" name="unit"
+                                                    value="{{x.unit}}" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin: 30px 0px 10px 0px;">
+                                            <div class="col" style="margin-left: -16px;">
+                                                <button type="button" class="btn dark-button" data-toggle="modal"
+                                                    data-target="#delconf-modal"> Delete
+                                                    Material </button>
+                                            </div>
+                                            <div class="col-4 order-2 text-right">
+                                                <button type="button" class="btn dark-button" data-toggle="modal"
+                                                    data-target="#editconf-modal" style="margin-left: 65px;">
+                                                    Save Edits </button>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                    <!-- CONFIRM EDIT MATERIALS MODAL-->
+
+                    <div class="modal" id="editconf-modal" tabindex="-1"
+                        style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="col-12">
+                                    <h4 style="text-align: center;"> Confirm edits? </h4>
+                                </div>
+                                <div class="row text-center" style="margin-top: 15px;">
+                                    <div class="col">
+                                        <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
+                                            Editing </button>
+                                    </div>
+                                    <div class="col">
+                                        <button type="submit" class="btn dark-button confirm-button" form="edit_form">
+                                            Confirm </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
 
+                    <!-- CONFIRM DELETE MATERIALS MODAL-->
+
+                    <div class="modal" id="delconf-modal" tabindex="-1"
+                        style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="col-12">
+                                    <h4 style="text-align: center;"> Delete Material? </h4>
+                                </div>
+                                <div id="confirmDeleteMaterial{{x.pk}}">
+                                    <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+
+                                        <input type="hidden" name="delete_form" value="1">
+                                        <input type="hidden" name="pk" value="{{x.pk}}">
+                                        <div class="container-fluid">
+                                            <div class="row text-center" style="margin-top: 15px;">
+                                                <div class="col">
+                                                    <button type="button" class="btn dark-button" data-dismiss="modal">
+                                                        Continue Editing
+                                                    </button>
+                                                </div>
+                                                <div class="col">
+                                                    <button type="submit" class="btn dark-button delete-button"
+                                                        form="delete_form" value="Submit"> Confirm </button>
+                                                </div>
+                                            </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         </div>
-
+        {% endfor %}
         </tbody>
         </table>
     </div>
@@ -181,56 +180,7 @@
 </tbody>
 </table>
 
-<!-- modal to add material -->
-<div class="modal-container fade-in" id="addMaterial">
-    <div class="modal-content fade-in">
-        <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:10px;">
-            <span class="close" onclick="toggleModal('addMaterial', 'close')">&times;</span>
-        </div>
-        <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-            <input type="hidden" name="add_form" value="1"></input>
-            <h3 style="margin-top: -35px; margin-bottom: 30px;">Add Material</h3>
-            <div class="row">
-                <div class="col">
-                    <label for="name">Material ID</label>
-                    <input type="text" class="form-control" readonly>
-                </div>
-                <div class="col">
-                    <label for="name">Material Name</label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="Material Name">
-                </div>
-                <div class="col">
-                    <label for="type">Material Type</label>
-                    <select class="input-select" id="type" name="type" placeholder="Material Type">
-                        <option value="textile">Textile</option>
-                        <option value="accessory">Accessory</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row pt-3">
-                <div class="col">
-                    <label for="stock">Stock</label>
-                    <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock">
-                </div>
-                <div class="col">
-                    <label for="cost">Cost</label>
-                    <input type="number" class="form-control" id="cost" name="cost" placeholder="Cost">
-                </div>
-                <div class="col">
-                    <label for="unit">Unit</label>
-                    <input type="text" class="form-control" value="unit" readonly>
-                </div>
-            </div>
-            <div class="row pt-3" style="margin-top: 15px; margin-left: 10px; margin-right: 15px;">
-                <div class="col-4 mr-auto">
-                    <button type="button" class="btn dark-button" onclick="toggleModal('addMaterial', 'close')"> Cancel
-                        Action</button>
-                </div>
-                <div class="col-4 ml-auto text-right">
-                    <button type="button" class="btn dark-button" onclick="toggleModal('confirmAddMaterial', 'open')">
-                        Add Material </button>
-                </div>
-            </div>
+<!-- ADD MATERIAL MODAL -->
 
 <div class="modal" id="orange-modal" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
     <div class="modal-content">
