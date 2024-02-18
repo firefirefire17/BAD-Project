@@ -225,7 +225,7 @@
             <span class="close" onclick="toggleModal('addProduct', 'close')">&times;</span>
         </div>
         <form method="POST" action="{% url 'products' %}"> {% csrf_token %}
-            <input type="hidden" name="add_form" value="1">
+            <input type="hidden" name="add_product_form" value="1">
             <div class="row">
                 <div class="col-3">
                     <label for="pk">Product ID</label>
@@ -266,7 +266,7 @@
                                 </button>
                             </div>
                         </div>
-                        <button type="button" class="btn dark-button x-button mt-4" id="addTextile_add" data-textile-id="1">Add Row</button>
+                        <button type="button" class="btn dark-button x-button mt-4" id="addTextile_add">Add Row</button>
                     </div>
                     <div class="row" style="margin: 25px 0px 25px 0px"></div>
                     <hr>
@@ -330,7 +330,7 @@
                                 <h2> Edit Textile Quantity</h2>
                             </div>
                             <div class="col text-right">
-                                <span class="close" onclick="toggleModal('confirmAddProduct', 'close')">&times;</span>
+                                <span class="close closeTextile" data-modal="editTextile1" data-modal-action="close">&times;</span>
                             </div>
                         </div>
                         <div class="row ml-2 mt-4">
@@ -349,7 +349,7 @@
                             <div class="col-1">
                             </div>
                         </div>
-                        <div class="row ml-2 mt-2" id="productComponent_row_temp" style="display:none;">
+                        <div class="row ml-2 mt-2" id="productComponent_row_temp1" style="display:none;">
                             <div class="col-4">
                                 <input type="text" class="form-control" id="component_name_temp" name="">
                             </div>
@@ -367,12 +367,12 @@
                             </div>
                         </div>
                         <div class="row justify-content-center mt-3">
-                            <button type="button" class="btn dark-button x-button addComponent_add">Add Row</button>
+                            <button type="button" class="btn dark-button x-button addComponent_add" data-textile-id="1">Add Row</button>
                         </div>
                         <div class="row text-center" style="margin-top: 30px;">
                             <div class="col">
-                                <button type="button" class="btn dark-button"
-                                    onclick="toggleModal('confirmAddProduct', 'close')"> Continue Editing </button>
+                                <button type="button" class="btn dark-button closeTextile"
+                                data-modal="editTextile1" data-modal-action="close"> Continue Editing </button>
                             </div>
                             <div class="col">
                                 <button type="submit" class="btn dark-button confirm-button"> Confirm </button>

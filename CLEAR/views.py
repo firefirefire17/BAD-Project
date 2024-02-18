@@ -38,11 +38,26 @@ def products(request):
             prod_margin = request.POST.get("prod_margin")
             labor_time = request.POST.get("labor_time")
             misc_margin = request.POST.get("misc_margin")
-            total_cost = request.POST.get("total_cost")
-            textiles_ids = request.POST.getlist("textiles")
-            accessories_ids = request.POST.getlist("accessories")
 
-            #create new product
+            print(request.POST)
+            #textiles
+            x=1
+            while True:
+                textile_id = request.POST.get(f"product_textile{x}")
+                y=1
+                while True:
+                    component_name = request.POST.get(f"component_name{x}_{y}")
+                    height = request.POST.get(f"height{x}_{y}")
+                    width = request.POST.get(f"width{x}_{y}")
+                    quantity = request.POST.get(f"quantity{x}_{y}")
+                    if component_name is None:
+                        break
+                    y+=1
+                if textile_id is None:
+                    break
+                x+=1
+
+
             new_product = Product.objects.create(name=name, 
                                                  stock=stock, 
                                                  prod_margin=prod_margin, 
