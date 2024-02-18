@@ -55,6 +55,7 @@
                                         </div>
                                         <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
                                             <input type="hidden" name="edit_form" value="1"></input>
+                                            <input type="hidden" name="type" value="{{material_data.type}}"></input>
                                             <div class="row">
                                                 <div class="col">
                                                     <label for="pk">Material ID</label>
@@ -67,8 +68,7 @@
                                                 </div>
                                                 <div class="col">
                                                     <label for="type">Material Type</label>
-                                                    <select class="input-select"
-                                                        placeholder={{material_data.type}} disabled>
+                                                    <select class="input-select" disabled>
                                                         <option value="textile" {% if 'textile' in material_data.type %}selected{% endif %}>Textile</option>
                                                         <option value="accessory" {% if 'accessory' in material_data.type %}selected{% endif %}>Accessory</option>
                                                     </select>

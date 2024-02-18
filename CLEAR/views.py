@@ -94,17 +94,19 @@ def materials(request):
     for accessory in accessory_objects:
         material_objects.append({'type': 'accessory', 'material': accessory, 'unit': accessory.get_unit_display()})
 
+    print(material_objects)
+
     if(request.method=="POST"):
         name = request.POST.get("name")
-        stock = request.POST.get("stock")
+        stock = float(request.POST.get("stock"))
         cost = request.POST.get("cost")
         type = request.POST.get("type")
         material_key = request.POST.get("material_key")
         
-        print(request.POST)
 
         if "add_form" in request.POST:
             material_key = MaterialKey.objects.create()
+            print(material_key)
             if type == "textile": 
                 Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
             if type == "accessory":
@@ -113,10 +115,11 @@ def materials(request):
 
         elif "edit_form" in request.POST:
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
-            print(material_key_obj)
             if type == "textile":
+                print(material_key_obj)
                 Textile.objects.filter(material_key=material_key_obj).update(name=name, stock=stock, cost=cost)
             else:
+                print(material_key_obj)
                 Accessory.objects.filter(material_key=material_key_obj).update(name=name, stock=stock, cost=cost)
             return redirect('materials')
 
