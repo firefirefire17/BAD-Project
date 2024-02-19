@@ -121,36 +121,73 @@ def products(request):
             return redirect("products")
 
         elif 'edit_form' in request.POST:
-            #edit of stuff
-            product_pk = request.POST.get("product_pk")
-            accessory_pk = request.POST.get("accessory_pk")
-            quantity = request.POST.get("accessory_quantity")
-            quantity_t = request.POST.get("quantity")
+            # not sure abt this if we default pk to django
+            # i think this shld be product.pk? but i used _id
+            product_id = request.POST.get("product_id")
+            product = get_object_or_404(Product, pk=product_id)
 
-            #duncan if this does not work, do your method!!
-            product = get_object_or_404(Product, pk=product_pk)
-            accessory = get_object_or_404(Product_Accessory, product=product, accessory__pk=accessory_pk)
-            textile = get_object_or_404(Product_Component, product=product, )
-
-            #update acc qty field
-            accessory.accessory_quantity = quantity
-            accessory.save()
-
-            #update fields
+            #update product attributes
             product.name = request.POST.get("name")
             product.stock = request.POST.get("stock")
+            product.prod_margin = request.POST.get("prod_margin")
             product.labor_time = request.POST.get("labor_time")
-            product.misc_margin = request.POST.get("misc_margin")
-            
+            product.misc_margin = int(request.POST.get("misc_margin"))
+
             product.save()
+
+            #update textiles
+            Product_Component.objects.filter(product=product).delete()
+        
+            x=1
+            while True:
+                textile_id = request.POST.get(f"product_textile{x}")
+
+                if textile_id is None:
+                    break
+
+                textile = get_object_or_404(Textile, material_key__material_key=textile_id)
+                height = request.POST.get(f"height{x}")
+                width = request.POST.get(f"width{x}")
+                quantity = request.POST.get(f"quantity{x}")
+
+                Product_Component.objects.create(product=product, textile=textile, height=height, width=width, quantity=quantity, buffer=1)
+
+                x+=1
+
+            #update accs
+            y=1
+            while True:
+                accessory_id = request.POST.get(f"product_accessory{y}")
+                quantity = request.POST.get(f"accessory_quantity{y}")
+
+                if accessory_id is None:
+                    break
+
+                accessory = get_object_or_404(Accessory, material_key__material_key=accessory_id)
+                Product_Accessory.objects.create(product=product, accessory=accessory, accessory_quantity=quantity)
+
+                y+=1
 
             return redirect('products')
 
         elif 'delete_form' in request.POST:
-            #delete
+            #delete old
+            '''
             product.pk = request.POST.get("productMaterial_pk")
             Product.objects.filter(pk=product_pk).delete()
+            '''
 
+            #delete try
+            product.pk = request.POST.get("productMaterial_pk")
+
+            try:
+                product = Product.objects.get(pk=product.pk)
+                product.delete()
+
+            except Product.DoesNotExist:
+                #if it does not exist we pass the shit
+                pass
+            
             return redirect('products')
         
     return render(request, 'CLEAR/products.html', {'products':product_objects, 
