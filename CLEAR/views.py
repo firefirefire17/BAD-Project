@@ -21,54 +21,88 @@ def products(request):
 
     product_material_list = []
 
+
     #create a list of dicts
     for product in product_objects:
         data = {
             'product':product,
-            'component':product.product_component_set.all(),
+            'components':product.product_component_set.all(),
             'accessories':product.product_accessory_set.all()
         }
         product_material_list.append(data)
+    print(product_material_list)
 
     if request.method == "POST":
-        if 'add_product_form' in request.POST:
+        if 'add_form' in request.POST:
             #adding of stuff
             name = request.POST.get("name")
             stock = request.POST.get("stock")
             prod_margin = request.POST.get("prod_margin")
             labor_time = request.POST.get("labor_time")
-            misc_margin = request.POST.get("misc_margin")
+            misc_margin = int(request.POST.get("misc_margin"))
 
             print(request.POST)
-            #textiles
+            new_product = Product.objects.create(name=name, 
+                                                 stock=stock, 
+                                                 prod_margin=prod_margin, 
+                                                 labor_time=labor_time, 
+                                                 misc_margin=misc_margin)
+
             x=1
             while True:
                 textile_id = request.POST.get(f"product_textile{x}")
+
+                print(textile_id)
+
+                # Break loop once there are no more textiles to be created 
+                if textile_id is None:
+                    break
+                textile = get_object_or_404(Textile, material_key__material_key = textile_id)
+                print(textile)
                 y=1
                 while True:
                     component_name = request.POST.get(f"component_name{x}_{y}")
                     height = request.POST.get(f"height{x}_{y}")
                     width = request.POST.get(f"width{x}_{y}")
                     quantity = request.POST.get(f"quantity{x}_{y}")
+                    
+                    print(component_name)
+                    # Break loop once there are no more components to be created
                     if component_name is None:
                         break
+
+                    component_name = component_name.lower()
+                
+                    
+                    # Get the component with an existing name (if it exists)
+                    component = Component.objects.filter(component_name=component_name).first()
+                    
+                    if component:
+                        # simply pass if a component already exists
+                        pass 
+                    else:
+                        # create a new component entity if it doesn't exist yet and assign it to component
+                        component = Component.objects.create(component_name=component_name)
+                    
+                    Product_Component.objects.create(product=new_product, textile=textile, component=component, height=height, width=width, quantity=quantity, buffer=1)
+
                     y+=1
-                if textile_id is None:
-                    break
                 x+=1
+            z=1
+            while True:
+                accessory_id = request.POST.get(f"product_accessory{z}")
+                quantity = request.POST.get(f"accessory_quantity{z}")
+                
+                print(accessory_id)
 
+                # Break loop once there are no more accessories to create
+                if accessory_id is None:
+                    break
 
-            new_product = Product.objects.create(name=name, 
-                                                 stock=stock, 
-                                                 prod_margin=prod_margin, 
-                                                 labor_time=labor_time, 
-                                                 misc_margin=misc_margin, 
-                                                 total_cost=total_cost)
+                accessory = get_object_or_404(Accessory, material_key__material_key = accessory_id)
+                Product_Accessory.objects.create(product=new_product, accessory=accessory, accessory_quantity=quantity)
+                z+=1
 
-            #add textiles
-            for textile_id in textiles_ids:
-                textile = Textile.objects.get(pk=textile_id)
-                new_product.textiles.add(textile)
 
             #add textiles alt
             '''
@@ -83,11 +117,6 @@ def products(request):
                 accessory = Accessory.objects.get(pk=accessory_id)
                 new_product.accessories.add(accessory)
             '''
-
-            #add accs
-            for accessory_id in accessories_ids:
-                accessory = Accessory.objects.get(pk=accessory_id)
-                Product_Accessory.objects.create(product=new_product, accessory=accessory)
 
             return redirect("products")
 

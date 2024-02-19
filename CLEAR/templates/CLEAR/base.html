@@ -161,6 +161,9 @@
 
                 newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + textileId + '_' + rowCounter_add_component);
 
+                // var button = $('.addComponent_add[data-textile-id="' + textileId + '"]');
+                // use something like this in the future to insert new rows before the add row button
+
                 $('#productComponent_row_temp' + textileId).after(newRow.show());
                 console.log(newRow)
                 rowCounter_add_component++;
