@@ -41,6 +41,12 @@ def products(request):
             labor_time = request.POST.get("labor_time")
             misc_margin = int(request.POST.get("misc_margin"))
 
+            #validation to ensure non-negative
+            '''
+            if stock < 0 or prod_margin < 0 or labor_time < 0 or misc_margin < 0:
+                error_message = "Stock, production margin, labor time, and misc margin cannot be negative."
+                return render(request, 'CLEAR/products.html', {'product_material_list': product_material_list, 'error_message': error_message})
+            '''
             print(request.POST)
             new_product = Product.objects.create(name=name, 
                                                  stock=stock, 
@@ -55,7 +61,7 @@ def products(request):
                 print(textile_id)
 
                 # Break loop once there are no more textiles to be created 
-                if textile_id is None:
+                if textile_id is None or textile_id == 'delete':
                     break
                 textile = get_object_or_404(Textile, material_key__material_key = textile_id)
                 print(textile)
@@ -221,13 +227,10 @@ def materials(request):
             cost = request.POST.get("cost")
 
             if stock < 0:
-                error_message = "Input cannot be a negative value"
+                # backend message
+                error_message = "Input cannot be negative"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
-            if cost < 0:
-                error_message = "Input cannot be a negative value"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
+                
             material_key = MaterialKey.objects.create()
             print(material_key)
 
@@ -243,14 +246,12 @@ def materials(request):
             cost = request.POST.get("cost")
 
             if stock < 0:
-                error_message = "Input cannot be a negative value"
+                # backend message
+                error_message = "Input cannot be negative"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
-            if cost < 0:
-                error_message = "Input cannot be a negative value"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
+                
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+
             if type == "textile":
                 print(material_key_obj)
                 Textile.objects.filter(material_key=material_key_obj).update(name=name, stock=stock, cost=cost)
