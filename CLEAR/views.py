@@ -55,7 +55,7 @@ def products(request):
                 print(textile_id)
 
                 # Break loop once there are no more textiles to be created 
-                if textile_id is None:
+                if textile_id is None or textile_id == 'delete':
                     break
                 textile = get_object_or_404(Textile, material_key__material_key = textile_id)
                 print(textile)

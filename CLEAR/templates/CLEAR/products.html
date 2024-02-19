@@ -183,6 +183,7 @@
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
+                                            {% for accessory in product_data.accessories %}
                                             <div class="row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row1">
                                                 <div class="col-4">
                                                     <select class="input-select" id="{{product_data.product.pk}}product_accessory1" name="{{product_data.product.pk}}product_accessory1">
@@ -205,6 +206,7 @@
                                                     </button>
                                                 </div>
                                             </div>
+                                            {% endfor %}
                                             <button type="button" class="btn dark-button x-button mt-4" id="addAccessory_edit" data-product-id="{{product_data.product.pk}}">Add Row</button>
                                         </div>
                                     </div>
