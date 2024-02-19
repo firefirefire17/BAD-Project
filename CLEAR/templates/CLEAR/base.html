@@ -132,7 +132,6 @@
         $(document).ready(function () {
             let rowCounter_add_accessory = 1;
             let rowCounter_add_textile = 1;
-            let rowCounter_add_component = 1;
 
             function addAccessory_add() {
                 rowCounter_add_accessory++;
@@ -150,23 +149,27 @@
 
             }
 
-            function addComponent_add(textileId) {
-
+            function addComponent_add(textileId, counter) {
+                console.log("before:" + counter)
                 let newRow = $('#productComponent_row_temp' + textileId).clone();
-                newRow.attr('id', 'productComponent_row' + textileId + '_' + rowCounter_add_component);
-                newRow.find('[id^="component_name"]').attr('id', 'component_name' + textileId + '_' + rowCounter_add_component).attr('name', 'component_name' + textileId + '_' + rowCounter_add_component);
-                newRow.find('[id^="height"]').attr('id', 'height' + textileId + '_' + rowCounter_add_component).attr('name', 'height' + textileId + '_' + rowCounter_add_component);
-                newRow.find('[id^="width"]').attr('id', 'width' + textileId + '_' + rowCounter_add_component).attr('name', 'width' + textileId + '_' + rowCounter_add_component);
-                newRow.find('[id^="quantity"]').attr('id', 'quantity' + textileId + '_' + rowCounter_add_component).attr('name', 'quantity' + textileId + '_' + rowCounter_add_component);
+                newRow.attr('id', 'productComponent_row' + textileId + '_' + counter);
+                newRow.find('[id^="component_name"]').attr('id', 'component_name' + textileId + '_' + counter).attr('name', 'component_name' + textileId + '_' + counter);
+                newRow.find('[id^="height"]').attr('id', 'height' + textileId + '_' + counter).attr('name', 'height' + textileId + '_' + counter);
+                newRow.find('[id^="width"]').attr('id', 'width' + textileId + '_' + counter).attr('name', 'width' + textileId + '_' + counter);
+                newRow.find('[id^="quantity"]').attr('id', 'quantity' + textileId + '_' + counter).attr('name', 'quantity' + textileId + '_' + counter);
 
-                newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + textileId + '_' + rowCounter_add_component);
+                newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + textileId + '_' + counter);
 
-                // var button = $('.addComponent_add[data-textile-id="' + textileId + '"]');
-                // use something like this in the future to insert new rows before the add row button
+                let button = $('.addComponent_add[data-textile-id="' + textileId + '"]');
 
-                $('#productComponent_row_temp' + textileId).after(newRow.show());
+                button.before(newRow.show());
                 console.log(newRow)
-                rowCounter_add_component++;
+                counter++;
+
+                console.log('after:' + counter)
+                console.log('before button:' + button.attr('data-counter'));
+                button.data('counter', counter);
+                console.log('after button:' + button.attr('data-counter'));
 
             }
 
@@ -240,9 +243,11 @@
 
             $('#addTextile_add').on('click', addTextile_add);
 
-            $(document).on('click', '.addComponent_add', function () {
+            $('#addProduct').on('click', '.addComponent_add', function () {
                 let textileId = $(this).data('textile-id');
-                addComponent_add(textileId);
+                let counter = $(this).data('counter');
+                console.log('event:' + counter)
+                addComponent_add(textileId, counter);
             });
             
             $(document).on('click', '.delete-productMaterial', function () {
