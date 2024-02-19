@@ -219,8 +219,18 @@ def materials(request):
             name = request.POST.get("name")
             stock = float(request.POST.get("stock"))
             cost = request.POST.get("cost")
+
+            if stock < 0:
+                error_message = "Input cannot be a negative value"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if cost < 0:
+                error_message = "Input cannot be a negative value"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
             material_key = MaterialKey.objects.create()
             print(material_key)
+
             if type == "textile": 
                 Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
             if type == "accessory":
@@ -231,6 +241,15 @@ def materials(request):
             name = request.POST.get("name")
             stock = float(request.POST.get("stock"))
             cost = request.POST.get("cost")
+
+            if stock < 0:
+                error_message = "Input cannot be a negative value"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if cost < 0:
+                error_message = "Input cannot be a negative value"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
             if type == "textile":
                 print(material_key_obj)
