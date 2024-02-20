@@ -1,4 +1,5 @@
 # CLEAR SYSTEM
+![alt text](https://github.com/firefirefire17/BAD-Project/blob/main/CLEAR%20logo.jpg)
 
 This is an management system for NiQUA Bag Manufacturing Company (An Open-Source System)
 
