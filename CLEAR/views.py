@@ -5,7 +5,6 @@ from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
 
 
-
 # Create your views here.
 
 @login_required(login_url="/login") # this is to restrict access if not logged in
@@ -224,11 +223,15 @@ def materials(request):
         if "add_form" in request.POST:
             name = request.POST.get("name")
             stock = float(request.POST.get("stock"))
-            cost = request.POST.get("cost")
+            cost = int(request.POST.get("cost"))
 
-            if stock < 0:
+            if stock < 0 or stock > 999:
                 # backend message
-                error_message = "Input cannot be negative"
+                error_message = "Input cannot be negative or more than 999"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if cost < 0:
+                error_message = "Input cannot be negative or more than 999"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
                 
             material_key = MaterialKey.objects.create()
@@ -243,11 +246,15 @@ def materials(request):
         elif "edit_form" in request.POST:
             name = request.POST.get("name")
             stock = float(request.POST.get("stock"))
-            cost = request.POST.get("cost")
+            cost = int(request.POST.get("cost"))
 
-            if stock < 0:
+            if stock < 0 or stock > 999:
                 # backend message
-                error_message = "Input cannot be negative"
+                error_message = "Input cannot be negative or more than 999"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if cost < 0:
+                error_message = "Input cannot be negative or more than 999"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
                 
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
