@@ -58,52 +58,47 @@
                         </div>
                     </a>
                 </div>
-                <div>
-                    <ul style="list-style-type: none; margin: 0; padding: 0;">
-                        <li class="nav-item pb-3" style="border-radius: 50px;">
-                            <a href="{% url 'dashboard' %}"
-                                class="nav-link text-white {% if 'dashboard' in request.path %} active {% endif %}">
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item pb-3">
-                            <a href="{% url 'products' %}"
-                                class="nav-link text-white {% if 'products' in request.path %} active {% endif %}">
-                                Products
-                            </a>
-                        </li>
-                        <li class="nav-item pb-3">
-                            <a href="{% url 'orders' %}"
-                                class="nav-link text-white {% if 'orders' in request.path %} active {% endif %}">
-                                Job Orders
-                            </a>
-                        </li>
-                        <li class="nav-item pb-3">
-                            <a href="{% url 'materials' %}"
-                                class="nav-link text-white {% if 'materials' in request.path %} active {% endif %}">
-                                Materials
-                            </a>
-                        </li>
-                        <li class="nav-item pb-3">
-                            <a href="{% url 'orders' %}"
-                                class="nav-link text-white {% if '#' in request.path %} active {% endif %}">
-                                Transactions
-                            </a>
-                        </li>
-                        <li class="nav-item pb-3">
-                            <a href="{% url 'reports' %}"
-                                class="nav-link text-white {% if 'reports' in request.path %} active {% endif %}">
-                                Reports
-                            </a>
-                        </li>
-                        <li class="nav-item pb-3">
-                            <a href="{% url 'logout' %}"
-                                class="nav-link text-white {% if 'reports' in request.path %} active {% endif %}">
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <div> 
+                    <ul style="list-style-type: none; margin: 0; padding: 0;"> 
+                        <li class="nav-item pb-3" style="border-radius: 50px;"> 
+                            <a id="navbars" href="{% url 'dashboard' %}" 
+                                class="nav-link text-white {% if 'dashboard' in request.path %} active {% endif %}"> 
+                                Dashboard 
+                            </a> 
+                        </li> 
+                        <li class="nav-item pb-3"> 
+                            <a id="navbars" href="{% url 'products' %}" 
+                                class="nav-link text-white {% if 'products' in request.path %} active {% endif %}"> 
+                                Products 
+                            </a> 
+                        </li> 
+                        <li class="nav-item pb-3"> 
+                            <a id="navbars" href="{% url 'orders' %}" 
+                                class="nav-link text-white {% if 'orders' in request.path %} active {% endif %}"> 
+                                Job Orders 
+                            </a> 
+                        </li> 
+                        <li class="nav-item pb-3"> 
+                            <a id="navbars" href="{% url 'materials' %}" 
+                                class="nav-link text-white {% if 'materials' in request.path %} active {% endif %}"> 
+                                Materials 
+                            </a> 
+                        </li> 
+                        <li class="nav-item pb-3"> 
+                            <a id="navbars" href="{% url 'orders' %}" 
+                                class="nav-link text-white {% if '#' in request.path %} active {% endif %}"> 
+                                Transactions 
+                            </a> 
+                        </li> 
+                        <li class="nav-item pb-3"> 
+                            <a id="navbars" href="{% url 'reports' %}" 
+                                class="nav-link text-white {% if 'reports' in request.path %} active {% endif %}"> 
+                                Reports 
+                            </a> 
+                        </li> 
+                    </ul> 
+                </div> 
+                <button type="button" class="logoutbtn"><a href="{% url 'logout' %}">Log Out</a></button> 
             </div>
             <div class="col-10" style="background-color:#EBEBEB;">
                 {% block content %}
