@@ -1,0 +1,386 @@
+{% extends "CLEAR/base.html" %}
+{% load static %}
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet3.css' %}">
+    <script src="{% static 'js/styling.js' %}"></script>
+</head>
+
+{% block content %}
+<div class="row pl-3 pt-3 pr-3" style="height:700px;">
+    <div class="card main-card">
+        <div class="table-responsive card"
+            style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
+            <table class="table table-hover table-striped" style="border-radius: 40px;">
+                <thead style="background-color: #3f3e3e; color: #ffffff;">
+                    <th scope="col"> Product # </th>
+                    <th scope="col"> Name</th>
+                    <th scope="col"> Stock</th>
+                    <th scope="col"> Cost </th>
+                    <th scope="col"></th>
+                </thead>
+                <tbody>
+                    {% for product_data in product_materials_list %}
+                    <!-- check views to see full breakdown of product_data -->
+                    <tr style="height: 75px;">
+                        <td>{{ product_data.product.pk }}</td>
+                        <td>{{ product_data.product.name }}</td>
+                        <td>{{ product_data.product.stock }}</td>
+                        <td>{{ product_data.product.cost }}</td>
+                        <td>
+                            <button type="button" class="btn btn-outline-secondary"
+                                onclick="toggleModal('editProduct{{product_data.product.pk}}', 'open')"
+                                style="border-radius: 30px;">Edit</button>
+                        </td>
+                    </tr>
+
+                    <!-- modal to edit products -->
+                    <div class="modal-container fade-in" id="editProduct{{ product_data.product.pk }}">
+                        <div class="modal-content modal-content-product fade-in">
+                            <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
+                                <span class="close"
+                                    onclick="toggleModal('editProduct{{product_data.product.pk}}', 'close')">&times;</span>
+                            </div>
+                            <form method="POST" action="{% url 'products' %}" id="test"> {% csrf_token %}
+                                <input type="hidden" name="edit_form" value="1">
+                                <input type="hidden" name="product_pk" value="{{ product_data.product.pk }}">
+                                <div class="row">
+                                    <div class="col-3">
+                                        <label for="pk">Product ID</label>
+                                        <input type="text" class="form-control" value="{{ product_data.product.pk }}"
+                                            readonly>
+                                    </div>
+                                    <div class="col-9">
+                                        <label for="name">Product Name</label>
+                                        <input type="text" class="form-control" id="name" name="name"
+                                            value="{{ product_data.product.name }}">
+                                    </div>
+                                </div>
+                                <div class="row pt-3">
+                                    <div class="col-8" style="height:220px; overflow-x:visible; overflow-y:scroll;">
+                                        <div class="row m-0">
+                                            <div class="col-4">Material</div>
+                                            <div class="col-3">Quantity</div>
+                                            <div class="col-3">Unit</div>
+                                            <div class="col-1"></div>
+                                        </div>
+                                        <div id="{{product_data.product.pk}}_productMaterialContainer">
+                                            {% for product_material in product_data.materials %}
+                                            <div class="row align-items-center mt-2"
+                                                id="{{product_data.product.pk}}_productMaterial_row{{ forloop.counter }}">
+                                                <input type="hidden"
+                                                    name="{{product_data.product.pk}}_productMaterial_pk{{ forloop.counter }}"
+                                                    id="{{product_data.product.pk}}_productMaterial_pk{{ forloop.counter }}"
+                                                    value="{{ product_material.pk }}">
+                                                <div class="col-4">
+                                                    <select class="input-select"
+                                                        id="{{product_data.product.pk}}_product_material{{ forloop.counter }}"
+                                                        name="{{product_data.product.pk}}_product_material{{ forloop.counter }}"
+                                                        value="{{product_material.material.pk}}">
+                                                        <option value="delete">None</option>
+                                                        {% for z in materials %}
+                                                        <option value="{{z.pk}}" {% if z.pk=product_material.material.pk
+                                                            %}selected>{{z.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-3">
+                                                    <input type="number" class="form-control"
+                                                        id="quantity{{ forloop.counter }}"
+                                                        name="quantity{{ forloop.counter }}"
+                                                        value="{{product_material.quantity}}">
+                                                </div>
+                                                <div class="col-3">
+                                                    <input type="text" class="form-control"
+                                                        id="unit{{ forloop.counter }}" name="unit{{ forloop.counter }}"
+                                                        value="{{product_material.material.unit}}" readonly>
+                                                </div>
+                                                <div class="col-1">
+                                                    <button type="button" class="btn dark-button delete-productMaterial"
+                                                        data-select-element-id="{{product_data.product.pk}}_product_material{{ forloop.counter }}"
+                                                        data-row-id="{{product_data.product.pk}}_productMaterial_row{{ forloop.counter }}">
+                                                        &times </button>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="button" class="btn dark-button mt-4 addRowEditProduct"
+                                            data-product-pk="{{product_data.product.pk}}">Add Row</button>
+                                    </div>
+                                    <div class="col-4 mt-3">
+                                        <label for="stock">Stock</label>
+                                        <input type="number" class="form-control" id="stock" name="stock"
+                                            value="{{product_data.product.stock}}">
+                                        <label class="mt-3" for="cost">Cost</label>
+                                        <input type="number" class="form-control" id="cost" name="cost"
+                                            value="{{product_data.product.cost}}" readonly>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin: 40px 5px 12px 5px;">
+                                    <div class="col-4 order-2 ml-auto text-right">
+                                        <button type="button" class="btn dark-button"
+                                            onclick="toggleModal('confirmEditProduct{{product_data.product.pk}}', 'open')">
+                                            Save
+                                            Edits </button>
+                                    </div>
+
+                                    <!-- modal to confirm edits to product -->
+                                    <div class="modal-overlap-container fade-in"
+                                        id="confirmEditProduct{{product_data.product.pk}}">
+                                        <div class="modal-overlap-content fade-in">
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                    <div class="col text-right">
+                                                        <span class="close"
+                                                            onclick="toggleModal('confirmEditProduct{{product_data.product.pk}}', 'close')">&times;</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h2> Confirm Edits? </h2>
+                                                    </div>
+                                                </div>
+                                                <div class="row text-center" style="margin-top: 15px;">
+                                                    <div class="col">
+                                                        <button type="button" class="btn dark-button"
+                                                            onclick="toggleModal('confirmEditProduct{{product_data.product.pk}}', 'close')">
+                                                            Continue Editing </button>
+                                                    </div>
+                                                    <div class="col">
+                                                        <button type="submit" class="btn dark-button confirm-button">
+                                                            Confirm
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </form>
+                            <div class="col-4 order-1 mr-auto text-left">
+                                <button type="button" class="btn dark-button"
+                                    onclick="toggleModal('confirmDeleteProduct{{product_data.product.pk}}', 'open')">
+                                    Delete Product
+                                </button>
+                            </div>
+
+                            <!-- modal to confirm deletion of product -->
+                            <div class="modal-overlap-container fade-in"
+                                id="confirmDeleteProduct{{product_data.product.pk}}">
+                                <form method="POST" action="{% url 'products' %}"> {% csrf_token %}
+                                    <div class="modal-overlap-content fade-in">
+                                        <input type="hidden" name="delete_form" value="1">
+                                        <input type="hidden" name="productMaterial_pk"
+                                            value="{{product_data.product.pk}}">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col text-right">
+                                                    <span class="close"
+                                                        onclick="toggleModal('confirmDeleteProduct{{product_data.product.pk}}', 'close')">&times;</span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col text-center">
+                                                    <h2> Delete Product? </h2>
+                                                </div>
+                                            </div>
+                                            <div class="row text-center" style="margin-top: 15px;">
+                                                <div class="col">
+                                                    <button type="button" class="btn dark-button"
+                                                        onclick="toggleModal('confirmDeleteProduct{{product_data.product.pk}}', 'close')">
+                                                        Continue Editing </button>
+                                                </div>
+                                                <div class="col">
+                                                    <button type="submit" class="btn dark-button delete-button"> Confirm
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+        </div>
+        </tbody>
+        </table>
+        </table>
+    </div>
+    <div class="row ml-auto pr-3">
+        <button type="button" class="btn light-button" onclick="toggleModal('addProduct', 'open')"
+            style="margin-top: -5%;">
+            Add Product</button>
+    </div>
+</div>
+
+
+<!-- modal to add product to table -->
+
+<div class="modal-container fade-in" id="addProduct">
+    <div class="modal-content modal-content-product fade-in">
+        <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
+            <span class="close" onclick="toggleModal('addProduct', 'close')">&times;</span>
+        </div>
+        <form method="POST" action="{% url 'products' %}" id="test2"> {% csrf_token %}
+            <input type="hidden" name="add_form" value="1">
+            <div class="row">
+                <div class="col-3">
+                    <label for="pk">Product ID</label>
+                    <input type="text" class="form-control" placeholder="Product #" readonly>
+                </div>
+                <div class="col-9">
+                    <label for="name">Product Name</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Product Name">
+                </div>
+            </div>
+            <div class="row pt-3">
+                <div class="col-8">
+                    <div class="container" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                        <div class="row m-0">
+                            <div class="col-4">Textiles:</div>
+                            <div class="col-3">Unit</div>
+                            <div class="col-3">Quantity</div>
+                            <div class="col-1"></div>
+                        </div>
+                        <div class="row align-items-center mt-2" id="productTextile_row1">
+                            <div class="col-4">
+                                <select class="input-select" id="product_textile1" name="product_textile1">
+                                    <option value="delete">None</option>
+                                    {% for z in textiles %}
+                                    <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <input type="text" class="form-control" id="textile_unit1" name="textile_unit1" placeholder="Unit" readonly>
+                            </div>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-outline-secondary" style="border-radius: 30px; width:85%;" id="editTextile_btn1" data-modal="editTextile1" data-modal-action="open">Edit</button>
+                            </div>
+                            <div class="col-1">
+                                <button type="button" class="btn dark-button delete-productMaterial"
+                                    data-select-element-id="product_textile1" data-row-id="productTextile_row1"> &times
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn dark-button x-button mt-4" id="addTextile_add">Add Row</button>
+                    </div>
+                    <div class="row" style="margin: 25px 0px 25px 0px"></div>
+                    <hr>
+                    <div class="row" style="margin: 25px 0px 25px 0px"></div> 
+                    <div class="container" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                        <div class="row m-0">
+                            <div class="col-4">Accessories:</div>
+                            <div class="col-3">Unit</div>
+                            <div class="col-3">Quantity</div>
+                            <div class="col-1"></div>
+                        </div>
+                        <div class="row align-items-center mt-2" id="productAccessory_row1">
+                            <div class="col-4">
+                                <select class="input-select" id="product_accessory1" name="product_accessory1">
+                                    <option value="delete">None</option>
+                                    {% for z in accessories %}
+                                    <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <input type="text" class="form-control" id="accessory_unit1" name="accessory_unit1" placeholder="Unit" readonly>
+                            </div>
+                            <div class="col-3">
+                                <input type="number" class="form-control" id="accessory_quantity1" name="accessory_quantity1"
+                                    placeholder="Quantity">
+                            </div>
+                            <div class="col-1">
+                                <button type="button" class="btn dark-button delete-productMaterial"
+                                    data-select-element-id="product_accessory1" data-row-id="productAccessory_row1"> &times
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn dark-button x-button mt-4" id="addAccessory_add">Add Row</button>
+                    </div>
+                </div>
+                
+                <div class="col-4 mt-3">
+                    <label for="stock">Stock</label>
+                    <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock">
+                    <label class="mt-3" for="cost">Cost</label>
+                    <input type="number" class="form-control" id="cost" name="cost" placeholder="Cost" readonly>
+                    <label class="mt-3" for="stock">Labor Time</label>
+                    <input type="number" class="form-control" id="labor_time" name="labor_time" placeholder="Labor Time">
+                    <label class="mt-3" for="stock">Miscellaneous Margin</label>
+                    <input type="number" class="form-control" id="misc_margin" name="misc_margin" placeholder="Miscellaneous Margin">
+                </div>
+            </div>
+            <div class="row" style="margin: 20px 5px 12px 5px;">
+                <div class="col-4 order-2 ml-auto text-right">
+                    <button type="button" class="btn dark-button" onclick="toggleModal('confirmAddProduct', 'open')">
+                        Save Edits </button>
+                </div>
+            </div>
+
+            <div class="modal-overlap-container fade-in" id="editTextile1">
+                <div class="modal-overlap-content" style="width:40%">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col">
+                                <h2> Edit Textile Quantity</h2>
+                            </div>
+                            <div class="col text-right">
+                                <span class="close" onclick="toggleModal('confirmAddProduct', 'close')">&times;</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-center">
+                                <h2> Add Product? </h2>
+                            </div>
+                        </div>
+                        <div class="row text-center" style="margin-top: 15px;">
+                            <div class="col">
+                                <button type="button" class="btn dark-button"
+                                    onclick="toggleModal('confirmAddProduct', 'close')"> Continue Editing </button>
+                            </div>
+                            <div class="col">
+                                <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- mmodal to confirm addition of product -->
+            <div class="modal-overlap-container fade-in" id="confirmAddProduct">
+                <div class="modal-overlap-content">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col text-right">
+                                <span class="close" onclick="toggleModal('confirmAddProduct', 'close')">&times;</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-center">
+                                <h2> Add Product? </h2>
+                            </div>
+                        </div>
+                        <div class="row text-center" style="margin-top: 15px;">
+                            <div class="col">
+                                <button type="button" class="btn dark-button"
+                                    onclick="toggleModal('confirmAddProduct', 'close')"> Continue Editing </button>
+                            </div>
+                            <div class="col">
+                                <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+</div>
+</div>
+</div>
+{% endblock %}

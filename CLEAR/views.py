@@ -1,34 +1,363 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Material, Product, Product_Material, Order, Customer, Item, Item_Material, Order_Item
-from django.db import transaction
+from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, Transaction, Transaction_Accessory, Transaction_Textile, Global_Value, Account, MaterialKey
+from django.contrib.auth import authenticate, login, logout
+from .forms import RegisterForm, LoginForm
+from django.contrib.auth.decorators import login_required
+
+
 
 # Create your views here.
-def login(request):
-    return render(request, 'CLEAR/base.html')
 
+@login_required(login_url="/login") # this is to restrict access if not logged in
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
 
+#new products
+@login_required(login_url="/login")
 def products(request):
     product_objects = Product.objects.all()
-    material_objects = Material.objects.all()
+    accessory_objects = Accessory.objects.all()
+    textile_objects = Textile.objects.all()
+
+    product_material_list = []
+
+
+    #create a list of dicts
+    for product in product_objects:
+        data = {
+            'product':product,
+            'components':product.product_component_set.all(),
+            'accessories':product.product_accessory_set.all()
+        }
+        product_material_list.append(data)
+    print(product_material_list)
+
+    if request.method == "POST":
+        if 'add_form' in request.POST:
+            #adding of stuff
+            name = request.POST.get("name")
+            stock = request.POST.get("stock")
+            prod_margin = request.POST.get("prod_margin")
+            labor_time = request.POST.get("labor_time")
+            misc_margin = int(request.POST.get("misc_margin"))
+
+            print(request.POST)
+            new_product = Product.objects.create(name=name, 
+                                                 stock=stock, 
+                                                 prod_margin=prod_margin, 
+                                                 labor_time=labor_time, 
+                                                 misc_margin=misc_margin)
+
+            x=1
+            while True:
+                textile_id = request.POST.get(f"product_textile{x}")
+
+                print(textile_id)
+
+                # Break loop once there are no more textiles to be created 
+                if textile_id is None or textile_id == 'delete':
+                    break
+                textile = get_object_or_404(Textile, material_key__material_key = textile_id)
+                print(textile)
+                y=1
+                while True:
+                    component_name = request.POST.get(f"component_name{x}_{y}")
+                    height = request.POST.get(f"height{x}_{y}")
+                    width = request.POST.get(f"width{x}_{y}")
+                    quantity = request.POST.get(f"quantity{x}_{y}")
+                    
+                    print(component_name)
+                    # Break loop once there are no more components to be created
+                    if component_name is None:
+                        break
+
+                    component_name = component_name.lower()
+                
+                    
+                    # Get the component with an existing name (if it exists)
+                    component = Component.objects.filter(component_name=component_name).first()
+                    
+                    if component:
+                        # simply pass if a component already exists
+                        pass 
+                    else:
+                        # create a new component entity if it doesn't exist yet and assign it to component
+                        component = Component.objects.create(component_name=component_name)
+                    
+                    Product_Component.objects.create(product=new_product, textile=textile, component=component, height=height, width=width, quantity=quantity, buffer=1)
+
+                    y+=1
+                x+=1
+            z=1
+            while True:
+                accessory_id = request.POST.get(f"product_accessory{z}")
+                quantity = request.POST.get(f"accessory_quantity{z}")
+                
+                print(accessory_id)
+
+                # Break loop once there are no more accessories to create
+                if accessory_id is None:
+                    break
+
+                accessory = get_object_or_404(Accessory, material_key__material_key = accessory_id)
+                Product_Accessory.objects.create(product=new_product, accessory=accessory, accessory_quantity=quantity)
+                z+=1
+
+
+            #add textiles alt
+            '''
+            for textile_id in textiles_ids:
+                textile = Textile.objects.get(pk=textile_id)
+                <We Dont Have a Product_Textile Assoc Entity>.objects.create(product=add_product, textile=textile)
+            '''
+
+            #add accs old
+            '''
+            for accessory_id in accessories_ids:
+                accessory = Accessory.objects.get(pk=accessory_id)
+                new_product.accessories.add(accessory)
+            '''
+
+            return redirect("products")
+
+        elif 'edit_form' in request.POST:
+            # not sure abt this if we default pk to django
+            # i think this shld be product.pk? but i used _id
+            product_id = request.POST.get("product_id")
+            product = get_object_or_404(Product, pk=product_id)
+
+            #update product attributes
+            product.name = request.POST.get("name")
+            product.stock = request.POST.get("stock")
+            product.prod_margin = request.POST.get("prod_margin")
+            product.labor_time = request.POST.get("labor_time")
+            product.misc_margin = int(request.POST.get("misc_margin"))
+
+            product.save()
+
+            #update textiles
+            Product_Component.objects.filter(product=product).delete()
+        
+            x=1
+            while True:
+                textile_id = request.POST.get(f"product_textile{x}")
+
+                if textile_id is None:
+                    break
+
+                textile = get_object_or_404(Textile, material_key__material_key=textile_id)
+                height = request.POST.get(f"height{x}")
+                width = request.POST.get(f"width{x}")
+                quantity = request.POST.get(f"quantity{x}")
+
+                Product_Component.objects.create(product=product, textile=textile, height=height, width=width, quantity=quantity, buffer=1)
+
+                x+=1
+
+            #update accs
+            y=1
+            while True:
+                accessory_id = request.POST.get(f"product_accessory{y}")
+                quantity = request.POST.get(f"accessory_quantity{y}")
+
+                if accessory_id is None:
+                    break
+
+                accessory = get_object_or_404(Accessory, material_key__material_key=accessory_id)
+                Product_Accessory.objects.create(product=product, accessory=accessory, accessory_quantity=quantity)
+
+                y+=1
+
+            return redirect('products')
+
+        elif 'delete_form' in request.POST:
+            #delete old
+            '''
+            product.pk = request.POST.get("productMaterial_pk")
+            Product.objects.filter(pk=product_pk).delete()
+            '''
+
+            #delete try
+            product.pk = request.POST.get("productMaterial_pk")
+
+            try:
+                product = Product.objects.get(pk=product.pk)
+                product.delete()
+
+            except Product.DoesNotExist:
+                #if it does not exist we pass the shit
+                pass
+            
+            return redirect('products')
+        
+    return render(request, 'CLEAR/products.html', {'products':product_objects, 
+                                                   'product_material_list':product_material_list,
+                                                   'accessories':accessory_objects,
+                                                   'textiles':textile_objects})
+
+# orders used to be here
+
+@login_required(login_url="/login")
+def materials(request):
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_objects = []
+
+    for textile in textile_objects:
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+        material_objects.append({'type': 'textile', 'material': textile, 'unit': unit})
+
+    for accessory in accessory_objects:
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+
+    print(request.POST)
+    if(request.method=="POST"):
+        material_key = request.POST.get("material_key")
+        type = request.POST.get("type")
+
+        if "add_form" in request.POST:
+            name = request.POST.get("name")
+            stock = float(request.POST.get("stock"))
+            cost = float(request.POST.get("cost"))
+
+            if len(name) > 50:
+                error_message = "Input cannot be more than 50 characters"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+
+            if stock < 0 or stock > 999:
+                #backend message
+                error_message = "Input cannot be negative or more than 999"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if type == "accessory":
+                if isinstance(stock, float):
+                    error_message = "Stock input cannot be a decimal number"
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if cost < 0:
+                #backend message
+                error_message = "Input cannot be negative"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+        
+            material_key = MaterialKey.objects.create()
+
+            if type == "textile": 
+                Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
+            if type == "accessory":
+                Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
+            return redirect('materials')
+
+        elif "edit_form" in request.POST:
+            name = request.POST.get("name")
+            stock = float(request.POST.get("stock"))
+            cost = float(request.POST.get("cost"))
+
+            if len(name) > 50:
+                error_message = "Input cannot be more than 50 characters"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+
+            if stock < 0 or stock > 999:
+                #backend message
+                error_message = "Input cannot be negative or more than 999"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                
+            if cost < 0:
+                #backend message
+                error_message = "Input cannot be negative or more than 999"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if type == "accessory":
+                if isinstance(stock, float):
+                    error_message = "Stock input cannot be a decimal number"
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+
+            material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+            if type == "textile":
+                print(material_key_obj)
+                Textile.objects.filter(material_key=material_key_obj).update(name=name, stock=stock, cost=cost)
+            else:
+                print(material_key_obj)
+                Accessory.objects.filter(material_key=material_key_obj).update(name=name, stock=stock, cost=cost)
+            return redirect('materials')
+
+        elif "delete_form" in request.POST:
+            material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+            print(material_key_obj)
+            if type == "textile":
+                Textile.objects.filter(material_key=material_key_obj).delete()
+            if type == "accessory":
+                Accessory.objects.filter(material_key=material_key_obj).delete()
+            return redirect('materials')
+
+
+    return render(request, 'CLEAR/materials.html', {'materials':material_objects})
+
+@login_required(login_url="/login")
+def reports(request):
+    return render(request, 'CLEAR/reports.html')
+
+
+def sign_up(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+
+    else:
+        form = RegisterForm()
+
+    return render(request, 'registration/sign_up.html', {"form": form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard')
+    else:
+        form = LoginForm()
+
+    return render(request, 'registration/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+
+''' old def products()
+def products(request):
+    product_objects = Product.objects.all()
+    accessory_objects = Accessory.objects.all()
+    textile_objects = Textile.objects.all()
+
+
     product_material_list = []
 
     # create a list of dictionaries, each dictionary pertaining to one product and its associated information
     for product in product_objects:
         data = {
             'product': product,
-            'materials': product.product_material_set.all(),
-            'product_materials_count': product.product_material_set.count()
+            'component': product.product_component_set.all(),
+            'accessories': product.product_accessory_set.all()
         }
         product_material_list.append(data)
     
     if(request.method=="POST"):
-        stock = request.POST.get("stock")
-        name = request.POST.get("name")
+            name = request.POST.get("name")
+            stock = request.POST.get("stock")
+            prod_margin = request.POST.get("prod_margin")
+            labor_time = request.POST.get("labor_time")
+            misc_margin = request.POST.get("misc_margin")
 
         print(request.POST)
-
         
         if 'edit_form' in request.POST:
             product_pk = request.POST.get("product_pk")
@@ -36,23 +365,7 @@ def products(request):
 
             x = 1
             while True:
-                pm_pk = request.POST.get(f"{product_pk}_productMaterial_pk{x}")
-                quantity = request.POST.get(f"quantity{x}")
-                materialID = request.POST.get(f"{product_pk}_product_material{x}")
-
-                if materialID is None:
-                    break
-                else:
-                    if pm_pk: 
-                        if materialID == "delete":
-                            Product_Material.objects.filter(pk=pm_pk).delete()
-                        else:
-                            Product_Material.objects.filter(pk=pm_pk).update(material=materialID, quantity=quantity)
-                    else:
-                        if materialID != "delete":
-                            material_object = get_object_or_404(Material, pk=materialID)
-                            Product_Material.objects.create(product=product, material=material_object, quantity=quantity)
-                x+=1
+                pass # leave it for now
             Product.objects.filter(pk=product_pk).update(stock=stock, name=name)
             return redirect('products')
 
@@ -67,30 +380,17 @@ def products(request):
 
             #create product_materials
             x = 1
-            product_cost = 0
             while True:
-                quantity = request.POST.get(f"quantity{x}")
-                materialID = request.POST.get(f"product_material{x}")
-                print(f"{materialID}")
-
-                if materialID is None:
-                    break
-                else:
-                    if materialID == "delete":
-                        pass
-                    else:
-                        material = get_object_or_404(Material, pk=materialID)
-                        product_material = Product_Material.objects.create(product=new_product, material=material, quantity=quantity)
-
-                        # add the cost of each material to the product price
-                        product_cost += material.cost*material.markup*int(product_material.quantity)
-                x += 1
+                pass
             new_product.cost = product_cost
             new_product.save()
             return redirect('products')
 
-    return render(request, 'CLEAR/products.html', {'products':product_objects, 'product_materials_list':product_material_list, 'materials':material_objects})
+    return render(request, 'CLEAR/products.html', {'products':product_objects, 'product_materials_list':product_material_list, 'accessories':accessory_objects, 'textiles':textile_objects})
+'''
 
+
+'''
 def orders(request):
     order_objects = Order.objects.all()
     customer_objects = Customer.objects.all()
@@ -148,18 +448,6 @@ def orders(request):
 
         if 'add_form' in request.POST:
 
-            ''' 
-            if customer_pk == "new_customer":
-                existing_customer = Customer.objects.filter(name=customer_name).first()
-                if existing_customer:
-                    # customer already exists error
-                    pass
-                else:
-                    order_customer = Customer.objects.create(name=customer_name, mobile_number=customer_number)
-            else:
-                order_customer = Customer.objects.filter(pk=customer_pk).first()
-            '''
-
             new_order = Order.objects.create(customer=customer_name, contact_number=customer_number, purchase_mode=purchase_mode, payment_type=payment_type, order_status=order_status, order_date=order_date, delivery_date=delivery_date, address_city=address_city, address_street=address_street, address_barangay=address_barangay, address_zip=address_zip)
             
             x = 1
@@ -213,11 +501,6 @@ def orders(request):
             return redirect('orders')
         
         elif 'edit_form' in request.POST:
-            '''
-            current_customer_pk = request.POST.get("current_customer_pk")
-            if current_customer_pk == customer_pk:
-                Customer.objects.filter(pk=customer_pk).update(name=customer_name, mobile_number=customer_number)
-            '''
 
             Order.objects.filter(pk=order_pk).update(customer=customer_name, contact_number=customer_number, purchase_mode=purchase_mode, payment_type=payment_type, order_status=order_status, order_date=order_date, delivery_date=delivery_date, address_city=address_city, address_street=address_street, address_barangay=address_barangay, address_zip=address_zip)
             order = Order.objects.filter(pk=order_pk).get()
@@ -282,46 +565,4 @@ def orders(request):
             return redirect('orders')
                 
     return render(request, 'CLEAR/orders.html', {'orders':order_list, 'customers':customer_objects, 'products':product_objects, 'materials':material_objects, 'product_names': product_names})
-
-
-
-def materials(request):
-    material_objects = Material.objects.all()
-    last = Material.objects.last()
-
-    if(request.method=="POST"):
-        name = request.POST.get("name")
-        stock = request.POST.get("stock")
-        cost = request.POST.get("cost")
-        type = request.POST.get("type")
-        if type == "leather":
-            unit = "per foot"
-        elif type == "lining":
-            unit = "per inch"
-        else:
-            unit = "per piece"
-
-        if "add_form" in request.POST:
-            markup = float(request.POST.get("markup"))
-            total_value = float(stock)*float(cost) 
-            Material.objects.create(name=name, stock=stock, cost=cost, type=type, markup=markup, unit=unit, total_value=total_value)
-            return redirect('materials')
-
-        elif "edit_form" in request.POST:
-            markup = float(request.POST.get("markup"))
-            total_value = float(stock)*float(cost)
-            pk=request.POST.get("pk")
-            Material.objects.filter(pk=pk).update(name=name, stock=stock, cost=cost, type=type, markup=markup, unit=unit, total_value=total_value)
-            return redirect('materials')
-
-        elif "delete_form" in request.POST:
-            pk=request.POST.get("pk")
-            Material.objects.filter(pk=pk).delete()
-            return redirect('materials')
-
-
-    return render(request, 'CLEAR/materials.html', {'materials':material_objects})
-
-def reports(request):
-    return render(request, 'CLEAR/reports.html')
-
+'''
