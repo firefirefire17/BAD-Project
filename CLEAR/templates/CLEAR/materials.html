@@ -2,7 +2,7 @@
 {% load static %}
 
 <head>
-    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet3.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet4.css' %}">
     <script src="{% static 'js/styling.js' %}"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
@@ -40,7 +40,7 @@
 
 
                         <!-- modal to edit materials -->
-
+                    <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
                         <div class="modal" id="editmat-modal{{material_data.material.material_key.material_key}}" tabindex="-1" role="dialog">
                             <div class="modal-content">
                                 <div class="modal-body">
@@ -53,88 +53,85 @@
                                                     data-dismiss="modal" aria-label="Close"><span
                                                         aria-hidden="true">&times;</span></button></div>
                                         </div>
-                                        <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-                                            <input type="hidden" name="edit_form" value="1"></input>
-                                            <input type="hidden" name="type" value="{{material_data.type}}"></input>
-                                            <div class="row">
-                                                <div class="col">
-                                                    <label for="pk">Material ID</label>
-                                                    <input type="text" class="form-control" name="material_key" value="{{material_data.material.material_key.material_key}}" readonly>
-                                                </div>
-                                                <div class="col">
-                                                    <label for="name">Material Name</label>
-                                                    <input type="text" class="form-control" id="name" name="name"
-                                                        value="{{material_data.material.name}}">
-                                                </div>
-                                                <div class="col">
-                                                    <label for="type">Material Type</label>
-                                                    <select class="input-select" disabled>
-                                                        <option value="textile" {% if 'textile' in material_data.type %}selected{% endif %}>Textile</option>
-                                                        <option value="accessory" {% if 'accessory' in material_data.type %}selected{% endif %}>Accessory</option>
-                                                    </select>
-                                                </div>
+                                        
+                                        <input type="hidden" name="edit_form" value="1"></input>
+                                        <input type="hidden" name="type" value="{{material_data.type}}"></input>
+                                        <div class="row">
+                                            <div class="col">
+                                                <label for="pk">Material ID</label>
+                                                <input type="text" class="form-control" name="material_key" value="{{material_data.material.material_key.material_key}}" readonly>
                                             </div>
-                                            <div class="row pt-3">
-                                                <div class="col">
-                                                    <label for="stock">Stock</label>
-                                                    <input type="number" class="form-control" id="stock" name="stock"
-                                                        value="{{material_data.material.stock}}" readonly>
-                                                </div>
-                                                <div class="col">
-                                                    <label for="cost">Cost</label>
-                                                    <input type="number" class="form-control" id="cost" name="cost"
-                                                        value="{{material_data.material.cost}}">
-                                                </div>
-                                                <div class="col">
-                                                    <label for="unit">Unit</label>
-                                                    <input type="text" class="form-control" id="unit" name="unit"
-                                                        value="{{material_data.material.unit}}" readonly>
-                                                </div>
+                                            <div class="col">
+                                                <label for="name">Material Name</label>
+                                                <input type="text" class="form-control" id="name" name="name"
+                                                    value="{{material_data.material.name}}">
                                             </div>
-                                            <div class="row" style="margin: 30px 0px 10px 0px;">
-                                                <div class="col" style="margin-left: -16px;">
-                                                    <button type="button" class="btn dark-button" data-toggle="modal"
-                                                        data-target="#delconf-modal{{material_data.material.material_key.material_key}}"> Delete
-                                                        Material </button>
-                                                </div>
-                                                <div class="col-4 order-2 text-right">
-                                                    <button type="button" class="btn dark-button" data-toggle="modal"
-                                                        data-target="#editconf-modal{{material_data.material.material_key.material_key}}" style="margin-left: 65px;">
-                                                        Save Edits </button>
-                                                </div>
+                                            <div class="col">
+                                                <label for="type">Material Type</label>
+                                                <select class="input-select" disabled>
+                                                    <option value="textile" {% if 'textile' in material_data.type %}selected{% endif %}>Textile</option>
+                                                    <option value="accessory" {% if 'accessory' in material_data.type %}selected{% endif %}>Accessory</option>
+                                                </select>
                                             </div>
-
-                                            <!-- CONFIRM EDIT MATERIALS MODAL-->
-                                            <div class="modal" id="editconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
-                                                style=" margin-left: 15%; margin-top: 10%; width: 70%;">
-                                                <div class="modal-content">
-                                                    <div class="modal-body">
-                                                        <div class="col-12">
-                                                            <h4 style="text-align: center;"> Confirm edits? </h4>
-                                                        </div>
-                                                        <div class="row text-center" style="margin-top: 15px;">
-                                                            <div class="col">
-                                                                <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
-                                                                    Editing </button>
-                                                            </div>
-                                                            <div class="col">
-                                                                <button type="submit" class="btn dark-button confirm-button">
-                                                                    Confirm </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        </div>
+                                        <div class="row pt-3">
+                                            <div class="col">
+                                                <label for="stock">Stock</label>
+                                                <input type="number" class="form-control" id="stock" name="stock"
+                                                    value="{{material_data.material.stock}}" readonly>
                                             </div>
-                                            
-                                        </form>
+                                            <div class="col">
+                                                <label for="cost">Cost</label>
+                                                <input type="number" class="form-control" id="cost" name="cost"
+                                                    value="{{material_data.material.cost}}">
+                                            </div>
+                                            <div class="col">
+                                                <label for="unit">Unit</label>
+                                                <input type="text" class="form-control" id="unit" name="unit"
+                                                    value="{{material_data.material.unit}}" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin: 30px 0px 10px 0px;">
+                                            <div class="col" style="margin-left: -16px;">
+                                                <button type="button" class="btn dark-button" data-toggle="modal"
+                                                    data-target="#delconf-modal{{material_data.material.material_key.material_key}}"> Delete
+                                                    Material </button>
+                                            </div>
+                                            <div class="col-4 order-2 text-right">
+                                                <button type="button" class="btn dark-button" data-toggle="modal"
+                                                    data-target="#editconf-modal{{material_data.material.material_key.material_key}}" style="margin-left: 65px;">
+                                                    Save Edits </button>
+                                            </div>
+                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
-
-
-
                         </div>
 
+                        <!-- CONFIRM EDIT MATERIALS MODAL-->
+
+                        <div class="modal" id="editconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
+                            style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="col-12">
+                                        <h4 style="text-align: center;"> Confirm edits? </h4>
+                                    </div>
+                                    <div class="row text-center" style="margin-top: 15px;">
+                                        <div class="col">
+                                            <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
+                                                Editing </button>
+                                        </div>
+                                        <div class="col">
+                                            <button type="submit" class="btn dark-button confirm-button">
+                                                Confirm </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- CONFIRM DELETE MATERIALS MODAL-->
 
                         <div class="modal" id="delconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
@@ -161,14 +158,13 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </form>
+                                        
                                     </div>
                                 </div>
                             </div>
                         </div>
                     {% endfor %}
-                </div>
-        
+            </form>
         </tbody>
         </table>
     </div>
@@ -181,91 +177,87 @@
 </table>
 
 <!-- ADD MATERIAL MODAL -->
-
-<div class="modal" id="orange-modal" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
-    <div class="modal-content">
-        <div class="modal-body">
-            <div class="container-fluid">
-                <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-                    <input type="hidden" name="add_form" value="1"></input>
-                    <div class="row">
-                        <div class="col-11">
-                            <h3 style="margin-bottom: 30px;">Add Material</h3>
+<form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+    <div class="modal" id="orange-modal" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="container-fluid">
+                    
+                        <input type="hidden" name="add_form" value="1"></input>
+                        <div class="row">
+                            <div class="col-11">
+                                <h3 style="margin-bottom: 30px;">Add Material</h3>
+                            </div>
+                            <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
+                                    aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
                         </div>
-                        <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
-                                aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <label for="name">Material ID</label>
-                            <input type="text" class="form-control" value="" readonly>
-                        </div>
-                        <div class="col">
-                            <label for="name">Material Name</label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Material Name">
-                        </div>
-                        <div class="col">
-                            <label for="type">Material Type</label>
-                            <select class="input-select" id="type" name="type" placeholder="Material Type">
-                                <option value="textile">Textile</option>
-                                <option value="accessory">Accessory</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row pt-3">
-                        <div class="col">
-                            <label for="stock">Stock</label>
-                            <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock">
-                        </div>
-                        <div class="col">
-                            <label for="cost">Cost</label>
-                            <input type="number" class="form-control" id="cost" name="cost" placeholder="Cost">
-                        </div>
-                        <div class="col">
-                            <label for="unit">Unit</label>
-                            <input type="text" class="form-control" value="unit" readonly>
-                        </div>
-                    </div>
-                    <div class="row pt-3" style="margin-top: 15px;">
-                        <div class="col-4 mr-auto">
-                            <button type="button" class="btn dark-button" data-dismiss="modal"> Cancel
-                                Action</button>
-                        </div>
-                        <div class="col-4 ml-auto text-right">
-                            <button type="button" class="btn dark-button" data-toggle="modal"
-                                data-target="#confirm-modal"> Add Material
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- CONFIRM ADD MODAL -->
-                    <div class="modal" id="confirm-modal" tabindex="-1" style=" margin-left: 0%; margin-top: 0%; width: 150%;">
-                        <div class="modal-content">
-                            <div class="modal-body">
-                                <div class="col-12">
-                                    <h4 style="text-align: center;"> Add Material? </h4>
-                                </div>
-                                <div class="row text-center" style="margin-top: 15px;">
-                                    <div class="col">
-                                        <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
-                                            Editing </button>
-                                    </div>
-                                    <div class="col">
-                                        <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
-                                    </div>
-                                </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="name">Material ID</label>
+                                <input type="text" class="form-control" value="" readonly>
+                            </div>
+                            <div class="col">
+                                <label for="name">Material Name</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Material Name">
+                            </div>
+                            <div class="col">
+                                <label for="type">Material Type</label>
+                                <select class="input-select" id="type" name="type" placeholder="Material Type">
+                                    <option value="textile">Textile</option>
+                                    <option value="accessory">Accessory</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
-                    
-
-                </form>
+                        <div class="row pt-3">
+                            <div class="col">
+                                <label for="stock">Stock</label>
+                                <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock">
+                            </div>
+                            <div class="col">
+                                <label for="cost">Cost</label>
+                                <input type="number" class="form-control" id="cost" name="cost" placeholder="Cost">
+                            </div>
+                            <div class="col">
+                                <label for="unit">Unit</label>
+                                <input type="text" class="form-control" value="unit" readonly>
+                            </div>
+                        </div>
+                        <div class="row pt-3" style="margin-top: 15px;">
+                            <div class="col-4 mr-auto">
+                                <button type="button" class="btn dark-button" data-dismiss="modal"> Cancel
+                                    Action</button>
+                            </div>
+                            <div class="col-4 ml-auto text-right">
+                                <button type="button" class="btn dark-button" data-toggle="modal"
+                                    data-target="#confirm-modal"> Add Material
+                                </button>
+                            </div>
+                        </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-
+    <!-- CONFIRM ADD MODAL -->
+    <div class="modal" id="confirm-modal" tabindex="-1" style="margin-left: -10%; margin-top: 1%; width: 100%;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="col-12">
+                    <h4 style="text-align: center;"> Add Material? </h4>
+                </div>
+                <div class="row text-center" style="margin-top: 15px;">
+                    <div class="col">
+                        <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
+                            Editing </button>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
 
 
 {% endblock %}

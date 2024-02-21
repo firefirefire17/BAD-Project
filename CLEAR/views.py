@@ -218,7 +218,7 @@ def materials(request):
         if "add_form" in request.POST:
             name = request.POST.get("name")
             stock = float(request.POST.get("stock"))
-            cost = int(request.POST.get("cost"))
+            cost = float(request.POST.get("cost"))
 
             if stock < 0 or stock > 999:
                 #backend message
@@ -242,7 +242,7 @@ def materials(request):
         elif "edit_form" in request.POST:
             name = request.POST.get("name")
             stock = float(request.POST.get("stock"))
-            cost = int(request.POST.get("cost"))
+            cost = float(request.POST.get("cost"))
 
             if stock < 0 or stock > 999:
                 #backend message

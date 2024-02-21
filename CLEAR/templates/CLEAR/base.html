@@ -61,49 +61,51 @@
                 <div>
                     <ul style="list-style-type: none; margin: 0; padding: 0;">
                         <li class="nav-item pb-3" style="border-radius: 50px;">
-                            <a href="{% url 'dashboard' %}"
+                            <a id="navbars" href="{% url 'dashboard' %}"
                                 class="nav-link text-white {% if 'dashboard' in request.path %} active {% endif %}">
                                 Dashboard
                             </a>
                         </li>
                         <li class="nav-item pb-3">
-                            <a href="{% url 'products' %}"
+                            <a id="navbars" href="{% url 'products' %}"
                                 class="nav-link text-white {% if 'products' in request.path %} active {% endif %}">
                                 Products
                             </a>
                         </li>
                         <li class="nav-item pb-3">
-                            <a href="{% url 'orders' %}"
+                            <a id="navbars" href="{% url 'orders' %}"
                                 class="nav-link text-white {% if 'orders' in request.path %} active {% endif %}">
                                 Job Orders
                             </a>
                         </li>
                         <li class="nav-item pb-3">
-                            <a href="{% url 'materials' %}"
+                            <a id="navbars" href="{% url 'materials' %}"
                                 class="nav-link text-white {% if 'materials' in request.path %} active {% endif %}">
                                 Materials
                             </a>
                         </li>
                         <li class="nav-item pb-3">
-                            <a href="{% url 'orders' %}"
+                            <a id="navbars" href="{% url 'orders' %}"
                                 class="nav-link text-white {% if '#' in request.path %} active {% endif %}">
                                 Transactions
                             </a>
                         </li>
                         <li class="nav-item pb-3">
-                            <a href="{% url 'reports' %}"
+                            <a id="navbars" href="{% url 'reports' %}"
                                 class="nav-link text-white {% if 'reports' in request.path %} active {% endif %}">
                                 Reports
                             </a>
                         </li>
                     </ul>
                 </div>
+                <button type="button" class="logoutbtn"><a href="{% url 'logout' %}">Log Out</a></button>
             </div>
             <div class="col-10" style="background-color:#EBEBEB;">
                 {% block content %}
                 {% endblock %}
             </div>
         </div>
+            
     </div>
 
     <script>
@@ -132,6 +134,7 @@
         $(document).ready(function () {
             let rowCounter_add_accessory = 1;
             let rowCounter_add_textile = 1;
+            let rowCounter_add_component = 1;
 
             function addAccessory_add() {
                 rowCounter_add_accessory++;
@@ -149,27 +152,20 @@
 
             }
 
-            function addComponent_add(textileId, counter) {
-                console.log("before:" + counter)
-                let newRow = $('#productComponent_row_temp' + textileId).clone();
-                newRow.attr('id', 'productComponent_row' + textileId + '_' + counter);
-                newRow.find('[id^="component_name"]').attr('id', 'component_name' + textileId + '_' + counter).attr('name', 'component_name' + textileId + '_' + counter);
-                newRow.find('[id^="height"]').attr('id', 'height' + textileId + '_' + counter).attr('name', 'height' + textileId + '_' + counter);
-                newRow.find('[id^="width"]').attr('id', 'width' + textileId + '_' + counter).attr('name', 'width' + textileId + '_' + counter);
-                newRow.find('[id^="quantity"]').attr('id', 'quantity' + textileId + '_' + counter).attr('name', 'quantity' + textileId + '_' + counter);
+            function addComponent_add() {
 
-                newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + textileId + '_' + counter);
+                let newRow = $('#productComponent_row_temp').clone();
+                newRow.attr('id', 'productComponent_row' + rowCounter_add_component);
+                newRow.find('[id^="component_name"]').attr('id', 'component_name' + rowCounter_add_component).attr('name', 'component_name' + rowCounter_add_component);
+                newRow.find('[id^="height"]').attr('id', 'height' + rowCounter_add_component).attr('name', 'height' + rowCounter_add_component);
+                newRow.find('[id^="width"]').attr('id', 'width' + rowCounter_add_component).attr('name', 'width' + rowCounter_add_component);
+                newRow.find('[id^="quantity"]').attr('id', 'quantity' + rowCounter_add_component).attr('name', 'quantity' + rowCounter_add_component);
 
-                let button = $('.addComponent_add[data-textile-id="' + textileId + '"]');
+                newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + rowCounter_add_component);
 
-                button.before(newRow.show());
-                console.log(newRow)
-                counter++;
+                $('#productComponent_row_temp').after(newRow.show());
 
-                console.log('after:' + counter)
-                console.log('before button:' + button.attr('data-counter'));
-                button.data('counter', counter);
-                console.log('after button:' + button.attr('data-counter'));
+                rowCounter_add_component++;
 
             }
 
@@ -185,18 +181,11 @@
                 newRow.find('.delete-productMaterial').attr('data-select-element-id', 'product_textile' + rowCounter_add_textile);
                 newRow.find('.delete-productMaterial').attr('data-row-id', 'productTextile_row' + rowCounter_add_textile);
 
-
                 $('#productTextile_row' + (rowCounter_add_textile - 1)).after(newRow.show());
-
 
                 let newModal = $('#editTextile1').clone();
                 newModal.attr('id', 'editTextile' + rowCounter_add_textile);
-                newModal.find('[id^="productComponent_row_temp"]').attr('id', 'productComponent_row_temp' + rowCounter_add_textile);
-                newModal.find('.addComponent_add').attr('data-textile-id', rowCounter_add_textile);
 
-                newModal.find('.closeTextile').each(function(index) {
-                    $(this).attr('data-modal', 'editTextile' + rowCounter_add_textile);
-                });
                 $('#editTextile' + (rowCounter_add_textile - 1)).after(newModal.show());
 
                 console.log(newModal)
@@ -243,13 +232,8 @@
 
             $('#addTextile_add').on('click', addTextile_add);
 
-            $('#addProduct').on('click', '.addComponent_add', function () {
-                let textileId = $(this).data('textile-id');
-                let counter = $(this).data('counter');
-                console.log('event:' + counter)
-                addComponent_add(textileId, counter);
-            });
-            
+            $('#addComponent_add').on('click', addComponent_add);
+
             $(document).on('click', '.delete-productMaterial', function () {
                 var selectElementId = $(this).data('select-element-id');
                 var rowId = $(this).data('row-id');
@@ -267,17 +251,6 @@
             $('#addProduct').on('click', '[id^="editTextile_btn"]', function () {
                 let modalId = $(this).data('modal');
                 let action = $(this).data('modal-action');
-
-                console.log(modalId)
-
-                toggleModal(modalId, action);
-            });
-
-            $('#addProduct').on('click', '.closeTextile', function () {
-                let modalId = $(this).data('modal');
-                let action = $(this).data('modal-action');
-
-                console.log(modalId)
 
                 toggleModal(modalId, action);
             });
