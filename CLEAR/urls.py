@@ -27,5 +27,9 @@ urlpatterns = [
     path('reports/', views.reports, name="reports"),
     path('sign-up/', views.sign_up, name="sign_up"),
     path('login/', views.login_view, name ="login"),
+<<<<<<< HEAD
     path('logout/', views.logout_view, name="logout"),
+=======
+    path('logout/', views.logout_view, name='custom_logout'),
+>>>>>>> main
 ]
