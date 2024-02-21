@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.functions import Now
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 # https://docs.djangoproject.com/en/5.0/topics/db/models/  Extra fields on many-to-many relationships
@@ -17,7 +18,7 @@ class Textile(models.Model):
     name = models.CharField(max_length=50)
     cost = models.FloatField()
     unit = models.CharField(max_length=2, choices = TEXTILE_UNIT_CHOICES, default="FT")
-    stock = models.FloatField()
+    stock = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(999)])
     material_key = models.OneToOneField(MaterialKey, on_delete=models.CASCADE)
 
 class Accessory(models.Model):
@@ -28,7 +29,7 @@ class Accessory(models.Model):
     name = models.CharField(max_length=50)
     cost = models.FloatField()
     unit = models.CharField(max_length=2, choices = ACCESSORY_UNIT_CHOICES, default="PC")
-    stock = models.IntegerField()
+    stock = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(999)])
     material_key = models.OneToOneField(MaterialKey, on_delete=models.CASCADE)
     
 class Product(models.Model):
