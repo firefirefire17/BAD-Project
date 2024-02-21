@@ -268,6 +268,11 @@ def materials(request):
                 #backend message
                 error_message = "Input cannot be negative or more than 999"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if type == "accessory":
+                if isinstance(stock, float):
+                    error_message = "Stock input cannot be a decimal number"
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
 
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
             if type == "textile":
