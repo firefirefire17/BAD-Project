@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models.functions import Now
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator
 
 # Create your models here.
 # https://docs.djangoproject.com/en/5.0/topics/db/models/  Extra fields on many-to-many relationships
@@ -15,7 +15,7 @@ class Textile(models.Model):
         ("IN", "per inch"),
         ("M", "per meter"),
     ]
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, validators=[MaxLengthValidator(50)])
     cost = models.FloatField()
     unit = models.CharField(max_length=2, choices = TEXTILE_UNIT_CHOICES, default="FT")
     stock = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(999)])
@@ -26,7 +26,7 @@ class Accessory(models.Model):
         ("PC", "per piece"),
         ("IN", "per inch"),
     ]
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, validators=[MaxLengthValidator(50)])
     cost = models.FloatField()
     unit = models.CharField(max_length=2, choices = ACCESSORY_UNIT_CHOICES, default="PC")
     stock = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(999)])

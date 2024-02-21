@@ -96,6 +96,12 @@
                                 Reports
                             </a>
                         </li>
+                        <li class="nav-item pb-3">
+                            <a href="{% url 'logout' %}"
+                                class="nav-link text-white {% if 'reports' in request.path %} active {% endif %}">
+                                Logout
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>

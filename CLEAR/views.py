@@ -219,6 +219,10 @@ def materials(request):
             stock = float(request.POST.get("stock"))
             cost = float(request.POST.get("cost"))
 
+            if len(name) > 50:
+                error_message = "Input cannot be more than 50 characters"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+
             if stock < 0 or stock > 999:
                 #backend message
                 error_message = "Input cannot be negative or more than 999"
@@ -246,6 +250,10 @@ def materials(request):
             name = request.POST.get("name")
             stock = float(request.POST.get("stock"))
             cost = float(request.POST.get("cost"))
+
+            if len(name) > 50:
+                error_message = "Input cannot be more than 50 characters"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
 
             if stock < 0 or stock > 999:
                 #backend message
