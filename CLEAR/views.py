@@ -204,10 +204,14 @@ def materials(request):
     material_objects = []
 
     for textile in textile_objects:
-        material_objects.append({'type': 'textile', 'material': textile, 'unit': textile.get_unit_display()})
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+        material_objects.append({'type': 'textile', 'material': textile, 'unit': unit})
 
     for accessory in accessory_objects:
-        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': accessory.get_unit_display()})
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
 
     print(request.POST)
     if(request.method=="POST"):
