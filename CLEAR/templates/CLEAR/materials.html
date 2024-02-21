@@ -83,7 +83,7 @@
                                             <div class="col">
                                                 <label for="cost">Cost</label>
                                                 <input type="number" class="form-control" id="cost" name="cost"
-                                                    value="{{material_data.material.cost}}">
+                                                    value="{{material_data.material.cost}}" step="any">
                                             </div>
                                             <div class="col">
                                                 <label for="unit">Unit</label>
@@ -131,6 +131,7 @@
                                 </div>
                             </div>
                         </div>
+                    </form>
                         
                         <!-- CONFIRM DELETE MATERIALS MODAL-->
 
@@ -158,13 +159,12 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     {% endfor %}
-            </form>
         </tbody>
         </table>
     </div>
@@ -211,11 +211,11 @@
                         <div class="row pt-3">
                             <div class="col">
                                 <label for="stock">Stock</label>
-                                <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock">
+                                <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock" step="any">
                             </div>
                             <div class="col">
                                 <label for="cost">Cost</label>
-                                <input type="number" class="form-control" id="cost" name="cost" placeholder="Cost">
+                                <input type="number" class="form-control" id="cost" name="cost" placeholder="Cost" step="any">
                             </div>
                             <div class="col">
                                 <label for="unit">Unit</label>

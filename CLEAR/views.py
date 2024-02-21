@@ -209,8 +209,7 @@ def materials(request):
     for accessory in accessory_objects:
         material_objects.append({'type': 'accessory', 'material': accessory, 'unit': accessory.get_unit_display()})
 
-    print(material_objects)
-
+    print(request.POST)
     if(request.method=="POST"):
         material_key = request.POST.get("material_key")
         type = request.POST.get("type")
@@ -225,13 +224,17 @@ def materials(request):
                 error_message = "Input cannot be negative or more than 999"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
             
+            if type == "accessory":
+                if isinstance(stock, float):
+                    error_message = "Stock input cannot be a decimal number"
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
             if cost < 0:
                 #backend message
-                error_message = "Input cannot be negative or more than 999"
+                error_message = "Input cannot be negative"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
             
             material_key = MaterialKey.objects.create()
-            print(material_key)
 
             if type == "textile": 
                 Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
