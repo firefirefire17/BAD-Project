@@ -241,11 +241,7 @@ def materials(request):
                 #backend message
                 error_message = "Input cannot be negative"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
-            if len(name) > 50:
-                error_message = "Input cannot be more than 50 characters"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
+        
             material_key = MaterialKey.objects.create()
 
             if type == "textile": 
@@ -267,27 +263,16 @@ def materials(request):
                 #backend message
                 error_message = "Input cannot be negative or more than 999"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
-            if type == "accessory":
-                if isinstance(stock, float):
-                    error_message = "Stock input cannot be a decimal number"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
                 
             if cost < 0:
                 #backend message
                 error_message = "Input cannot be negative or more than 999"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
             
-<<<<<<< HEAD
             if type == "accessory":
                 if isinstance(stock, float):
                     error_message = "Stock input cannot be a decimal number"
                     return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-=======
-            if len(name) > 50:
-                error_message = "Input cannot be more than 50 characters"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
->>>>>>> 9ac252a6fed1b033cd8e68921fd26f48cddea7a5
 
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
             if type == "textile":
