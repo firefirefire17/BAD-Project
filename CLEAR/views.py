@@ -209,18 +209,52 @@ def materials(request):
         material_objects.append({'type': 'textile', 'material': textile, 'unit': unit})
 
     for accessory in accessory_objects:
-        unit = textile.get_unit_display()
+        unit = accessory.get_unit_display()
         unit = unit.removeprefix("per ")
         material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
 
-    print(request.POST)
+    print(material_objects)
+
     if(request.method=="POST"):
         material_key = request.POST.get("material_key")
         type = request.POST.get("type")
 
         if "add_form" in request.POST:
             name = request.POST.get("name")
-            stock = float(request.POST.get("stock"))
+            stock = int(request.POST.get("stock"))
+            cost = float(request.POST.get("cost"))
+
+            if len(name) > 50:
+                error_message = "Input cannot be more than 50 characters"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+
+            if stock < 0 or stock > 999:
+                #backend message
+                error_message = "Input cannot be negative or more than 999"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if type == "accessory":
+                if isinstance(stock, float):
+                    error_message = "Stock input cannot be a decimal number"
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                    
+            if cost < 0:
+                #backend message
+                error_message = "Input cannot be negative"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+
+            material_key = MaterialKey.objects.create()
+            print(material_key)
+
+            if type == "textile": 
+                Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
+            if type == "accessory":
+                Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
+            return redirect('materials')
+
+        elif "edit_form" in request.POST:
+            name = request.POST.get("name")
+            stock = int(request.POST.get("stock"))
             cost = float(request.POST.get("cost"))
 
             if len(name) > 50:
@@ -241,40 +275,9 @@ def materials(request):
                 #backend message
                 error_message = "Input cannot be negative"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-        
-            material_key = MaterialKey.objects.create()
-
-            if type == "textile": 
-                Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
-            if type == "accessory":
-                Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key)
-            return redirect('materials')
-
-        elif "edit_form" in request.POST:
-            name = request.POST.get("name")
-            stock = float(request.POST.get("stock"))
-            cost = float(request.POST.get("cost"))
-
-            if len(name) > 50:
-                error_message = "Input cannot be more than 50 characters"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-
-            if stock < 0 or stock > 999:
-                #backend message
-                error_message = "Input cannot be negative or more than 999"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-                
-            if cost < 0:
-                #backend message
-                error_message = "Input cannot be negative or more than 999"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
-            if type == "accessory":
-                if isinstance(stock, float):
-                    error_message = "Stock input cannot be a decimal number"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
 
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
+
             if type == "textile":
                 print(material_key_obj)
                 Textile.objects.filter(material_key=material_key_obj).update(name=name, stock=stock, cost=cost)
