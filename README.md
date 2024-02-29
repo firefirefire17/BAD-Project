@@ -1,5 +1,5 @@
 # CLEAR SYSTEM
-![alt text](https://github.com/firefirefire17/BAD-Project/blob/main/CLEAR%20logo.jpg)
+![alt text](https://github.com/firefirefire17/BAD-Project/blob/main/CLEAR%20LOGO%20(New).jpg)
 
 This is a management system for NiQUA Bag Manufacturing Company (An Open-Source System). It is built using the Django Framework and Bootstrap.
 
