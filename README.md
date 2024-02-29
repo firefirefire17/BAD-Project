@@ -25,3 +25,7 @@ This is a management system for NiQUA Bag Manufacturing Company (An Open-Source 
 1. Download all the ```Requirements```
 2. Setup venv
 3. ```python or python3 manage.py runserver```
+
+## When Making Changes:
+1. Make sure to run ```python or python3 manage.py makemigrations```
+2. Then ```python or python3 manage.py migrate```
