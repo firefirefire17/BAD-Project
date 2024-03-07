@@ -227,7 +227,7 @@ def materials(request):
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-
+            
             if stock < 0 or stock > 999:
                 #backend message
                 error_message = "Input cannot be negative or more than 999"
@@ -254,18 +254,13 @@ def materials(request):
 
         elif "edit_form" in request.POST:
             name = request.POST.get("name")
-            stock = float(request.POST.get("stock"))
+            stock = request.POST.get("stock")
             cost = float(request.POST.get("cost"))
 
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-
-            if stock < 0 or stock > 999:
-                #backend message
-                error_message = "Input cannot be negative or more than 999"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-            
+          
             if type == "accessory":
                 if isinstance(stock, float):
                     error_message = "Stock input cannot be a decimal number"
