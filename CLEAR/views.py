@@ -221,7 +221,7 @@ def materials(request):
 
         if "add_form" in request.POST:
             name = request.POST.get("name")
-            stock = int(request.POST.get("stock"))
+            stock = float(request.POST.get("stock"))
             cost = float(request.POST.get("cost"))
 
             if len(name) > 50:

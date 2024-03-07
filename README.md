@@ -1,7 +1,7 @@
 # CLEAR SYSTEM
-![alt text](https://github.com/firefirefire17/BAD-Project/blob/main/CLEAR%20logo.jpg)
+![alt text](https://github.com/firefirefire17/BAD-Project/blob/main/CLEAR%20LOGO%20(New).jpg)
 
-This is an management system for NiQUA Bag Manufacturing Company (An Open-Source System)
+This is a management system for NiQUA Bag Manufacturing Company (An Open-Source System). It is built using the Django Framework and Bootstrap.
 
 ## Features
 - Manage Materials
@@ -9,7 +9,7 @@ This is an management system for NiQUA Bag Manufacturing Company (An Open-Source
 - Manage Transactions
 - Manage Job Orders
 - Manage Shopping List
-- Create Production Reports (and other reports)
+- Create Production Reports
 
 ## Requirements
 - Latest version of [Python](https://www.python.org/downloads/)
@@ -25,3 +25,7 @@ This is an management system for NiQUA Bag Manufacturing Company (An Open-Source
 1. Download all the ```Requirements```
 2. Setup venv
 3. ```python or python3 manage.py runserver```
+
+## When Making Changes:
+1. Make sure to run ```python or python3 manage.py makemigrations```
+2. Then ```python or python3 manage.py migrate```
