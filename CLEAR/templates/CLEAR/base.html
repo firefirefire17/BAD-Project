@@ -134,6 +134,8 @@
         $(document).ready(function () {
             let rowCounter_add_accessory = 1;
             let rowCounter_add_textile = 1;
+            const addTextile_parent = $('.productTextileContainer');
+            const component_template = $('#productComponent_row_temp')
 
             function addAccessory_add() {
                 rowCounter_add_accessory++;
@@ -152,23 +154,25 @@
             }
 
             function addComponent_add(textileId, counter) {
-                console.log("before:" + counter)
-                let newRow = $('#productComponent_row_temp' + textileId).clone();
+                console.log("before:" + counter);
+                let parent = $('#productComponentContainer' + textileId);
+
+                newRow = component_template.clone()
                 newRow.attr('id', 'productComponent_row' + textileId + '_' + counter);
-                newRow.find('[id^="component_name"]').attr('id', 'component_name' + textileId + '_' + counter).attr('name', 'component_name' + textileId + '_' + counter);
-                newRow.find('[id^="height"]').attr('id', 'height' + textileId + '_' + counter).attr('name', 'height' + textileId + '_' + counter);
-                newRow.find('[id^="width"]').attr('id', 'width' + textileId + '_' + counter).attr('name', 'width' + textileId + '_' + counter);
-                newRow.find('[id^="quantity"]').attr('id', 'quantity' + textileId + '_' + counter).attr('name', 'quantity' + textileId + '_' + counter);
+                newRow.find('.component_name').val('');
+                newRow.find('.height').val('');
+                newRow.find('.width').val('');
+                newRow.find('.quantity').val('');
 
                 newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + textileId + '_' + counter);
 
+                newRow.show();
+                parent.append(newRow)
+
                 let button = $('.addComponent_add[data-textile-id="' + textileId + '"]');
 
-                button.before(newRow.show());
-                console.log(newRow)
                 counter++;
 
-                console.log('after:' + counter)
                 console.log('before button:' + button.attr('data-counter'));
                 button.data('counter', counter);
                 console.log('after button:' + button.attr('data-counter'));
@@ -178,27 +182,30 @@
             function addTextile_add() {
                 rowCounter_add_textile++;
 
-                let newRow = $('#productTextile_row1').clone();
+                let newRow = addTextile_parent.find('.productTextile_row').first().clone();
                 newRow.attr('id', 'productTextile_row' + rowCounter_add_textile);
-                newRow.find('[id^="product_textile"]').attr('id', 'product_textile' + rowCounter_add_textile).attr('name', 'product_textile' + rowCounter_add_textile);
-                newRow.find('[id^="textile_quantity"]').attr('id', 'textile_quantity' + rowCounter_add_textile).attr('name', 'textile_quantity' + rowCounter_add_textile);
-                newRow.find('[id^="editTextile_btn"]').attr('id', 'editTextile_btn' + rowCounter_add_textile).attr('data-modal', 'editTextile' + rowCounter_add_textile);
+                newRow.find('.product_textile').val('delete');
+                newRow.find('.unit').val('');
+                newRow.find('.editTextile_btn').attr('data-modal', 'editTextile' + rowCounter_add_textile)
 
-                newRow.find('.delete-productMaterial').attr('data-select-element-id', 'product_textile' + rowCounter_add_textile);
-                newRow.find('.delete-productMaterial').attr('data-row-id', 'productTextile_row' + rowCounter_add_textile);
+                newRow.find('.delete-productMaterial').attr('data-row-id', 'productTextile_row' + rowCounter_add_textile)
 
-
-                $('#productTextile_row' + (rowCounter_add_textile - 1)).after(newRow.show());
+                addTextile_parent.append(newRow);
 
 
                 let newModal = $('#editTextile1').clone();
                 newModal.attr('id', 'editTextile' + rowCounter_add_textile);
-                newModal.find('[id^="productComponent_row_temp"]').attr('id', 'productComponent_row_temp' + rowCounter_add_textile);
+                newModal.find('[id^="productComponent_row_temp"]').attr('id', 'productComponent_row' + rowCounter_add_textile);
                 newModal.find('.addComponent_add').attr('data-textile-id', rowCounter_add_textile);
 
                 newModal.find('.closeTextile').each(function(index) {
                     $(this).attr('data-modal', 'editTextile' + rowCounter_add_textile);
                 });
+
+                let component_container = newModal.find('.productComponentContainer')
+                component_container.attr('id', 'productComponentContainer' + rowCounter_add_textile)
+                component_container.empty()
+
                 $('#editTextile' + (rowCounter_add_textile - 1)).after(newModal.show());
 
                 console.log(newModal)
@@ -243,7 +250,7 @@
 
             $('#addAccessory_add').on('click', addAccessory_add);
 
-            $('#addTextile_add').on('click', addTextile_add);
+            $('#addTextile_add').on('click', addTextile_add); 
 
             $('#addProduct').on('click', '.addComponent_add', function () {
                 let textileId = $(this).data('textile-id');
@@ -252,11 +259,10 @@
                 addComponent_add(textileId, counter);
             });
             
-            $(document).on('click', '.delete-productMaterial', function () {
-                var selectElementId = $(this).data('select-element-id');
+            $(addTextile_parent).on('click', '.delete-productMaterial', function () {
                 var rowId = $(this).data('row-id');
 
-                setToDeleteAndHide(selectElementId, rowId);
+                $('#' + rowId).remove();
             });
 
             $(document).on('click', '.delete-component', function () {
@@ -266,7 +272,7 @@
                 $('#' + rowId).remove();
             });
 
-            $('#addProduct').on('click', '[id^="editTextile_btn"]', function () {
+            $('#addProduct').on('click', '.editTextile_btn', function () {
                 let modalId = $(this).data('modal');
                 let action = $(this).data('modal-action');
 

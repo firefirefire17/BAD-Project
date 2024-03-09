@@ -348,27 +348,29 @@
                             <div class="col-3">Unit</div>
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
-<<<<<<< HEAD
                         </div>
-                        <div class="row align-items-center mt-2" id="productTextile_row1">
-                            <div class="col-4">
-                                <select class="input-select" id="product_textile1" name="product_textile1">
-                                    <option value="delete">None</option>
-                                    {% for z in textiles %}
-                                    <option value="{{z.material_key.material_key}}">{{z.name}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-3">
-                                <input type="text" class="form-control" id="textile_unit1" name="textile_unit1" placeholder="Unit" readonly>
-                            </div>
-                            <div class="col-3">
-                                <button type="button" class="btn btn-outline-secondary" style="border-radius: 30px; width:85%;" id="editTextile_btn1" data-modal="editTextile1" data-modal-action="open">Edit</button>
-                            </div>
-                            <div class="col-1">
-                                <button type="button" class="btn dark-button delete-productMaterial"
-                                    data-select-element-id="product_textile1" data-row-id="productTextile_row1"> &times
-                                </button>
+                        <div class="productTextileContainer">
+                            <div class="productTextile_row row align-items-center mt-2" id="productTextile_row1">
+                                <div class="col-4">
+                                    <select class="product_textile input-select" name="product_textile">
+                                        <option value="delete">None</option>
+                                        {% for z in textiles %}
+                                        <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <input type="text" class="unit form-control" name="textile_unit1" placeholder="Unit" readonly>
+                                </div>
+                                <div class="col-3">
+                                    <button type="button" class="editTextile_btn btn btn-outline-secondary" style="border-radius: 30px; width:85%;" 
+                                    data-modal="editTextile1" data-modal-action="open">Edit</button>
+                                </div>
+                                <div class="col-1">
+                                    <button type="button" class="btn dark-button delete-productMaterial"
+                                     data-row-id="productTextile_row1"> &times
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <button type="button" class="btn dark-button x-button mt-4" id="addTextile_add">Add Row</button>
@@ -382,8 +384,6 @@
                             <div class="col-3">Unit</div>
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
-=======
->>>>>>> main
                         </div>
                         <div class="row align-items-center mt-2" id="productAccessory_row1">
                             <div class="col-4">
@@ -429,60 +429,64 @@
                 </div>
             </div>
 
-            <div class="modal-overlap-container fade-in" id="editTextile1">
-                <div class="modal-overlap-content" style="width:45%">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-8">
-                                <h2> Edit Textile Quantity</h2>
+            <div class="editTextileContainer">
+                <div class="modal-overlap-container fade-in" id="editTextile1">
+                    <div class="modal-overlap-content" style="width:45%">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-8">
+                                    <h2> Edit Textile Quantity</h2>
+                                </div>
+                                <div class="col text-right">
+                                    <span class="close closeTextile" data-modal="editTextile1" data-modal-action="close">&times;</span>
+                                </div>
                             </div>
-                            <div class="col text-right">
-                                <span class="close closeTextile" data-modal="editTextile1" data-modal-action="close">&times;</span>
+                            <div class="row ml-2 mt-4">
+                                <div class="col-4">
+                                    Component
+                                </div>
+                                <div class="col-2">
+                                    Height:
+                                </div>
+                                <div class="col-2">
+                                    Width:
+                                </div>
+                                <div class="col-2">
+                                    Qty:
+                                </div>
+                                <div class="col-1">
+                                </div>
                             </div>
-                        </div>
-                        <div class="row ml-2 mt-4">
-                            <div class="col-4">
-                                Component
+                            <div class="productComponentContainer" id="productComponentContainer1">
+                                <div class="productComponent_row row ml-2 mt-2" id="productComponent_row_temp" style="display:none;">
+                                    <div class="col-4">
+                                        <input type="text" class="component_name form-control" name="">
+                                    </div>
+                                    <div class="col-2">
+                                        <input type="number" class="height form-control" name="">
+                                    </div>
+                                    <div class="col-2">
+                                        <input type="number" class="width form-control" name="">
+                                    </div>
+                                    <div class="col-2">
+                                        <input type="number" class="quantity form-control" name="">
+                                    </div>
+                                    <div class="col-1">
+                                        <button type="button" class="btn dark-button delete-component" data-row-id=""> &times </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-2">
-                                Height:
+                            <div class="row justify-content-center mt-3">
+                                <button type="button" class="btn dark-button x-button addComponent_add" data-textile-id="1" data-counter="1">Add Row</button>
                             </div>
-                            <div class="col-2">
-                                Width:
-                            </div>
-                            <div class="col-2">
-                                Qty:
-                            </div>
-                            <div class="col-1">
-                            </div>
-                        </div>
-                        <div class="row ml-2 mt-2" id="productComponent_row_temp1" style="display:none;">
-                            <div class="col-4">
-                                <input type="text" class="form-control" id="component_name_temp" name="">
-                            </div>
-                            <div class="col-2">
-                                <input type="number" class="form-control" id="height_temp" name="">
-                            </div>
-                            <div class="col-2">
-                                <input type="number" class="form-control" id="width_temp" name="">
-                            </div>
-                            <div class="col-2">
-                                <input type="number" class="form-control" id="quantity_temp" name="">
-                            </div>
-                            <div class="col-1">
-                                <button type="button" class="btn dark-button delete-component" data-row-id=""> &times </button>
-                            </div>
-                        </div>
-                        <div class="row justify-content-center mt-3">
-                            <button type="button" class="btn dark-button x-button addComponent_add" data-textile-id="1" data-counter="1">Add Row</button>
-                        </div>
-                        <div class="row text-center" style="margin-top: 30px;">
-                            <div class="col">
-                                <button type="button" class="btn dark-button closeTextile"
-                                data-modal="editTextile1" data-modal-action="close"> Continue Editing </button>
-                            </div>
-                            <div class="col">
-                                <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                            <div class="row text-center" style="margin-top: 30px;">
+                                <div class="col">
+                                    <button type="button" class="btn dark-button closeTextile"
+                                    data-modal="editTextile1" data-modal-action="close"> Continue Editing </button>
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                                </div>
                             </div>
                         </div>
                     </div>
