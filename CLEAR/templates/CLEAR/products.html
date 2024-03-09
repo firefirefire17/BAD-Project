@@ -337,7 +337,7 @@
                 </div>
                 <div class="col-9">
                     <label for="name">Product Name</label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="Product Name">
+                    <input type="text" class="product_name form-control" name="name" placeholder="Product Name">
                 </div>
             </div>
             <div class="row pt-3">
@@ -385,26 +385,26 @@
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="row align-items-center mt-2" id="productAccessory_row1">
-                            <div class="col-4">
-                                <select class="input-select" id="product_accessory1" name="product_accessory1">
-                                    <option value="delete">None</option>
-                                    {% for z in accessories %}
-                                    <option value="{{z.material_key.material_key}}">{{z.name}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-3">
-                                <input type="text" class="form-control" id="accessory_unit1" name="accessory_unit1" placeholder="Unit" readonly>
-                            </div>
-                            <div class="col-3">
-                                <input type="number" class="form-control" id="accessory_quantity1" name="accessory_quantity1"
-                                    placeholder="Quantity">
-                            </div>
-                            <div class="col-1">
-                                <button type="button" class="btn dark-button delete-productMaterial"
-                                    data-select-element-id="product_accessory1" data-row-id="productAccessory_row1"> &times
-                                </button>
+                        <div class="productAccessoryContainer">
+                            <div class="row align-items-center mt-2" id="productAccessory_row1">
+                                <div class="col-4">
+                                    <select class="product_accessory input-select" name="product_accessory">
+                                        <option value="delete">None</option>
+                                        {% for z in accessories %}
+                                        <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <input type="text" class="unit form-control" name="accessory_unit" placeholder="Unit" readonly>
+                                </div>
+                                <div class="col-3">
+                                    <input type="number" class="quantity form-control"  name="accessory_quantity" placeholder="Quantity">
+                                </div>
+                                <div class="col-1">
+                                    <button type="button" class="btn dark-button delete-productMaterial" data-row-id="productAccessory_row1"> &times
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <button type="button" class="btn dark-button x-button mt-4" id="addAccessory_add">Add Row</button>
@@ -413,13 +413,13 @@
                 
                 <div class="col-4 mt-3">
                     <label for="stock">Product Margin</label>
-                    <input type="number" class="form-control" id="prod_margin" name="prod_margin" placeholder="Product Margin">
+                    <input type="number" class="product_margin form-control" id="prod_margin" name="prod_margin" placeholder="Product Margin">
                     <label class="mt-3" for="cost">Stock</label>
-                    <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock">
+                    <input type="number" class="product_stock form-control" id="stock" name="stock" placeholder="Stock">
                     <label class="mt-3" for="stock">Labor Time</label>
-                    <input type="number" class="form-control" id="labor_time" name="labor_time" placeholder="Labor Time">
+                    <input type="number" class="product_labor form-control" id="labor_time" name="labor_time" placeholder="Labor Time">
                     <label class="mt-3" for="stock">Miscellaneous Margin</label>
-                    <input type="number" class="form-control" id="misc_margin" name="misc_margin" value="50">
+                    <input type="number" class="product_misc form-control" id="misc_margin" name="misc_margin" value="50">
                 </div>
             </div>
             <div class="row" style="margin: 20px 5px 12px 5px;">
@@ -458,23 +458,6 @@
                                 </div>
                             </div>
                             <div class="productComponentContainer" id="productComponentContainer1">
-                                <div class="productComponent_row row ml-2 mt-2" id="productComponent_row_temp" style="display:none;">
-                                    <div class="col-4">
-                                        <input type="text" class="component_name form-control" name="">
-                                    </div>
-                                    <div class="col-2">
-                                        <input type="number" class="height form-control" name="">
-                                    </div>
-                                    <div class="col-2">
-                                        <input type="number" class="width form-control" name="">
-                                    </div>
-                                    <div class="col-2">
-                                        <input type="number" class="quantity form-control" name="">
-                                    </div>
-                                    <div class="col-1">
-                                        <button type="button" class="btn dark-button delete-component" data-row-id=""> &times </button>
-                                    </div>
-                                </div>
                             </div>
                             <div class="row justify-content-center mt-3">
                                 <button type="button" class="btn dark-button x-button addComponent_add" data-textile-id="1" data-counter="1">Add Row</button>
@@ -485,7 +468,7 @@
                                     data-modal="editTextile1" data-modal-action="close"> Continue Editing </button>
                                 </div>
                                 <div class="col">
-                                    <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                                    <button type="button" class="btn dark-button confirm-button"> Confirm </button>
                                 </div>
                             </div>
                         </div>
@@ -493,6 +476,7 @@
                 </div>
             </div>
 
+            
             <!-- mmodal to confirm addition of product -->
             <div class="modal-overlap-container fade-in" id="confirmAddProduct">
                 <div class="modal-overlap-content">
@@ -513,7 +497,7 @@
                                     onclick="toggleModal('confirmAddProduct', 'close')"> Continue Editing </button>
                             </div>
                             <div class="col">
-                                <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                                <button type="button" class="btn dark-button confirm-button submit-btn"> Confirm </button>
                             </div>
                         </div>
                     </div>
@@ -528,5 +512,70 @@
 </div>
 </div>
 </div>
+
+<!-- templates -->
+<div class="productComponent_row row ml-2 mt-2" id="productComponent_row_temp" style="display:none;">
+    <div class="col-4">
+        <input type="text" class="component_name form-control" name="">
+    </div>
+    <div class="col-2">
+        <input type="number" class="height form-control" name="">
+    </div>
+    <div class="col-2">
+        <input type="number" class="width form-control" name="">
+    </div>
+    <div class="col-2">
+        <input type="number" class="quantity form-control" name="">
+    </div>
+    <div class="col-1">
+        <button type="button" class="btn dark-button delete-component" data-row-id=""> &times </button>
+    </div>
+</div>
+
+<div class="productTextile_row row align-items-center mt-2" id="productTextile_row_temp" style="display:none;">
+    <div class="col-4">
+        <select class="product_textile input-select" name="product_textile">
+            <option value="delete">None</option>
+            {% for z in textiles %}
+            <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-3">
+        <input type="text" class="unit form-control" name="textile_unit" placeholder="Unit" readonly>
+    </div>
+    <div class="col-3">
+        <button type="button" class="editTextile_btn btn btn-outline-secondary" style="border-radius: 30px; width:85%;" 
+        data-modal="editTextile1" data-modal-action="open">Edit</button>
+    </div>
+    <div class="col-1">
+        <button type="button" class="btn dark-button delete-productMaterial"
+         data-row-id="productTextile_row1"> &times
+        </button>
+    </div>
+</div>
+
+<div class="row align-items-center mt-2" id="productAccessory_row_temp" style="display:none;">
+    <div class="col-4">
+        <select class="product_accessory input-select" name="product_accessory">
+            <option value="delete">None</option>
+            {% for z in accessories %}
+            <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-3">
+        <input type="text" class="unit form-control" name="accessory_unit" placeholder="Unit" readonly>
+    </div>
+    <div class="col-3">
+        <input type="number" class="quantity form-control"  name="accessory_quantity"
+            placeholder="Quantity">
+    </div>
+    <div class="col-1">
+        <button type="button" class="btn dark-button delete-productMaterial" data-row-id="productAccessory_row1"> &times
+        </button>
+    </div>
+</div>
+
 
 {% endblock %}
