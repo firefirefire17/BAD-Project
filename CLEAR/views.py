@@ -3,6 +3,10 @@ from .models import Textile, Accessory, Product, Product_Accessory, Component, P
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.urls import reverse
+
+import json
 
 
 
@@ -23,102 +27,88 @@ def products(request):
 
 
     #create a list of dicts
+    temp_list = []
     for product in product_objects:
-        data = {
+        product_data = {
             'product':product,
-            'components':product.product_component_set.all(),
-            'accessories':product.product_accessory_set.all()
+            'textiles': [],
+            'accessories': [],
         }
-        product_material_list.append(data)
-    print(product_material_list)
+        for textile in product.textiles.all():
+            textile_data = {
+                'textile': textile,
+                'unit': textile.unit,
+                'components': []
+            }
+            for component in textile.product_component_set.filter(product=product):
+                component_data = {
+                    'name': component.component.component_name,
+                    'height': component.height,
+                    'wdith': component.width,
+                    'quantity': component.quantity,
+                }
+                textile_data['components'].append(component_data)
+            product_data['textiles'].append(textile_data)
+        for accessory in product.product_accessory_set.all():
+            accessory_data = {
+                'accessory': accessory.accessory,
+                'unit': accessory.accessory.unit,
+                'quantity': accessory.accessory_quantity,
+            }
+            product_data['accessories'].append(accessory_data)
+        product_material_list.append(product_data)
 
     if request.method == "POST":
         if 'add_form' in request.POST:
             #adding of stuff
+
             name = request.POST.get("name")
+            prod_margin = request.POST.get("margin")
             stock = request.POST.get("stock")
-            prod_margin = request.POST.get("prod_margin")
-            labor_time = request.POST.get("labor_time")
-            misc_margin = int(request.POST.get("misc_margin"))
+            labor_time = request.POST.get("labor")
+            misc_margin = request.POST.get("misc")
 
-            print(request.POST)
             new_product = Product.objects.create(name=name, 
-                                                 stock=stock, 
-                                                 prod_margin=prod_margin, 
-                                                 labor_time=labor_time, 
-                                                 misc_margin=misc_margin)
+                                                stock=stock, 
+                                               prod_margin=prod_margin, 
+                                               labor_time=labor_time, 
+                                             misc_margin=misc_margin)
 
-            x=1
-            while True:
-                textile_id = request.POST.get(f"product_textile{x}")
-
-                print(textile_id)
-
-                # Break loop once there are no more textiles to be created 
-                if textile_id is None or textile_id == 'delete':
-                    break
-                textile = get_object_or_404(Textile, material_key__material_key = textile_id)
-                print(textile)
-                y=1
-                while True:
-                    component_name = request.POST.get(f"component_name{x}_{y}")
-                    height = request.POST.get(f"height{x}_{y}")
-                    width = request.POST.get(f"width{x}_{y}")
-                    quantity = request.POST.get(f"quantity{x}_{y}")
-                    
-                    print(component_name)
-                    # Break loop once there are no more components to be created
-                    if component_name is None:
-                        break
-
-                    component_name = component_name.lower()
+            textile_data = json.loads(request.POST.get("textile_data"))
+            for textile in textile_data:
+                textile_id = textile['textile_id']
+                textile_object = Textile.objects.get(material_key__material_key = textile_id)
                 
-                    
-                    # Get the component with an existing name (if it exists)
-                    component = Component.objects.filter(component_name=component_name).first()
-                    
-                    if component:
-                        # simply pass if a component already exists
-                        pass 
+                for component in textile['components']:
+                    component_name = component['component_name'].lower()
+                    height = component['height']
+                    width = component['width']
+                    component_quantity = component['quantity']
+
+                    existing_component = Component.objects.filter(component_name=component_name).first()
+
+                    if existing_component:
+                        Product_Component.objects.create(product=new_product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity)
                     else:
-                        # create a new component entity if it doesn't exist yet and assign it to component
-                        component = Component.objects.create(component_name=component_name)
-                    
-                    Product_Component.objects.create(product=new_product, textile=textile, component=component, height=height, width=width, quantity=quantity, buffer=1)
+                        new_component = Component.objects.create(component_name=component_name)
+                        Product_Component.objects.create(product=new_product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity)
 
-                    y+=1
-                x+=1
-            z=1
-            while True:
-                accessory_id = request.POST.get(f"product_accessory{z}")
-                quantity = request.POST.get(f"accessory_quantity{z}")
-                
-                print(accessory_id)
+            
+            accessory_data = json.loads(request.POST.get("accessory_data"))
+            for accessory in accessory_data:
+                accessory_id = accessory['accessory_id']
+                quantity = accessory['quantity']
 
-                # Break loop once there are no more accessories to create
-                if accessory_id is None:
-                    break
+                accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
+                Product_Accessory.objects.create(product=new_product, accessory=accessory_object, accessory_quantity=quantity)
 
-                accessory = get_object_or_404(Accessory, material_key__material_key = accessory_id)
-                Product_Accessory.objects.create(product=new_product, accessory=accessory, accessory_quantity=quantity)
-                z+=1
+            response = {}
+            response['status'] = True
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('products')  # URL to direct is str
 
-
-            #add textiles alt
-            '''
-            for textile_id in textiles_ids:
-                textile = Textile.objects.get(pk=textile_id)
-                <We Dont Have a Product_Textile Assoc Entity>.objects.create(product=add_product, textile=textile)
-            '''
-
-            #add accs old
-            '''
-            for accessory_id in accessories_ids:
-                accessory = Accessory.objects.get(pk=accessory_id)
-                new_product.accessories.add(accessory)
-            '''
-
-            return redirect("products")
+            # return dict to ajax
+            return JsonResponse(response)
 
         elif 'edit_form' in request.POST:
             # not sure abt this if we default pk to django

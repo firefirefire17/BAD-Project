@@ -65,7 +65,7 @@ class Product_Component(models.Model):
     height = models.FloatField()
     width = models.FloatField()
     quantity = models.IntegerField()
-    buffer = models.FloatField()  
+    buffer = models.FloatField(null=True)  
 
     
 class Job_Order(models.Model):
