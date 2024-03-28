@@ -16,7 +16,7 @@ import json
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
 
-#new products
+
 @login_required(login_url="/login")
 def products(request):
     product_objects = Product.objects.all()
@@ -34,7 +34,12 @@ def products(request):
             'textiles': [],
             'accessories': [],
         }
-        for textile in product.textiles.all():
+
+        unique_textiles = set()
+        for product_component in product.product_component_set.all():
+            unique_textiles.add(product_component.textile)
+
+        for textile in unique_textiles:
             textile_data = {
                 'textile': textile,
                 'unit': textile.unit,
@@ -44,10 +49,11 @@ def products(request):
                 component_data = {
                     'name': component.component.component_name,
                     'height': component.height,
-                    'wdith': component.width,
+                    'width': component.width,
                     'quantity': component.quantity,
                 }
                 textile_data['components'].append(component_data)
+            textile_data['component_count'] = len(textile_data['components'])
             product_data['textiles'].append(textile_data)
         for accessory in product.product_accessory_set.all():
             accessory_data = {
@@ -56,10 +62,13 @@ def products(request):
                 'quantity': accessory.accessory_quantity,
             }
             product_data['accessories'].append(accessory_data)
+        product_data["textile_count"] = len(product_data['textiles'])
+        product_data["accessory_count"] = len(product_data['accessories'])
         product_material_list.append(product_data)
-
     if request.method == "POST":
-        if 'add_form' in request.POST:
+        print(request.POST)
+        action = request.POST.get("action")
+        if action == "add_form":
             #adding of stuff
 
             name = request.POST.get("name")
@@ -77,21 +86,29 @@ def products(request):
             textile_data = json.loads(request.POST.get("textile_data"))
             for textile in textile_data:
                 textile_id = textile['textile_id']
-                textile_object = Textile.objects.get(material_key__material_key = textile_id)
-                
-                for component in textile['components']:
-                    component_name = component['component_name'].lower()
-                    height = component['height']
-                    width = component['width']
-                    component_quantity = component['quantity']
 
-                    existing_component = Component.objects.filter(component_name=component_name).first()
+                if textile_id == "delete":
+                    pass
+                else:
+                    textile_object = Textile.objects.get(material_key__material_key = textile_id)
+                    
+                    for component in textile['components']:
+                        component_name = component['component_name'].lower()
 
-                    if existing_component:
-                        Product_Component.objects.create(product=new_product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity)
-                    else:
-                        new_component = Component.objects.create(component_name=component_name)
-                        Product_Component.objects.create(product=new_product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity)
+                        if component_name == 'delete':
+                            pass
+                        else: 
+                            height = component['height']
+                            width = component['width']
+                            component_quantity = component['quantity']
+
+                            existing_component = Component.objects.filter(component_name=component_name).first()
+
+                            if existing_component:
+                                Product_Component.objects.create(product=new_product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity)
+                            else:
+                                new_component = Component.objects.create(component_name=component_name)
+                                Product_Component.objects.create(product=new_product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity)
 
             
             accessory_data = json.loads(request.POST.get("accessory_data"))
@@ -99,8 +116,11 @@ def products(request):
                 accessory_id = accessory['accessory_id']
                 quantity = accessory['quantity']
 
-                accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
-                Product_Accessory.objects.create(product=new_product, accessory=accessory_object, accessory_quantity=quantity)
+                if accessory_id == "delete":
+                    pass
+                else:
+                    accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
+                    Product_Accessory.objects.create(product=new_product, accessory=accessory_object, accessory_quantity=quantity)
 
             response = {}
             response['status'] = True
@@ -110,55 +130,75 @@ def products(request):
             # return dict to ajax
             return JsonResponse(response)
 
-        elif 'edit_form' in request.POST:
-            # not sure abt this if we default pk to django
-            # i think this shld be product.pk? but i used _id
-            product_id = request.POST.get("product_id")
-            product = get_object_or_404(Product, pk=product_id)
+        elif action == "edit_form":
+            product_id = request.POST.get("pk")
+            product = Product.objects.get(pk=product_id)
+
+            name = request.POST.get("name")
+            prod_margin = request.POST.get("margin")
+            stock = request.POST.get("stock")
+            labor_time = request.POST.get("labor")
+            misc_margin = request.POST.get("misc")
 
             #update product attributes
-            product.name = request.POST.get("name")
-            product.stock = request.POST.get("stock")
-            product.prod_margin = request.POST.get("prod_margin")
-            product.labor_time = request.POST.get("labor_time")
-            product.misc_margin = int(request.POST.get("misc_margin"))
+            product.name = name
+            product.stock = stock
+            product.prod_margin = prod_margin
+            product.labor_time = labor_time
+            product.misc_margin = int(misc_margin)
 
             product.save()
 
             #update textiles
             Product_Component.objects.filter(product=product).delete()
-        
-            x=1
-            while True:
-                textile_id = request.POST.get(f"product_textile{x}")
 
-                if textile_id is None:
-                    break
+            textile_data = json.loads(request.POST.get("textile_data"))
+            for textile in textile_data:
+                textile_id = textile['textile_id']
 
-                textile = get_object_or_404(Textile, material_key__material_key=textile_id)
-                height = request.POST.get(f"height{x}")
-                width = request.POST.get(f"width{x}")
-                quantity = request.POST.get(f"quantity{x}")
+                if textile_id == "delete":
+                    pass
+                else:
+                    textile_object = Textile.objects.get(material_key__material_key = textile_id)
+                    
+                    for component in textile['components']:
+                        component_name = component['component_name'].lower()
 
-                Product_Component.objects.create(product=product, textile=textile, height=height, width=width, quantity=quantity, buffer=1)
+                        if component_name == 'delete':
+                            pass
+                        else: 
+                            height = component['height']
+                            width = component['width']
+                            component_quantity = component['quantity']
 
-                x+=1
+                            existing_component = Component.objects.filter(component_name=component_name).first()
+
+                            if existing_component:
+                                Product_Component.objects.create(product=product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity)
+                            else:
+                                new_component = Component.objects.create(component_name=component_name)
+                                Product_Component.objects.create(product=product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity)
 
             #update accs
-            y=1
-            while True:
-                accessory_id = request.POST.get(f"product_accessory{y}")
-                quantity = request.POST.get(f"accessory_quantity{y}")
+            Product_Accessory.objects.filter(product=product).delete()       
+            accessory_data = json.loads(request.POST.get("accessory_data"))
+            for accessory in accessory_data:
+                accessory_id = accessory['accessory_id']
+                quantity = accessory['quantity']
 
-                if accessory_id is None:
-                    break
+                if accessory_id == "delete":
+                    pass
+                else:
+                    accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
+                    Product_Accessory.objects.create(product=product, accessory=accessory_object, accessory_quantity=quantity)
 
-                accessory = get_object_or_404(Accessory, material_key__material_key=accessory_id)
-                Product_Accessory.objects.create(product=product, accessory=accessory, accessory_quantity=quantity)
+            response = {}
+            response['status'] = True
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('products')  # URL to products view
 
-                y+=1
-
-            return redirect('products')
+            # return dict to ajax
+            return JsonResponse(response)
 
         elif 'delete_form' in request.POST:
             #delete old

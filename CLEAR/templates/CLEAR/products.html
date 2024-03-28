@@ -38,7 +38,7 @@
                     </tr>
 
                     <!-- modal to edit products -->
-                    <div class="modal-container fade-in" id="editProduct{{ product_data.product.pk }}">
+                    <div class="editProduct modal-container fade-in" id="editProduct{{ product_data.product.pk }}">
                         <div class="modal-content modal-content-product fade-in">
                             <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
                                 <span class="close"
@@ -49,11 +49,11 @@
                                 <div class="row">
                                     <div class="col-3">
                                         <label for="pk">Product ID</label>
-                                        <input type="text" class="form-control" name="product_pk" value="{{product_data.product.pk}}" readonly>
+                                        <input type="text" class="product_pk form-control" name="product_pk" value="{{product_data.product.pk}}" readonly>
                                     </div>
                                     <div class="col-9">
                                         <label for="name">Product Name</label>
-                                        <input type="text" class="form-control" id="name" name="name" value="{{product_data.product.name}}">
+                                        <input type="text" class="product_name form-control" id="name" name="name" value="{{product_data.product.name}}">
                                     </div>
                                 </div>
                                 <div class="row pt-3">
@@ -65,9 +65,9 @@
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            <div class="productTextileContainer" pk="{{product_data.product.pk}}">
+                                            <div class="productTextileContainer_edit" id="{{product_data.product.pk}}productTextileContainer">
                                                 {% for textile in product_data.textiles %}
-                                                <div class="row align-items-center mt-2" id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}">
+                                                <div class="productTextile_row row align-items-center mt-2" id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}">
                                                     <div class="col-4">
                                                         <select class="product_textile input-select" id="{{product_data.product.pk}}product_textile{{forloop.counter}}">
                                                             <option value="delete">None</option>
@@ -80,17 +80,18 @@
                                                         <input type="text" class="unit form-control" name="textile_unit1" value="{{textile.unit}}" readonly>
                                                     </div>
                                                     <div class="col-3">
-                                                        <button type="button" class="editTextile_btn btn btn-outline-secondary" style="border-radius: 30px; width:85%;" data-modal="{{product_data.product.pk}}editTextile1" data-modal-action="open">Edit</button>
+                                                        <button type="button" class="editTextile_btn btn btn-outline-secondary" style="border-radius: 30px; width:85%;" 
+                                                        data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="open">Edit</button>
                                                     </div>
                                                     <div class="col-1">
                                                         <button type="button" class="btn dark-button delete-productMaterial"
-                                                            data-select-element-id="{{product_data.product.pk}}product_textile1" data-row-id="{{product_data.product.pk}}productTextile_row1"> &times
+                                                        data-row-id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}"> &times
                                                         </button>
                                                     </div>
                                                 </div>
 
                                                 <!-- modal to edit a textile's quantity -->
-                                                <div class="modal-overlap-container fade-in" id="{{product_data.product.pk}}editTextile{{forloop.counter}}">
+                                                <div class="editTextile modal-overlap-container fade-in" id="{{product_data.product.pk}}editTextile{{forloop.counter}}">
                                                     <div class="modal-overlap-content" style="width:45%">
                                                         <div class="container-fluid">
                                                             <div class="row">
@@ -98,7 +99,7 @@
                                                                     <h2> Edit Textile Quantity</h2>
                                                                 </div>
                                                                 <div class="col text-right">
-                                                                    <span class="close closeTextile" data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close">&times;</span>
+                                                                    <span class="close editTextile_btn" data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close">&times;</span>
                                                                 </div>
                                                             </div>
                                                             <div class="row ml-2 mt-4">
@@ -117,29 +118,33 @@
                                                                 <div class="col-1">
                                                                 </div>
                                                             </div>
-                                                            <div class="row ml-2 mt-2" id="edit_productComponent_row_temp{{forloop.counter}}" style="display:none;">
-                                                                <div class="col-4">
-                                                                    <input type="text" class="form-control" id="component_name_temp" name="">
+                                                            <div class="productComponentContainer" id="{{product_data.product.pk}}productComponentContainer{{forloop.counter}}">
+                                                                {% for component in textile.components %}
+                                                                <div class="productComponent_row row ml-2 mt-2" id="{{product_data.product.pk}}productComponent_row{{forloop.parentloop.counter}}_{{forloop.counter}}">
+                                                                    <div class="col-4">
+                                                                        <input type="text" class="component_name form-control" value="{{component.name}}">
+                                                                    </div>
+                                                                    <div class="col-2">
+                                                                        <input type="number" class="height form-control" value="{{component.height}}">
+                                                                    </div>
+                                                                    <div class="col-2">
+                                                                        <input type="number" class="width form-control" value="{{component.width}}">
+                                                                    </div>
+                                                                    <div class="col-2">
+                                                                        <input type="number" class="quantity form-control" value="{{component.quantity}}">
+                                                                    </div>
+                                                                    <div class="col-1">
+                                                                        <button type="button" class="btn dark-button delete-component" data-row-id="{{product_data.product.pk}}productComponent_row{{forloop.parentloop.counter}}_{{forloop.counter}}"> &times </button>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="col-2">
-                                                                    <input type="number" class="form-control" id="height_temp" name="">
-                                                                </div>
-                                                                <div class="col-2">
-                                                                    <input type="number" class="form-control" id="width_temp" name="">
-                                                                </div>
-                                                                <div class="col-2">
-                                                                    <input type="number" class="form-control" id="quantity_temp" name="">
-                                                                </div>
-                                                                <div class="col-1">
-                                                                    <button type="button" class="btn dark-button delete-component" data-row-id=""> &times </button>
-                                                                </div>
+                                                                {% endfor %}
                                                             </div>
                                                             <div class="row justify-content-center mt-3">
-                                                                <button type="button" class="btn dark-button x-button addComponent_edit" data-textile-id="{{forloop.counter}}" data-product-id="{{product_data.product.pk}}">Add Row</button>
+                                                                <button type="button" class="btn dark-button x-button addComponent_edit" data-textile-id="{{forloop.counter}}" data-product-id="{{product_data.product.pk}}" data-counter="{{textile.component_count}}">Add Row</button>
                                                             </div>
                                                             <div class="row text-center" style="margin-top: 30px;">
                                                                 <div class="col">
-                                                                    <button type="button" class="btn dark-button closeTextile"
+                                                                    <button type="button" class="btn dark-button editTextile_btn"
                                                                     data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close"> Continue Editing </button>
                                                                 </div>
                                                                 <div class="col">
@@ -152,7 +157,7 @@
 
                                                 {% endfor %}
                                             </div>
-                                            <button type="button" class="btn dark-button x-button mt-4" id="addTextile_edit" data-product-id="{{product_data.product.pk}}">Add Row</button>
+                                            <button type="button" class="btn dark-button x-button mt-4 addTextile_edit" data-product-id="{{product_data.product.pk}}" data-counter="{{product_data.textile_count}}">Add Row</button>
                                         </div>
                                         <div class="row" style="margin: 25px 0px 25px 0px"></div>
                                         <hr>
@@ -164,48 +169,49 @@
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            {% for accessory in product_data.accessories %}
-                                            <div class="row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row1">
-                                                <div class="col-4">
-                                                    <select class="input-select" id="{{product_data.product.pk}}product_accessory1" name="{{product_data.product.pk}}product_accessory1">
-                                                        <option value="delete">None</option>
-                                                        {% for z in accessories %}
-                                                        <option value="{{z.material_key.material_key}}">{{z.name}}</option>
-                                                        {% endfor %}
-                                                    </select>
+                                            <div class="productAccessoryContainer_edit" id="{{product_data.product.pk}}productAccessoryContainer">
+                                                {% for accessory_data in product_data.accessories %}
+                                                <div class="productAccessory_row row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row1">
+                                                    <div class="col-4">
+                                                        <select class="product_accessory input-select" id="{{product_data.product.pk}}product_accessory{{forloop.counter}}">
+                                                            <option value="delete">None</option>
+                                                            {% for z in accessories %}
+                                                            <option value="{{z.material_key.material_key}}" {% if z.material_key.material_key == accessory_data.accessory.material_key.material_key %}selected{% endif %}>{{z.name}}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <input type="text" class="unit form-control" value="{{accessory_data.accessory.unit}}" readonly>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <input type="number" class="quantity form-control" value="{{accessory_data.quantity}}">
+                                                    </div>
+                                                    <div class="col-1">
+                                                        <button type="button" class="btn dark-button delete-productMaterial"
+                                                        data-row-id="{{product_data.product.pk}}productAccessory_row{{forloop.counter}}"> &times
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div class="col-3">
-                                                    <input type="text" class="form-control" id="{{product_data.product.pk}}accessory_unit1" name="{{product_data.product.pk}}accessory_unit1" placeholder="Unit" readonly>
-                                                </div>
-                                                <div class="col-3">
-                                                    <input type="number" class="form-control" id="{{product_data.product.pk}}accessory_quantity1" name="{{product_data.product.pk}}accessory_quantity1"
-                                                        placeholder="Quantity">
-                                                </div>
-                                                <div class="col-1">
-                                                    <button type="button" class="btn dark-button delete-productMaterial"
-                                                        data-select-element-id="{{product_data.product.pk}}product_accessory1" data-row-id="{{product_data.product.pk}}productAccessory_row1"> &times
-                                                    </button>
-                                                </div>
+                                                {% endfor %}
                                             </div>
-                                            {% endfor %}
-                                            <button type="button" class="btn dark-button x-button mt-4" id="addAccessory_edit" data-product-id="{{product_data.product.pk}}">Add Row</button>
+                                            <button type="button" class="addAccessory_edit btn dark-button x-button mt-4" data-product-id="{{product_data.product.pk}}" data-counter="{{product_data.accessory_count}}">Add Row</button>
                                         </div>
                                     </div>
                                     
                                     <div class="col-4 mt-3">
-                                        <label for="stock">Product Margin</label>
-                                        <input type="number" class="form-control" id="prod_margin" name="prod_margin" value="{{product_data.product.prod_margin}}">
+                                        <label for="product_margin">Product Margin</label>
+                                        <input type="number" class="product_margin form-control" name="product_margin"value="{{product_data.product.prod_margin}}">
                                         <label class="mt-3" for="cost">Stock</label>
-                                        <input type="number" class="form-control" id="stock" name="stock" value="{{product_data.product.stock}}">
+                                        <input type="number" class="product_stock form-control" name="product_stock" value="{{product_data.product.stock}}">
                                         <label class="mt-3" for="stock">Labor Time</label>
-                                        <input type="number" class="form-control" id="labor_time" name="labor_time" value="{{product_data.product.labor_time}}">
+                                        <input type="number" class="product_labor form-control" name="product_labor" value="{{product_data.product.labor_time}}">
                                         <label class="mt-3" for="stock">Miscellaneous Margin</label>
-                                        <input type="number" class="form-control" id="misc_margin" name="misc_margin" value="{{product_data.product.misc_margin}}">
+                                        <input type="number" class="product_misc form-control" name="product_misc" value="{{product_data.product.misc_margin}}">
                                     </div>
                                 </div>
                                 <div class="row" style="margin: 20px 5px 12px 5px;">
                                     <div class="col-4 order-2 ml-auto text-right">
-                                        <button type="button" class="btn dark-button" onclick="toggleModal('confirmAddProduct', 'open')">
+                                        <button type="button" class="btn dark-button" onclick="toggleModal('confirmEditProduct{{product_data.product.pk}}', 'open')">
                                             Save Edits </button>
                                     </div>
                                 </div>
@@ -235,7 +241,9 @@
                                                             Continue Editing </button>
                                                     </div>
                                                     <div class="col">
-                                                        <button type="submit" class="btn dark-button confirm-button">
+                                                        <button type="button" class="btn dark-button confirm-button submit-btn" 
+                                                        data-product-pk="{{product_data.product.pk}}"
+                                                        data-action="edit_form">
                                                             Confirm
                                                         </button>
                                                     </div>
@@ -289,9 +297,9 @@
                         </div>
                         {% endfor %}
                     </div>
+
         </div>
         </tbody>
-        </table>
         </table>
     </div>
     <div class="row ml-auto pr-3">
@@ -330,7 +338,7 @@
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="productTextileContainer">
+                        <div class="productTextileContainer" id="productTextileContainer">
                             <div class="productTextile_row row align-items-center mt-2" id="productTextile_row1">
                                 <div class="col-4">
                                     <select class="product_textile input-select" name="product_textile">
@@ -349,7 +357,7 @@
                                 </div>
                                 <div class="col-1">
                                     <button type="button" class="btn dark-button delete-productMaterial"
-                                     data-row-id="productTextile_row1"> &times
+                                    data-row-id="productTextile_row1"> &times
                                     </button>
                                 </div>
                             </div>
@@ -366,7 +374,7 @@
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="productAccessoryContainer">
+                        <div class="productAccessoryContainer" id="productAccessoryContainer">
                             <div class="productAccessory_row row align-items-center mt-2" id="productAccessory_row1">
                                 <div class="col-4">
                                     <select class="product_accessory input-select" name="product_accessory">
@@ -393,14 +401,14 @@
                 </div>
                 
                 <div class="col-4 mt-3">
-                    <label for="stock">Product Margin</label>
-                    <input type="number" class="product_margin form-control" id="prod_margin" name="prod_margin" placeholder="Product Margin">
-                    <label class="mt-3" for="cost">Stock</label>
-                    <input type="number" class="product_stock form-control" id="stock" name="stock" placeholder="Stock">
-                    <label class="mt-3" for="stock">Labor Time</label>
-                    <input type="number" class="product_labor form-control" id="labor_time" name="labor_time" placeholder="Labor Time">
-                    <label class="mt-3" for="stock">Miscellaneous Margin</label>
-                    <input type="number" class="product_misc form-control" id="misc_margin" name="misc_margin" value="50">
+                    <label for="product_margin">Product Margin</label>
+                    <input type="number" class="product_margin form-control" name="product_margin" placeholder="Product Margin">
+                    <label class="mt-3" for="product_stock">Stock</label>
+                    <input type="number" class="product_stock form-control" name="product_stock" placeholder="Stock">
+                    <label class="mt-3" for="product_labor">Labor Time</label>
+                    <input type="number" class="product_labor form-control" name="product_labor" placeholder="Labor Time">
+                    <label class="mt-3" for="product_misc">Miscellaneous Margin</label>
+                    <input type="number" class="product_misc form-control" name="product_misc" value="50">
                 </div>
             </div>
             <div class="row" style="margin: 20px 5px 12px 5px;">
@@ -419,7 +427,7 @@
                                     <h2> Edit Textile Quantity</h2>
                                 </div>
                                 <div class="col text-right">
-                                    <span class="close closeTextile" data-modal="editTextile1" data-modal-action="close">&times;</span>
+                                    <span class="close editTextile_btn" data-modal="editTextile1" data-modal-action="close">&times;</span>
                                 </div>
                             </div>
                             <div class="row ml-2 mt-4">
@@ -445,7 +453,7 @@
                             </div>
                             <div class="row text-center" style="margin-top: 30px;">
                                 <div class="col">
-                                    <button type="button" class="btn dark-button closeTextile"
+                                    <button type="button" class="btn dark-button editTextile_btn"
                                     data-modal="editTextile1" data-modal-action="close"> Continue Editing </button>
                                 </div>
                                 <div class="col">
@@ -478,7 +486,10 @@
                                     onclick="toggleModal('confirmAddProduct', 'close')"> Continue Editing </button>
                             </div>
                             <div class="col">
-                                <button type="button" class="btn dark-button confirm-button submit-btn"> Confirm </button>
+                                <button type="button" class="btn dark-button confirm-button submit-btn" 
+                                data-product-pk=""
+                                data-action="add_form"> 
+                                Confirm </button>
                             </div>
                         </div>
                     </div>
@@ -536,7 +547,7 @@
     </div>
 </div>
 
-<div class="row align-items-center mt-2" id="productAccessory_row_temp" style="display:none;">
+<div class="productAccessory_row row align-items-center mt-2" id="productAccessory_row_temp" style="display:none;">
     <div class="col-4">
         <select class="product_accessory input-select" name="product_accessory">
             <option value="delete">None</option>
@@ -564,11 +575,14 @@
         let rowCounter_add_accessory = 1;
         let rowCounter_add_textile = 1;
         const addTextile_parent = $('.productTextileContainer');
-        const textile_template = $('#productTextile_row_temp');
         const addAccessory_parent = $('.productAccessoryContainer');
+        const textileModal_parent = $('.editTextileContainer');
+        const addProduct_parent = $('#addProduct')
+
         const accessory_template = $('#productAccessory_row_temp');
         const component_template = $('#productComponent_row_temp');
-        const textileModal_parent = $('.editTextileContainer');
+        const textile_template = $('#productTextile_row_temp');
+        const editTextile_template = $('#editTextile1');
 
         function addAccessory_add() {
             rowCounter_add_accessory++;
@@ -599,12 +613,11 @@
             newRow.show()
             addTextile_parent.append(newRow);
 
-            let newModal = $('#editTextile1').clone();
+            let newModal = editTextile_template.clone();
             newModal.attr('id', 'editTextile' + rowCounter_add_textile);
-            newModal.find('[id^="productComponent_row_temp"]').attr('id', 'productComponent_row' + rowCounter_add_textile);
             newModal.find('.addComponent_add').attr('data-textile-id', rowCounter_add_textile);
 
-            newModal.find('.closeTextile').each(function(index) {
+            newModal.find('.editTextile_btn').each(function(index) {
                 $(this).attr('data-modal', 'editTextile' + rowCounter_add_textile);
             });
 
@@ -613,11 +626,11 @@
             component_container.empty()
 
             $('#editTextile' + (rowCounter_add_textile - 1)).after(newModal.show());
+            
 
         }
 
-        function addComponent_add(textileId, counter) {
-            console.log("before:" + counter);
+        function addComponent_add(textileId, counter, button) {
             let parent = $('#productComponentContainer' + textileId);
 
             newRow = component_template.clone()
@@ -629,20 +642,88 @@
 
             newRow.find('.delete-component').attr('data-row-id', 'productComponent_row' + textileId + '_' + counter);
 
-            newRow.show();
-            parent.append(newRow)
+            parent.append(newRow);
 
-            let button = $('.addComponent_add[data-textile-id="' + textileId + '"]');
+            newRow.show();
 
             counter++;
 
-            console.log('before button:' + button.attr('data-counter'));
             button.data('counter', counter);
-            console.log('after button:' + button.attr('data-counter'));
 
+            console.log(newRow);
         }
 
+        function addTextile_edit(product_id, counter, parent, button) {
+            counter++;
+
+            let newRow = textile_template.clone();
+            newRow.attr('id', product_id + 'productTextile_row' + counter);
+            newRow.find('.product_textile').val('delete');
+            newRow.find('.unit').val('');
+            newRow.find('.editTextile_btn').attr('data-modal', product_id + 'editTextile' + counter)
+
+            newRow.find('.delete-productMaterial').attr('data-row-id', product_id + 'productTextile_row' + counter)
+
+            newRow.show()
+            parent.append(newRow);
+
+            let newModal = editTextile_template.clone();
+            newModal.attr('id', product_id + 'editTextile' + counter);
+            newModal.find('.addComponent_add').attr('data-textile-id', counter).attr('data-product-id', product_id);
+            
+
+            newModal.find('.editTextile_btn').each(function(index) {
+                $(this).attr('data-modal', product_id + 'editTextile' + counter);
+            });
+
+            let component_container = newModal.find('.productComponentContainer')
+            component_container.attr('id', product_id + 'productComponentContainer' + counter)
+            component_container.empty()
+
+            parent.append(newModal)
+            
+            console.log(button)
+            button.data('counter', counter)
+        }
+
+        function addComponent_edit(product_id, textile_id, counter, button) {
+            counter++;
+
+            let parent = $('#' + product_id + 'productComponentContainer' + textile_id);
+            newRow = component_template.clone()
+            newRow.attr('id', product_id + 'productComponent_row' + textile_id + '_' + counter);
+            newRow.find('.component_name').val('');
+            newRow.find('.height').val('');
+            newRow.find('.width').val('');
+            newRow.find('.quantity').val('');
+
+            newRow.find('.delete-component').attr('data-row-id', product_id + 'productComponent_row' + textile_id + '_' + counter);
+
+            parent.append(newRow);
+
+            newRow.show();
+
+            button.data('counter', counter);
+
+            console.log(newRow);
+        }
         
+        function addAccessory_edit(product_id, counter, parent, button) {
+            counter++;
+
+            let newRow = accessory_template.clone();
+            newRow.attr('id', product_id + 'productAccessory_row' + counter);
+            newRow.find('.product_accessory').val('delete');
+            newRow.find('.unit').val('');
+            newRow.find('.quantity').val('');
+
+            newRow.find('.delete-productMaterial').attr('data-row-id', product_id + 'productAccessory_row' + counter)
+
+            parent.append(newRow);
+            newRow.show()
+
+            button.data('counter', counter)
+        }
 
         $('#addAccessory_add').on('click', addAccessory_add);
 
@@ -651,32 +732,34 @@
         $('#addProduct').on('click', '.addComponent_add', function () {
             let textileId = $(this).data('textile-id');
             let counter = $(this).data('counter');
-            console.log('event:' + counter)
-            addComponent_add(textileId, counter);
+            let button = $(this);
+            addComponent_add(textileId, counter, button);
         });
         
-        $(addTextile_parent).on('click', '.delete-productMaterial', function () {
+        $(document).on('click', '.delete-productMaterial', function () {
             let rowId = $(this).data('row-id');
+            let row = $('#' + rowId);
             console.log(rowId)
 
-            $('#' + rowId).remove();
-        });
+            let selectElement = row.find('select');
 
-        $(addAccessory_parent).on('click', '.delete-productMaterial', function () {
-            let rowId = $(this).data('row-id');
-            console.log(rowId)
+            selectElement.val('delete');
+            row.hide();
 
-            $('#' + rowId).remove();
         });
 
         $(document).on('click', '.delete-component', function () {
             let rowId = $(this).data('row-id');
+            let row = $('#' + rowId);
             console.log(rowId)
 
-            $('#' + rowId).remove();
+            let nameElement = row.find('.component_name')
+            
+            nameElement.val('delete');
+            row.hide();
         });
 
-        $('#addProduct').on('click', '.editTextile_btn', function () {
+        $(document).on('click', '.editTextile_btn', function () {
             let modalId = $(this).data('modal');
             let action = $(this).data('modal-action');
 
@@ -685,14 +768,33 @@
             toggleModal(modalId, action);
         });
 
-        $('#addProduct').on('click', '.closeTextile', function () {
-            let modalId = $(this).data('modal');
-            let action = $(this).data('modal-action');
+        $('.editProduct').on('click', '.addTextile_edit', function () {
+            let counter = $(this).data('counter');
+            let productId = $(this).data('product-id');
+            let parent = $('.productTextileContainer_edit#' + productId + 'productTextileContainer')
+            let button = $(this)
 
-            console.log(modalId)
-
-            toggleModal(modalId, action);
+            addTextile_edit(productId, counter, parent, button)
         });
+
+        $('.editProduct').on('click', '.addAccessory_edit', function () {
+            let counter = $(this).data('counter');
+            let productId = $(this).data('product-id');
+            let parent = $('.productAccessoryContainer_edit#' + productId + 'productAccessoryContainer')
+            let button = $(this)
+
+            addAccessory_edit(productId, counter, parent, button)
+        });
+
+        $('.editTextile').on('click', '.addComponent_edit', function () {
+            let counter = $(this).data('counter');
+            let productId = $(this).data('product-id');
+            let textileId = $(this).data('textile-id');
+            let button = $(this);
+
+            addComponent_edit(productId, textileId, counter, button)
+        });
+
 
         $(document).on('click', '.addRowEditProduct', function () {
             var productPK = $(this).data('product-pk');
@@ -704,28 +806,49 @@
         });
 
         $(".submit-btn").click(function() {
+            
+            let product_id = $(this).data('product-pk')
 
-            // pack rows
+            let textile_container = $(document).find('#' + product_id + 'productTextileContainer');
+            let accessory_container = $(document).find('#' + product_id + 'productAccessoryContainer');
+            let product_container;
+
+            let action = $(this).data('action');
+
+            console.log(action)
+
+            if (action === 'edit_form') {
+                product_container = $(document).find('#editProduct' + product_id)
+            } else if (action === 'add_form') {
+                product_container = $(document).find('#addProduct')
+            }
+
+            console.log(product_container);
+            console.log(textile_container);
+            console.log(accessory_container);
+
             let textile_data = [];
             let accessory_data = [];
-            const product_parent = $('#addProduct')
 
-            $.each($(addTextile_parent).find('.productTextile_row'), function(counter, row){
+            $.each(textile_container.find('.productTextile_row'), function(counter, row){
                 let rowId = $(row).attr('id');
                 let rowNumber = rowId.match(/\d+$/)[0];
                 let componentsData = [];
 
-                $('#productComponentContainer' + rowNumber).find('.productComponent_row').each(function() {
-                    let component = {
-                        'component_name': $(this).find('.component_name').val(),
-                        'height': $(this).find('.height').val(),
-                        'width': $(this).find('.width').val(),
-                        'quantity': $(this).find('.quantity').val(),
-                    };
-                    componentsData.push(component);
-                });
+                let selectElement = $(row).find('.product_textile');
 
-
+                if (selectElement.val() !== "delete") {
+                    $('#' + product_id + 'productComponentContainer' + rowNumber).find('.productComponent_row').each(function () {
+                        let component = {
+                            'component_name': $(this).find('.component_name').val(),
+                            'height': $(this).find('.height').val(),
+                            'width': $(this).find('.width').val(),
+                            'quantity': $(this).find('.quantity').val(),
+                        };
+                        componentsData.push(component);
+                    });
+                }
+                
                 temp = {
                     'textile_id': $(row).find(".product_textile").val(),
                     'components': componentsData
@@ -733,29 +856,28 @@
                 textile_data.push(temp);
             });
 
-            $.each($(addAccessory_parent).find('.productAccessory_row'), function(counter, row){
+            $.each(accessory_container.find('.productAccessory_row'), function(counter, row){
                 let rowId = $(row).attr('id');
                 let rowNumber = rowId.match(/\d+$/)[0];
-
 
                 temp = {
                     'accessory_id': $(row).find(".product_accessory").val(),
                     'quantity': $(row).find(".quantity").val(),
                 }
                 accessory_data.push(temp);
-                console.log(accessory_data);
             });
 
             submit_data = {
-                'name': product_parent.find('.product_name').val(),
-                'margin': product_parent.find('.product_margin').val(),
-                'stock': product_parent.find('.product_stock').val(),
-                'labor': product_parent.find('.product_labor').val(),
-                'misc': product_parent.find('.product_misc').val(),
+                'pk': product_container.find('.product_pk').val(),
+                'name': product_container.find('.product_name').val(),
+                'margin': product_container.find('.product_margin').val(),
+                'stock': product_container.find('.product_stock').val(),
+                'labor': product_container.find('.product_labor').val(),
+                'misc': product_container.find('.product_misc').val(),
                 'textile_data': JSON.stringify(textile_data),
                 'accessory_data': JSON.stringify(accessory_data),
                 "csrfmiddlewaretoken": $("[name=csrfmiddlewaretoken]").val(),
-                'add_form': 'add_form'
+                action: action,
             }
             console.log(submit_data)
 
