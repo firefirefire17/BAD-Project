@@ -87,8 +87,12 @@
                                             </div>
                                             <div class="col">
                                                 <label for="unit">Unit</label>
-                                                <input type="text" class="form-control" id="unit" name="unit"
-                                                    value="{{material_data.material.unit}}" readonly>
+                                                <input type="text" class="form-control" 
+                                                    value=
+                                                    "{% if material_data.material.unit == 'M' %} per meter
+                                                    {% elif material_data.material.unit == 'IN' %} per inch 
+                                                    {% elif material_data.material.unit == 'PC' %} per piece 
+                                                    {% elif material_data.material.unit == 'FT' %} per foot {% endif %}" readonly>
                                             </div>
                                         </div>
                                         <div class="row" style="margin: 30px 0px 10px 0px;">
@@ -219,7 +223,11 @@
                             </div>
                             <div class="col">
                                 <label for="unit">Unit</label>
-                                <input type="text" class="form-control" value="unit" readonly>
+                                <select class="input-select" id="unit" name="unit" placeholder="Unit">
+                                    <option value="FT">per foot</option>
+                                    <option value="IN">per inch</option>
+                                    <option value="M">per meter</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row pt-3" style="margin-top: 15px;">
@@ -259,5 +267,27 @@
     </div>
 </form>
 
+<script>
+    $(document).ready(function() {
+        const unit_select = $('#unit');
+
+      $('#type').change(function() {
+        let type = $(this).val();
+        
+        // Clear existing options
+        unit_select.empty();
+        
+        // Populate options based on the selected option of the first select element
+        if (type === "textile") {
+            unit_select.append($('<option>', { value: 'FT', text: 'per foot' }));
+            unit_select.append($('<option>', { value: 'IN', text: 'per inch' }));
+            unit_select.append($('<option>', { value: 'M', text: 'per meter' }));
+        } else if (type === "accessory") {
+            unit_select.append($('<option>', { value: 'IN', text: 'per inch' }));
+            unit_select.append($('<option>', { value: 'PC', text: 'per piece' }));
+        }
+      });
+    });
+    </script>
 
 {% endblock %}

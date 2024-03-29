@@ -51,9 +51,13 @@
                                         <label for="pk">Product ID</label>
                                         <input type="text" class="product_pk form-control" name="product_pk" value="{{product_data.product.pk}}" readonly>
                                     </div>
-                                    <div class="col-9">
+                                    <div class="col-5">
                                         <label for="name">Product Name</label>
                                         <input type="text" class="product_name form-control" id="name" name="name" value="{{product_data.product.name}}">
+                                    </div>
+                                    <div class="col-4">
+                                        <label for="total_cost">Total Cost</label>
+                                        <input type="number" class="total_cost form-control" name="total_cost" value="{{product_data.product.total_cost}}" readonly>
                                     </div>
                                 </div>
                                 <div class="row pt-3">
@@ -92,7 +96,7 @@
 
                                                 <!-- modal to edit a textile's quantity -->
                                                 <div class="editTextile modal-overlap-container fade-in" id="{{product_data.product.pk}}editTextile{{forloop.counter}}">
-                                                    <div class="modal-overlap-content" style="width:45%">
+                                                    <div class="modal-overlap-content component-modal-content" style="width:45%; margin:10% auto;">
                                                         <div class="container-fluid">
                                                             <div class="row">
                                                                 <div class="col-8">
@@ -100,6 +104,14 @@
                                                                 </div>
                                                                 <div class="col text-right">
                                                                     <span class="close editTextile_btn" data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close">&times;</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row ml-2 mt-2">
+                                                                <div class="col-1 mr-1">
+                                                                    <label for="component_buffer">Buffer</label>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <input type="number" class="component_buffer form-control" placeholder="Component Buffer">
                                                                 </div>
                                                             </div>
                                                             <div class="row ml-2 mt-4">
@@ -171,7 +183,7 @@
                                             </div>
                                             <div class="productAccessoryContainer_edit" id="{{product_data.product.pk}}productAccessoryContainer">
                                                 {% for accessory_data in product_data.accessories %}
-                                                <div class="productAccessory_row row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row1">
+                                                <div class="productAccessory_row row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row{{forloop.counter}}">
                                                     <div class="col-4">
                                                         <select class="product_accessory input-select" id="{{product_data.product.pk}}product_accessory{{forloop.counter}}">
                                                             <option value="delete">None</option>
@@ -181,7 +193,7 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-3">
-                                                        <input type="text" class="unit form-control" value="{{accessory_data.accessory.unit}}" readonly>
+                                                        <input type="text" class="unit form-control" value="{{accessory_data.unit}}" readonly>
                                                     </div>
                                                     <div class="col-3">
                                                         <input type="number" class="quantity form-control" value="{{accessory_data.quantity}}">
@@ -302,14 +314,75 @@
         </tbody>
         </table>
     </div>
-    <div class="row ml-auto pr-3">
+    <div class="row ml-auto pr-3 mt-3">
+        <button type="button" class="btn light-button mr-3" onclick="toggleModal('globalValues', 'open')"
+        style="margin-top: -5%;">
+        Global Values</button>
         <button type="button" class="btn light-button" onclick="toggleModal('addProduct', 'open')"
-            style="margin-top: -5%;">
-            Add Product</button>
+        style="margin-top: -5%;">
+        Add Product</button>
     </div>
 </div>
 
+<div class="modal-container" id="globalValues">
+    <div class="modal-content modal-content fade-in">
+        <div class="row" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
+            <div class="col">
+                <h2> Global Values</h2>
+            </div>
+            <div class="col">
+                <span class="close" onclick="toggleModal('globalValues', 'close')">&times;</span>
+            </div>
+        </div>
+        <form method="POST" action="{% url 'products' %}"> {% csrf_token %}
+            <input type="hidden" name="global_values" value="1">
+            <div class="row mt-3">
+                <div class="col">
+                    <label for="pk">Labor Wage</label>
+                    <input type="number" class="form-control" name="labor_wage" value="{{wage}}">
+                </div>
+                <div class="col">
+                    <label for="name">Value-Added Tax</label>
+                    <input type="number" class="form-control" name="VAT" value="{{VAT}}">
+                </div>
+            </div>
+            <div class="row text-center justify-content-end" style="margin-top: 20px;">
+                <div class="col-3">
+                    <button type="button" class="btn dark-button" onclick="toggleModal('confirmGlobalValues', 'open')">
+                        Save Edits </button>
+                </div>
+            </div>
 
+            <div class="modal-overlap-container fade-in" id="confirmGlobalValues">
+                <div class="modal-overlap-content">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col text-right">
+                                <span class="close" onclick="toggleModal('confirmGlobalValues', 'close')">&times;</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-center">
+                                <h2> Confirm Edits? </h2>
+                            </div>
+                        </div>
+                        <div class="row text-center" style="margin-top: 15px;">
+                            <div class="col">
+                                <button type="button" class="btn dark-button"
+                                    onclick="toggleModal('confirmGlobalValues', 'close')"> Continue Editing </button>
+                            </div>
+                            <div class="col">
+                                <button type="submit" class="btn dark-button confirm-button"> 
+                                Confirm </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+</div>
 <!-- modal to add product to table -->
 
 <div class="modal-container fade-in" id="addProduct">
@@ -324,9 +397,13 @@
                     <label for="pk">Product ID</label>
                     <input type="text" class="form-control" placeholder="Product #" readonly>
                 </div>
-                <div class="col-9">
+                <div class="col-5">
                     <label for="name">Product Name</label>
                     <input type="text" class="product_name form-control" name="name" placeholder="Product Name">
+                </div>
+                <div class="col-4">
+                    <label for="total_cost">Total Cost</label>
+                    <input type="number" class="total_cost form-control" name="total_cost" value="" readonly>
                 </div>
             </div>
             <div class="row pt-3">
@@ -420,7 +497,7 @@
 
             <div class="editTextileContainer">
                 <div class="modal-overlap-container fade-in" id="editTextile1">
-                    <div class="modal-overlap-content" style="width:45%">
+                    <div class="modal-overlap-content" style="width:45%; margin:10% auto;">
                         <div class="container-fluid">
                             <div class="row">
                                 <div class="col-8">
@@ -428,6 +505,14 @@
                                 </div>
                                 <div class="col text-right">
                                     <span class="close editTextile_btn" data-modal="editTextile1" data-modal-action="close">&times;</span>
+                                </div>
+                            </div>
+                            <div class="row ml-2 mt-2">
+                                <div class="col-1 mr-1">
+                                    <label for="component_buffer">Buffer</label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="number" class="component_buffer form-control" placeholder="Component Buffer">
                                 </div>
                             </div>
                             <div class="row ml-2 mt-4">
@@ -670,6 +755,12 @@
             let newModal = editTextile_template.clone();
             newModal.attr('id', product_id + 'editTextile' + counter);
             newModal.find('.addComponent_add').attr('data-textile-id', counter).attr('data-product-id', product_id);
+            newModal.find('.addComponent_add')
+            .removeClass('addComponent_add')
+            .addClass('addComponent_edit')
+            .attr('data-textile-id', counter)
+            .attr('data-product-id', product_id)
+            .attr('data-counter', 0);
             
 
             newModal.find('.editTextile_btn').each(function(index) {
@@ -682,7 +773,6 @@
 
             parent.append(newModal)
             
-            console.log(button)
             button.data('counter', counter)
         }
 
@@ -721,6 +811,8 @@
 
             parent.append(newRow);
             newRow.show()
+
+            console.log(newRow)
 
             button.data('counter', counter)
         }
@@ -786,11 +878,12 @@
             addAccessory_edit(productId, counter, parent, button)
         });
 
-        $('.editTextile').on('click', '.addComponent_edit', function () {
+        $('.editProduct').on('click', '.addComponent_edit', function () {
             let counter = $(this).data('counter');
             let productId = $(this).data('product-id');
             let textileId = $(this).data('textile-id');
             let button = $(this);
+
 
             addComponent_edit(productId, textileId, counter, button)
         });

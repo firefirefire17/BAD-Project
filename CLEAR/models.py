@@ -12,8 +12,8 @@ class MaterialKey(models.Model):
 class Textile(models.Model):
     TEXTILE_UNIT_CHOICES = [
         ("FT", "per sq/ft"),
-        ("IN", "per inch"),
-        ("M", "per meter"),
+        ("IN", "per sq/in"),
+        ("M", "per sq/m"),
     ]
     name = models.CharField(max_length=50, validators=[MaxLengthValidator(50)])
     cost = models.FloatField()
