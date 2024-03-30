@@ -84,8 +84,8 @@
                         </li> 
                         <li class="nav-item pb-3"> 
                             <a id="navbars" href="{% url 'orders' %}" 
-                                class="nav-link text-white {% if '#' in request.path %} active {% endif %}"> 
-                                Transactions 
+                                class="nav-link text-white {% if 'stock-in' in request.path %} active {% endif %}"> 
+                                Stock-In
                             </a> 
                         </li> 
                         <li class="nav-item pb-3"> 

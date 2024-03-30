@@ -284,8 +284,14 @@ def products(request):
             return redirect('products')
 
             
-        
-    return render(request, 'CLEAR/products.html', {'products':product_objects, 
+    if not vat_object or not wage_object:
+        return render(request, 'CLEAR/products.html', {'products':product_objects, 
+                                                   'product_material_list':product_material_list,
+                                                   'accessories':accessory_objects,
+                                                   'textiles':textile_objects,
+                                                   })
+    else:
+        return render(request, 'CLEAR/products.html', {'products':product_objects, 
                                                    'product_material_list':product_material_list,
                                                    'accessories':accessory_objects,
                                                    'textiles':textile_objects,
