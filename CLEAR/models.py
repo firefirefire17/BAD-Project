@@ -45,6 +45,59 @@ class Product(models.Model):
     
     def __str__(self):
         return str(self.name)
+    
+    def updateCost(self):
+        print("pass")
+        wage_object = Global_Value.objects.get(name="labor_wage")
+        wage = wage_object.value
+        
+        vat_object = Global_Value.objects.get(name="vat")
+        vat = vat_object.value
+
+        print(wage)
+        print(vat)
+
+        labor_time = self.labor_time
+        prod_margin = self.prod_margin
+        misc_margin = self.misc_margin
+
+        raw_material_cost = 0
+        for product_component in self.product_component_set.all():
+            height = product_component.height
+            width = product_component.width
+            quantity = product_component.quantity
+            textile_cost = product_component.textile.cost
+            textile_unit = product_component.textile.unit
+            print(product_component.buffer)
+            buffer = product_component.buffer
+
+            productComponent_cost = get_prodComponentCost(height, width, quantity, textile_unit, textile_cost, buffer)
+            raw_material_cost += productComponent_cost
+            print(f"product component: {productComponent_cost}")
+        
+        for product_accessory in self.product_accessory_set.all():
+            quantity = product_accessory.accessory_quantity
+            accessory_cost = product_accessory.accessory.cost
+            productAccessory_cost = quantity*accessory_cost
+            raw_material_cost += productAccessory_cost
+            print(f"product accessory: {productAccessory_cost}")
+
+        labor_cost = wage*(int(labor_time)/60)
+        total_cost = raw_material_cost + labor_cost + labor_cost*(float(misc_margin)/100)
+        margin = total_cost*(float(prod_margin)/100)
+        selling_price = (total_cost + margin)*(1 + (vat/100))
+        self.total_cost = selling_price
+
+        print(f"labor: {labor_cost}")
+        print(f"total cost: {total_cost}")
+        print(f"margin: {margin}")
+
+        print(selling_price)
+        return self.total_cost
+
+
+
+
 
 class Product_Accessory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -109,20 +162,20 @@ class Order_Item(models.Model):
     def __str__(self):
         return f'{self.item.pk} in Order #{self.order.pk}'
 
-class Transaction(models.Model):
+class StockIn(models.Model):
     transaction_date = models.DateField()
     edit_reason  = models.CharField(max_length=200, null=True)
-    textiles = models.ManyToManyField(Textile, through='Transaction_Textile')
-    accessories = models.ManyToManyField(Accessory, through='Transaction_Accessory')
+    accessories = models.ManyToManyField(Accessory, through="StockIn_Accessory")
+    textiles = models.ManyToManyField(Textile, through="StockIn_Textile")
 
-class Transaction_Accessory(models.Model):
-    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+class StockIn_Accessory(models.Model):
     accessory = models.ForeignKey(Accessory, on_delete=models.CASCADE)
+    stock_in = models.ForeignKey(StockIn, on_delete=models.CASCADE)
     quantity = models.IntegerField()
 
-class Transaction_Textile(models.Model):
-    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+class StockIn_Textile(models.Model):
     textile = models.ForeignKey(Textile, on_delete=models.CASCADE)
+    stock_in = models.ForeignKey(StockIn, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     
 
@@ -139,5 +192,17 @@ class Account(models.Model):
 
 
 
-
+# function used in products to get cost of a product component
+def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost, buffer):
+    sq_inch  = float(height)*float(width)*float(buffer/100 + 1)
+    if textile_unit == "FT":
+        final_unit = sq_inch / 144
+    elif textile_unit == "M":
+        final_unit = sq_inch / 1550.0031
+    else:
+        final_unit = sq_inch
+    
+    final_quantity = final_unit*float(quantity)
+    final_cost = final_quantity*float(textile_cost)
+    return final_cost
 

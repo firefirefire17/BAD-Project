@@ -5,8 +5,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'stylesheet3.css' %}">
     <script src="{% static 'js/styling.js' %}"></script>
 
-
-
 </head>
 
 {% block content %}
@@ -70,18 +68,18 @@
                                                 <div class="col-1"></div>
                                             </div>
                                             <div class="productTextileContainer_edit" id="{{product_data.product.pk}}productTextileContainer">
-                                                {% for textile in product_data.textiles %}
+                                                {% for textile_buffer in product_data.textile_buffers %}
                                                 <div class="productTextile_row row align-items-center mt-2" id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}">
                                                     <div class="col-4">
                                                         <select class="product_textile input-select" id="{{product_data.product.pk}}product_textile{{forloop.counter}}">
                                                             <option value="delete">None</option>
                                                             {% for z in textiles %}
-                                                            <option value="{{z.material_key.material_key}}" {% if z.material_key.material_key == textile.textile.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            <option value="{{z.material_key.material_key}}" {% if z.material_key.material_key == textile_buffer.textile.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
                                                             {% endfor %}
                                                         </select>
                                                     </div>
                                                     <div class="col-3">
-                                                        <input type="text" class="unit form-control" name="textile_unit1" value="{{textile.unit}}" readonly>
+                                                        <input type="text" class="unit form-control" name="textile_unit1" value="{{textile_buffer.unit}}" readonly>
                                                     </div>
                                                     <div class="col-3">
                                                         <button type="button" class="editTextile_btn btn btn-outline-secondary" style="border-radius: 30px; width:85%;" 
@@ -111,7 +109,7 @@
                                                                     <label for="component_buffer">Buffer</label>
                                                                 </div>
                                                                 <div class="col-4">
-                                                                    <input type="number" class="component_buffer form-control" placeholder="Component Buffer">
+                                                                    <input type="number" class="component_buffer form-control" value="{{textile_buffer.buffer}}">
                                                                 </div>
                                                             </div>
                                                             <div class="row ml-2 mt-4">
@@ -130,8 +128,8 @@
                                                                 <div class="col-1">
                                                                 </div>
                                                             </div>
-                                                            <div class="productComponentContainer" id="{{product_data.product.pk}}productComponentContainer{{forloop.counter}}">
-                                                                {% for component in textile.components %}
+                                                            <div class="productComponentContainer" id="{{product_data.product.pk}}productComponentContainer{{forloop.counter}}" style="height:25%; overflow-y:scroll; padding: 0px 15px 0px 15px;">
+                                                                {% for component in textile_buffer.components %}
                                                                 <div class="productComponent_row row ml-2 mt-2" id="{{product_data.product.pk}}productComponent_row{{forloop.parentloop.counter}}_{{forloop.counter}}">
                                                                     <div class="col-4">
                                                                         <input type="text" class="component_name form-control" value="{{component.name}}">
@@ -152,7 +150,7 @@
                                                                 {% endfor %}
                                                             </div>
                                                             <div class="row justify-content-center mt-3">
-                                                                <button type="button" class="btn dark-button x-button addComponent_edit" data-textile-id="{{forloop.counter}}" data-product-id="{{product_data.product.pk}}" data-counter="{{textile.component_count}}">Add Row</button>
+                                                                <button type="button" class="btn dark-button x-button addComponent_edit" data-textile-id="{{forloop.counter}}" data-product-id="{{product_data.product.pk}}" data-counter="{{textile_buffer.component_count}}">Add Row</button>
                                                             </div>
                                                             <div class="row text-center" style="margin-top: 30px;">
                                                                 <div class="col">
@@ -531,7 +529,7 @@
                                 <div class="col-1">
                                 </div>
                             </div>
-                            <div class="productComponentContainer" id="productComponentContainer1">
+                            <div class="productComponentContainer" id="productComponentContainer1" style="height:25%; overflow-y:scroll; padding: 0px 15px 0px 15px;">
                             </div>
                             <div class="row justify-content-center mt-3">
                                 <button type="button" class="btn dark-button x-button addComponent_add" data-textile-id="1" data-counter="1">Add Row</button>
@@ -905,6 +903,8 @@
             let textile_container = $(document).find('#' + product_id + 'productTextileContainer');
             let accessory_container = $(document).find('#' + product_id + 'productAccessoryContainer');
             let product_container;
+            let component_modal;
+            let buffer;
 
             let action = $(this).data('action');
 
@@ -916,9 +916,6 @@
                 product_container = $(document).find('#addProduct')
             }
 
-            console.log(product_container);
-            console.log(textile_container);
-            console.log(accessory_container);
 
             let textile_data = [];
             let accessory_data = [];
@@ -930,13 +927,18 @@
 
                 let selectElement = $(row).find('.product_textile');
 
+
                 if (selectElement.val() !== "delete") {
+                    component_modal = $('#' + product_id + 'editTextile' + rowNumber);
+                    buffer = $(component_modal).find('.component_buffer').val();
+
                     $('#' + product_id + 'productComponentContainer' + rowNumber).find('.productComponent_row').each(function () {
                         let component = {
                             'component_name': $(this).find('.component_name').val(),
                             'height': $(this).find('.height').val(),
                             'width': $(this).find('.width').val(),
                             'quantity': $(this).find('.quantity').val(),
+                            'buffer': buffer,
                         };
                         componentsData.push(component);
                     });

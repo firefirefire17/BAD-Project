@@ -89,10 +89,11 @@
                                                 <label for="unit">Unit</label>
                                                 <input type="text" class="form-control" 
                                                     value=
-                                                    "{% if material_data.material.unit == 'M' %} per meter
+                                                    "{% if material_data.material.unit == 'M' %} per sq/m
+                                                    {% elif material_data.material.unit == 'IN' and material_data.type == 'textile' %} per sq/in
                                                     {% elif material_data.material.unit == 'IN' %} per inch 
                                                     {% elif material_data.material.unit == 'PC' %} per piece 
-                                                    {% elif material_data.material.unit == 'FT' %} per foot {% endif %}" readonly>
+                                                    {% elif material_data.material.unit == 'FT' %} per sq/ft {% endif %}" readonly>
                                             </div>
                                         </div>
                                         <div class="row" style="margin: 30px 0px 10px 0px;">
@@ -224,9 +225,9 @@
                             <div class="col">
                                 <label for="unit">Unit</label>
                                 <select class="input-select" id="unit" name="unit" placeholder="Unit">
-                                    <option value="FT">per foot</option>
-                                    <option value="IN">per inch</option>
-                                    <option value="M">per meter</option>
+                                    <option value="FT">per sq/ft</option>
+                                    <option value="IN">per sq/in</option>
+                                    <option value="M">per sq/m</option>
                                 </select>
                             </div>
                         </div>
@@ -279,9 +280,9 @@
         
         // Populate options based on the selected option of the first select element
         if (type === "textile") {
-            unit_select.append($('<option>', { value: 'FT', text: 'per foot' }));
-            unit_select.append($('<option>', { value: 'IN', text: 'per inch' }));
-            unit_select.append($('<option>', { value: 'M', text: 'per meter' }));
+            unit_select.append($('<option>', { value: 'FT', text: 'per sq/ft' }));
+            unit_select.append($('<option>', { value: 'IN', text: 'per sq/in' }));
+            unit_select.append($('<option>', { value: 'M', text: 'per sq/m' }));
         } else if (type === "accessory") {
             unit_select.append($('<option>', { value: 'IN', text: 'per inch' }));
             unit_select.append($('<option>', { value: 'PC', text: 'per piece' }));

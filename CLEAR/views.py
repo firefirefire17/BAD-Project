@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, Transaction, Transaction_Accessory, Transaction_Textile, Global_Value, Account, MaterialKey
+from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Global_Value, Account, MaterialKey
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
@@ -55,34 +55,50 @@ def products(request):
 
 
     #create a list of dicts
-    temp_list = []
     for product in product_objects:
         product_data = {
             'product':product,
-            'textiles': [],
+            'textile_buffers': [],
             'accessories': [],
         }
 
         unique_textiles = set()
+        textile_buffer_list = []
         for product_component in product.product_component_set.all():
             unique_textiles.add(product_component.textile)
-
+        
         for textile in unique_textiles:
-            textile_data = {
+            unique_buffers = set()
+            for component in textile.product_component_set.filter(product=product):
+                unique_buffers.add(component.buffer)
+            for buffer in unique_buffers:
+                data = {
+                    'textile':textile,
+                    'buffer': buffer,
+                }
+                textile_buffer_list.append(data)
+
+        for textile_buffer in textile_buffer_list:
+            textile = textile_buffer['textile']
+            buffer = textile_buffer['buffer']
+            textile_buffer_data = {
                 'textile': textile,
-                'unit': textile.get_unit_display(),
+                'buffer': buffer,
+                'unit': textile.unit,
                 'components': []
             }
-            for component in textile.product_component_set.filter(product=product):
+
+            for component in textile.product_component_set.filter(product=product, buffer=buffer):
                 component_data = {
                     'name': component.component.component_name,
                     'height': component.height,
                     'width': component.width,
                     'quantity': component.quantity,
-                }
-                textile_data['components'].append(component_data)
-            textile_data['component_count'] = len(textile_data['components'])
-            product_data['textiles'].append(textile_data)
+                    'buffer': component.buffer,
+                } 
+                textile_buffer_data['components'].append(component_data)
+            textile_buffer_data['component_count'] = len(textile_buffer_data['components'])
+            product_data['textile_buffers'].append(textile_buffer_data)
         for accessory in product.product_accessory_set.all():
             accessory_data = {
                 'accessory': accessory.accessory,
@@ -90,7 +106,7 @@ def products(request):
                 'quantity': accessory.accessory_quantity,
             }
             product_data['accessories'].append(accessory_data)
-        product_data["textile_count"] = len(product_data['textiles'])
+        product_data["textile_count"] = len(product_data['textile_buffers'])
         product_data["accessory_count"] = len(product_data['accessories'])
         product_material_list.append(product_data)
     if request.method == "POST":
@@ -110,7 +126,6 @@ def products(request):
                                                labor_time=labor_time, 
                                              misc_margin=misc_margin)
 
-            raw_material_cost = 0
             textile_data = json.loads(request.POST.get("textile_data"))
             for textile in textile_data:
                 textile_id = textile['textile_id']
@@ -125,21 +140,21 @@ def products(request):
 
                         if component_name == 'delete':
                             pass
+                        elif not component_name:
+                            pass
                         else: 
                             height = component['height']
                             width = component['width']
                             component_quantity = component['quantity']
+                            buffer = component['buffer']
 
                             existing_component = Component.objects.filter(component_name=component_name).first()
 
                             if existing_component:
-                                product_component = Product_Component.objects.create(product=new_product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity)
+                                product_component = Product_Component.objects.create(product=new_product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
                             else:
                                 new_component = Component.objects.create(component_name=component_name)
-                                product_component = Product_Component.objects.create(product=new_product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity)
-                            productComponent_cost = get_prodComponentCost(height, width, component_quantity, textile_object.unit, textile_object.cost)
-                            print(f"productComponent_cost: {productComponent_cost}")
-                            raw_material_cost += productComponent_cost
+                                product_component = Product_Component.objects.create(product=new_product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
 
             
             accessory_data = json.loads(request.POST.get("accessory_data"))
@@ -152,17 +167,9 @@ def products(request):
                 else:
                     accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
                     Product_Accessory.objects.create(product=new_product, accessory=accessory_object, accessory_quantity=quantity)
-                    productAccessory_cost = accessory_object.cost*int(quantity)
-                    raw_material_cost += productAccessory_cost
             
-            # final calculations to determine selling price
-            labor_cost = wage*(int(labor_time)/60)
-            total_cost = raw_material_cost + labor_cost + labor_cost*(float(misc_margin)/100)
-            margin = total_cost*(float(prod_margin)/100)
-            selling_price = (total_cost + margin)*(1 + (vat/100))
-            new_product.total_cost = selling_price
+            new_product.updateCost()
             new_product.save()
-            
 
             response = {}
             response['status'] = True
@@ -194,7 +201,6 @@ def products(request):
             #update textiles
             Product_Component.objects.filter(product=product).delete()
 
-            raw_material_cost = 0
             textile_data = json.loads(request.POST.get("textile_data"))
             for textile in textile_data:
                 textile_id = textile['textile_id']
@@ -213,16 +219,15 @@ def products(request):
                             height = component['height']
                             width = component['width']
                             component_quantity = component['quantity']
+                            buffer = component['buffer']
 
                             existing_component = Component.objects.filter(component_name=component_name).first()
 
                             if existing_component:
-                                Product_Component.objects.create(product=product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity)
+                                Product_Component.objects.create(product=product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
                             else:
                                 new_component = Component.objects.create(component_name=component_name)
-                                Product_Component.objects.create(product=product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity)
-                            productComponent_cost = get_prodComponentCost(height, width, component_quantity, textile_object.unit, textile_object.cost)
-                            raw_material_cost += productComponent_cost
+                                Product_Component.objects.create(product=product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
 
             #update accs
             Product_Accessory.objects.filter(product=product).delete()       
@@ -236,14 +241,8 @@ def products(request):
                 else:
                     accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
                     Product_Accessory.objects.create(product=product, accessory=accessory_object, accessory_quantity=quantity)
-                    productAccessory_cost = accessory_object.cost*int(quantity)
-                    raw_material_cost += productAccessory_cost
 
-            labor_cost = wage*(int(labor_time)/60)
-            total_cost = raw_material_cost + labor_cost + labor_cost*(float(misc_margin)/100)
-            margin = total_cost*(float(prod_margin)/100)
-            selling_price = (total_cost + margin)*(1 + (vat/100))
-            product.total_cost = selling_price
+            product.updateCost()
             product.save()
 
             response = {}
