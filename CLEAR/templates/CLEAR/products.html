@@ -30,15 +30,15 @@
                         <td>{{ product_data.product.cost }}</td>
                         <td>
                             <button type="button" class="btn btn-outline-secondary"
-                                onclick="toggleModal('editProduct{{product_data.product.pk}}', 'open')"
-                                style="border-radius: 30px;">Edit</button>
+                                onclick="toggleModal('editProduct{{product_data.product.pk}}', 'open')" style="border-radius: 30px;">Edit</button>
                         </td>
                     </tr>
 
                     <!-- modal to edit products -->
                     <div class="editProduct modal-container fade-in" id="editProduct{{ product_data.product.pk }}">
                         <div class="modal-content modal-content-product fade-in">
-                            <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
+                            <div class="row mt-1" style="margin-right: 5px; margin-top:0px; margin-bottom:0px; display: flexbox; justify-content: space-between;">
+                                <h4 style="margin-left: 2%;">Edit Product</h4>
                                 <span class="close"
                                     onclick="toggleModal('editProduct{{product_data.product.pk}}', 'close')">&times;</span>
                             </div>
@@ -60,14 +60,14 @@
                                 </div>
                                 <div class="row pt-3">
                                     <div class="col-8">
-                                        <div class="container" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                                        <div class="container">
                                             <div class="row m-0">
                                                 <div class="col-4">Textiles:</div>
                                                 <div class="col-3">Unit</div>
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            <div class="productTextileContainer_edit" id="{{product_data.product.pk}}productTextileContainer">
+                                            <div class="productTextileContainer_edit" id="{{product_data.product.pk}}productTextileContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
                                                 {% for textile_buffer in product_data.textile_buffers %}
                                                 <div class="productTextile_row row align-items-center mt-2" id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}">
                                                     <div class="col-4">
@@ -96,19 +96,15 @@
                                                 <div class="editTextile modal-overlap-container fade-in" id="{{product_data.product.pk}}editTextile{{forloop.counter}}">
                                                     <div class="modal-overlap-content component-modal-content" style="width:50%; margin:10% auto;">
                                                         <div class="container-fluid">
-                                                            <div class="row">
-                                                                <div class="col-8">
+                                                            <div class="row" style="display: flexbox; justify-content: space-between;">
                                                                     <h2> Edit Textile Quantity</h2>
-                                                                </div>
-                                                                <div class="col text-right">
                                                                     <span class="close editTextile_btn" data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close">&times;</span>
-                                                                </div>
                                                             </div>
-                                                            <div class="row ml-2 mt-2">
-                                                                <div class="col-1 mr-1">
+                                                            <div class="row ml-1 mt-2">
+                                                                <div class="mr-3">
                                                                     <label for="component_buffer">Buffer</label>
                                                                 </div>
-                                                                <div class="col-4">
+                                                                <div>
                                                                     <input type="number" class="component_buffer form-control" value="{{textile_buffer.buffer}}">
                                                                 </div>
                                                             </div>
@@ -128,7 +124,7 @@
                                                                 <div class="col-1">
                                                                 </div>
                                                             </div>
-                                                            <div class="productComponentContainer" id="{{product_data.product.pk}}productComponentContainer{{forloop.counter}}" style="height:25%; overflow-y:scroll; padding: 0px 15px 0px 15px;">
+                                                            <div class="productComponentContainer" id="{{product_data.product.pk}}productComponentContainer{{forloop.counter}}" style="height:20%; overflow-y:scroll; padding: 0px 15px 0px 15px;">
                                                                 {% for component in textile_buffer.components %}
                                                                 <div class="productComponent_row row ml-2 mt-2" id="{{product_data.product.pk}}productComponent_row{{forloop.parentloop.counter}}_{{forloop.counter}}">
                                                                     <div class="col-4">
@@ -149,17 +145,18 @@
                                                                 </div>
                                                                 {% endfor %}
                                                             </div>
-                                                            <div class="row justify-content-center mt-3">
-                                                                <button type="button" class="btn dark-button x-button addComponent_edit" data-textile-id="{{forloop.counter}}" data-product-id="{{product_data.product.pk}}" data-counter="{{textile_buffer.component_count}}">Add Row</button>
+                                                            <div class="row mt-3" style="display: flexbox; justify-content: center;">
+                                                                <button type="button" class="btn dark-button x-button addComponent_edit" data-textile-id="{{forloop.counter}}" data-product-id="{{product_data.product.pk}}" data-counter="{{textile_buffer.component_count}}"
+                                                                >Add Row</button>
                                                             </div>
-                                                            <div class="row text-center" style="margin-top: 30px;">
-                                                                <div class="col">
+                                                            <div class="row text-center" style="margin-top: 20px; display: flexbox; justify-content: space-evenly;">
+                                                                
                                                                     <button type="button" class="btn dark-button editTextile_btn"
                                                                     data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close"> Continue Editing </button>
-                                                                </div>
-                                                                <div class="col">
+                                                                
+                                                                
                                                                     <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
-                                                                </div>
+                                                                
                                                             </div>
                                                         </div>
                                                     </div>
@@ -167,19 +164,21 @@
 
                                                 {% endfor %}
                                             </div>
-                                            <button type="button" class="btn dark-button x-button mt-4 addTextile_edit" data-product-id="{{product_data.product.pk}}" data-counter="{{product_data.textile_count}}">Add Row</button>
+                                            
                                         </div>
-                                        <div class="row" style="margin: 25px 0px 25px 0px"></div>
+                                        <button type="button" class="btn dark-button x-button mt-3 mb-3 addTextile_edit"
+                                            data-product-id="{{product_data.product.pk}}" data-counter="{{product_data.textile_count}}">Add Row</button>
+                                        
                                         <hr>
-                                        <div class="row" style="margin: 25px 0px 25px 0px"></div> 
-                                        <div class="container" style="height:125px; overflow-x:visible; overflow-y:scroll;">
-                                            <div class="row m-0">
+                                        
+                                        <div class="container">
+                                            <div class="row mb-1">
                                                 <div class="col-4">Accessories:</div>
                                                 <div class="col-3">Unit</div>
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            <div class="productAccessoryContainer_edit" id="{{product_data.product.pk}}productAccessoryContainer">
+                                            <div class="productAccessoryContainer_edit" id="{{product_data.product.pk}}productAccessoryContainer" style="height:125px; overflow-x:visible; overflow-y:scroll; display: flexbox; flex-direction: column-reverse;">
                                                 {% for accessory_data in product_data.accessories %}
                                                 <div class="productAccessory_row row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row{{forloop.counter}}">
                                                     <div class="col-4">
@@ -204,10 +203,11 @@
                                                 </div>
                                                 {% endfor %}
                                             </div>
-                                            <button type="button" class="addAccessory_edit btn dark-button x-button mt-4" data-product-id="{{product_data.product.pk}}" data-counter="{{product_data.accessory_count}}">Add Row</button>
+                                            
                                         </div>
+                                        <button type="button" class="addAccessory_edit btn dark-button x-button mt-3 ml-1"
+                                            data-product-id="{{product_data.product.pk}}" data-counter="{{product_data.accessory_count}}">Add Row</button>
                                     </div>
-                                    
                                     <div class="col-4 mt-3">
                                         <label for="product_margin">Product Margin</label>
                                         <input type="number" class="product_margin form-control" name="product_margin"value="{{product_data.product.prod_margin}}">
@@ -497,13 +497,9 @@
                 <div class="modal-overlap-container fade-in" id="editTextile1">
                     <div class="modal-overlap-content" style="width:50%; margin:10% auto;">
                         <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-8">
-                                    <h2> Edit Textile Quantity</h2>
-                                </div>
-                                <div class="col text-right">
-                                    <span class="close editTextile_btn" data-modal="editTextile1" data-modal-action="close">&times;</span>
-                                </div>
+                            <div class="row" style="display: flexbox; justify-content: space-between;">
+                                <h4 style="text-align: text-left;"> Edit Textile Quantity</h4>
+                                <span class="close editTextile_btn" data-modal="editTextile1" data-modal-action="close">&times;</span>
                             </div>
                             <div class="row ml-2 mt-2">
                                 <div class="col-1 mr-1">
