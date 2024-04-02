@@ -68,6 +68,10 @@ img.navicon {
     outline: none;
 }
 
+.filterbutton {
+    opacity: 30%;
+}
+
 .table-responsive {
     overflow-y: scroll;
     border-radius: 15px;
