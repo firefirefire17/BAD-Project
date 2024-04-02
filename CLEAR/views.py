@@ -422,6 +422,10 @@ def job_orders(request):
 def reports(request):
     return render(request, 'CLEAR/reports.html')
 
+@login_required(login_url="/login")
+def stock_in(request):
+    return render(request, 'CLEAR/stock_in.html')
+
 
 def sign_up(request):
     if request.method == 'POST':
