@@ -444,6 +444,34 @@ def stock_in(request):
 
     return render(request, 'CLEAR/stock_in.html', {'textiles':textile_objects, 'accessories': accessory_objects})
 
+@login_required(login_url="/login")
+def stock_in(request):
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+
+    if(request.method=="POST"):
+        action = request.POST.get("action")
+        if action == "add_form":
+            date = request.POST.get("date")
+
+            new_stockIn = StockIn.objects.create(transaction_date=date)
+            material_data = json.loads(request.POST.get("materials"))
+
+            for material in material_data:
+                material_id = material['stock_material']
+                material_type = material['material_type']
+                quantity = material['quantity']
+                cost = material['cost']
+                
+                if material_type == "textile":
+                    material_object = Textile.objects.get(material_key__material_key = material_id)
+                    StockIn_Textile.objects.create(textile=material_object, stock_in=new_stockIn, quantity=quantity)
+                else:
+                    material_object = Accessory.objects.get(material_key__material_key = material_id)      
+
+
+
+    return render(request, 'CLEAR/stock_in.html', {'textiles':textile_objects, 'accessories': accessory_objects})
 
 def sign_up(request):
     if request.method == 'POST':
@@ -475,3 +503,35 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+def get_material_options(request): # function used to change materials in stock-in upon material type change 
+    material_type = request.GET.get('material_type') 
+ 
+    materials = [] 
+    if material_type == "textile": 
+        materials = Textile.objects.all() 
+    else: 
+        materials = Accessory.objects.all() 
+ 
+    options = {} 
+    for material in materials: 
+        pk = material.material_key.material_key 
+        name = material.name 
+        options[pk] = name 
+ 
+    return JsonResponse({'options': options}) 
+ 
+# this is a function used in products to get the cost of each product component 
+def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost): 
+    sq_inch  = float(height)*float(width) 
+ 
+    if textile_unit == "FT": 
+        final_unit = sq_inch / 144 
+    elif textile_unit == "M": 
+        final_unit = sq_inch / 1550.0031 
+    else: 
+        final_unit = sq_inch 
+     
+    final_quantity = final_unit*float(quantity) 
+    final_cost = final_quantity*float(textile_cost) 
+    return final_cost 
