@@ -293,6 +293,7 @@ def materials(request):
     accessory_objects = Accessory.objects.all()
     material_objects = []
 
+    
     for textile in textile_objects:
         unit = textile.get_unit_display()
         unit = unit.removeprefix("per ")
@@ -366,7 +367,7 @@ def materials(request):
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-          
+        
             if type == "accessory":
                 if isinstance(stock, float):
                     error_message = "Stock input cannot be a decimal number"
@@ -395,6 +396,10 @@ def materials(request):
             if type == "accessory":
                 Accessory.objects.filter(material_key=material_key_obj).delete()
             return redirect('materials')
+        
+        #if searchitem in request.GET:
+           # searchitem = request.GET['searchitem']
+           # data = Textile.objects.filter(name__unaccent__icontains=searchitem)
 
 
     return render(request, 'CLEAR/materials.html', {'materials':material_objects})
@@ -470,37 +475,3 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
-
-
-def get_material_options(request): # function used to change materials in stock-in upon material type change
-    material_type = request.GET.get('material_type')
-
-    materials = []
-    if material_type == "textile":
-        materials = Textile.objects.all()
-    else:
-        materials = Accessory.objects.all()
-
-    options = {}
-    for material in materials:
-        pk = material.material_key.material_key
-        name = material.name
-        options[pk] = name
-
-    return JsonResponse({'options': options})
-
-# this is a function used in products to get the cost of each product component
-def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost):
-    sq_inch  = float(height)*float(width)
-
-    if textile_unit == "FT":
-        final_unit = sq_inch / 144
-    elif textile_unit == "M":
-        final_unit = sq_inch / 1550.0031
-    else:
-        final_unit = sq_inch
-    
-    final_quantity = final_unit*float(quantity)
-    final_cost = final_quantity*float(textile_cost)
-    return final_cost
-
