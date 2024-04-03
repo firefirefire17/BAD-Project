@@ -67,7 +67,7 @@
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            <div class="productTextileContainer_edit" id="{{product_data.product.pk}}productTextileContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                                            <div class="productTextileContainer_edit pl-3 pr-3" id="{{product_data.product.pk}}productTextileContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
                                                 {% for textile_buffer in product_data.textile_buffers %}
                                                 <div class="productTextile_row row align-items-center mt-2" id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}">
                                                     <div class="col-4">
@@ -155,7 +155,7 @@
                                                                     data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close"> Continue Editing </button>
                                                                 
                                                                 
-                                                                    <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                                                                    <button type="button" class="btn dark-button confirm-button"> Confirm </button>
                                                                 
                                                             </div>
                                                         </div>
@@ -178,7 +178,7 @@
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            <div class="productAccessoryContainer_edit" id="{{product_data.product.pk}}productAccessoryContainer" style="height:125px; overflow-x:visible; overflow-y:scroll; display: flexbox; flex-direction: column-reverse;">
+                                            <div class="productAccessoryContainer_edit pr-3 pl-3" id="{{product_data.product.pk}}productAccessoryContainer" style="height:125px; overflow-x:visible; overflow-y:scroll; display: flexbox; flex-direction: column-reverse;">
                                                 {% for accessory_data in product_data.accessories %}
                                                 <div class="productAccessory_row row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row{{forloop.counter}}">
                                                     <div class="col-4">
@@ -415,7 +415,7 @@
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="productTextileContainer" id="productTextileContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                        <div class="productTextileContainer pl-3 pr-3" id="productTextileContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
                             <div class="productTextile_row row align-items-center mt-2" id="productTextile_row1">
                                 <div class="col-4">
                                     <select class="product_textile input-select" name="product_textile">
@@ -450,7 +450,7 @@
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="productAccessoryContainer" id="productAccessoryContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                        <div class="productAccessoryContainer pr-3 pl-3" id="productAccessoryContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
                             <div class="productAccessory_row row align-items-center mt-2" id="productAccessory_row1">
                                 <div class="col-4">
                                     <select class="product_accessory input-select" name="product_accessory">

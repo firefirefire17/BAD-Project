@@ -201,7 +201,7 @@
                         </div>
                         <div class="col-4">
                             <label for="date">Stock-in Date</label>
-                            <input type="date" class="form-control" name="date">
+                            <input type="date" class="date form-control" name="date">
                         </div>
                     </div>
                     <div class="row mt-3">
@@ -217,8 +217,8 @@
                         <div class="col-1">
                         </div>
                     </div>
-                    <div class="stockRowContainer" id="stockRowContainer">
-                        <div class="stockRow row mt-1" id="stockRow1">
+                    <div class="materialRowContainer" id="materialRowContainer">
+                        <div class="materialRow row mt-1" id="materialRow1">
                             <div class="col-3">
                                 <select class="material_type input-select" id="material_type1">
                                     <option value="textile"> Textile</option>
@@ -227,8 +227,10 @@
                             </div>
                             <div class="col-3">
                                 <select class="stock_material input-select" id="stock_material1">
-                                    <option value="textile"> Textile</option>
-                                    <option value="accessory"> Accessory</option>
+                                    <option value="delete"> None </option>
+                                    {% for z in textiles %}
+                                    <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="col-2">
@@ -239,7 +241,7 @@
                             </div>
                             <div class="col-1">
                                 <button type="button" class="btn dark-button delete-row"
-                                data-row-id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}"> &times
+                                data-row-id="materialRow1"> &times
                                 </button>
                             </div>
                         </div>
@@ -276,7 +278,7 @@
                             Editing </button>
                     </div>
                     <div class="col">
-                        <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                        <button type="submit" class="submit_btn btn dark-button confirm-button" data-stockIn-id="" data-action="add_form"> Confirm </button>
                     </div>
                 </div>
             </div>
@@ -284,5 +286,153 @@
     </div>
 </form>
 
+
+<div class="materialRow row mt-1" id="materialRow_temp" style="display:none;">
+    <div class="col-3">
+        <select class="material_type input-select" id="material_type1">
+            <option value="textile"> Textile</option>
+            <option value="accessory"> Accessory</option>
+        </select>
+    </div>
+    <div class="col-3">
+        <select class="stock_material input-select" id="stock_material1">
+            <option value="delete"> None </option>
+            {% for z in textiles %}
+            <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-2">
+        <input type="number" class="quantity form-control" name="quantity" placeholder="1" step="0.01">
+    </div>
+    <div class="col-3">
+        <input type="number" class="cost form-control" name="cost" placeholder="Cost" step="0.01">
+    </div>
+    <div class="col-1">
+        <button type="button" class="btn dark-button delete-row"
+        data-row-id="" data-counter=""> &times
+        </button>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        const addStock_parent = $('#materialRowContainer');
+        const materialRow_template = $('#materialRow_temp');
+        function addMaterial_add(counter, button) {
+            counter++
+            newRow = materialRow_template.clone()
+            newRow.attr('id', 'materialRow' + counter);
+            newRow.find('.material_type').val('textile').attr('id', 'materialRow' + counter);
+            newRow.find('.stock_material').val('delete');
+            newRow.find('.quantity').val('');
+            newRow.find('.cost').val('');
+
+            newRow.find('.delete-row').attr('data-row-id', 'materialRow' + counter);
+
+            addStock_parent.append(newRow);
+
+            newRow.show();
+            
+            button.data('counter', counter);
+
+            console.log(newRow);
+        }
+
+        $(".submit-btn").click(function() {
+            let stockIn_id = $(this).data('stockIn-id');
+            let action = $(this).data('action');
+
+            let stockIn_modal;
+
+            if (action === 'edit_form') {
+                stockIn_modal = $(document).find('#editstock-modal' + stockIn_id)
+            } else {
+                stockIn_modal = $(document).find('#addstock-modal')
+            }
+
+            let materialRow_container = $('#materialRowContainer' + stockIn_id);
+
+            material_data = []
+            $.each(materialRow_container.find('.materialRow'), function(counter, row){
+                temp = {
+                    'material_type': $(row).find('.material_type').val(),
+                    'stock_material': $(row).find('.stock_material').val(),
+                    'quantity': $(row).find('.quantity').val(),
+                    'cost': $(row).find('.cost').val(),
+                }
+                material_data.push()
+            });
+
+            submit_data = {
+                'pk': stockIn_modal.find('pk').val(),
+                'date': stockIn_modal.find('date').val(),
+                'materials': JSON.stringify(material_data),
+                "csrfmiddlewaretoken": stockIn_modal.find("[name=csrfmiddlewaretoken]").val(),
+                'action': action,
+            }
+
+            $.ajax({
+                method: "post",
+                data: submit_data,
+                success: function(data){
+                    console.log(data["status"])
+                    if (data["status"]){
+                        // redirect to returned url
+                        window.location = data["url"];
+                    } else{
+                        // controlled error, display message
+                        alert(data["msg"]);
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    // Basic `xhr.status` Key
+                    // 0    = Server didn't Reply (Server Down)
+                    // 400  = Bad Request         (Syntax Error)
+                    // 403  = Forbidden           (Login Token Expired)
+                    // 403  = Not Found           (Invalid Url)
+                    // 500  = Server Error        (Django Crash)
+                    alert("something broke")  // uncontrolled error
+                }
+            });
+
+
+        });
+
+        $(document).on('change', '.material_type', function() {
+            let materialType = $(this).val();
+            let select = $(this).closest('.materialRow').find('.stock_material'); 
+            $.ajax({
+                url: '/get_material_options/',
+                data: {
+                    'material_type': materialType
+                },
+                dataType: 'json',
+                success: function(data) {
+                    var options = data.options;
+                    select.empty();
+                    select.append('<option value="delete"> None </option>');
+                    $.each(options, function(key, value) {
+                        select.append('<option value="' + key + '">' + value + '</option>');
+                    });
+                }
+            });
+        });
+        $('#materialRowContainer').on('click', '.delete-row', function () {
+            let rowId = $(this).data('row-id');
+            let selectId = $('#' + rowId).find('.stock_material').attr('id');
+
+            setToDeleteAndHide(selectId, rowId);
+        });
+        $('#addstock-modal').on('click', '.addStock_add', function() {
+            let counter = $(this).data('counter');
+            let button = $(this);
+
+            addMaterial_add(counter, button);
+        });
+
+
+    
+    });
+</script>
 
 {% endblock %}
