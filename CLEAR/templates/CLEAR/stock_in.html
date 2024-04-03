@@ -16,12 +16,11 @@
     <div class="card main-card">
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
-            <table class="table table-hover table-striped" style="border-radius: 40px;">
+            <table class="table table-hover table-striped" style="border-radius: 40px; width: auto;">
                 <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Stock-in #</th>
                     <th scope="col"> Date</th>
                     <th scope="col"> Stock-in Cost </th>
-                    <th scope="col"></th>
                     <th scope="col"></th>
                 </thead>
                 <tbody>
@@ -57,6 +56,10 @@
                                             <div class="col-4">
                                                 <label for="date">Stock-in Date</label>
                                                 <input type="date" class="date form-control" name="date" value="{{stockIn_data.stock_in.transaction_date}}">
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="total_cost" class="mb-2">Total Cost:</label>
+                                                <input type="number" class="total_cost form-control" name="total_cost" readonly>
                                             </div>
                                         </div>
                                         <div class="row mt-3">
@@ -104,16 +107,11 @@
                                         <div class="row justify-content-center mt-3">
                                             <button type="button" class="btn dark-button x-button addStock_add" data-counter="1">Add Row</button>
                                         </div>
-                                        <div class="row pt-3" style="margin-top: 15px;">
-                                            <div class="col-4 mr-auto">
-                                                <label for="total_cost" class="mb-0">Total Cost:</label>
-                                                <input type="number" class="total_cost form-control" name="total_cost" readonly>
-                                            </div>
-                                            <div class="col-4 ml-auto text-right">
+                                        <div class="row pt-3" style="margin-top: 15px; display: flexbox; justify-content: space-between;">
+                                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="" style="border-radius: 35px; max-height: fit-content;">Delete Stock-in</button>
                                                 <button type="button" class="btn dark-button" data-toggle="modal"
                                                     data-target="#confirm-modal"> Create Stock-in
                                                 </button>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -210,6 +208,10 @@
                             <label for="date">Stock-in Date</label>
                             <input type="date" class="date form-control" name="date">
                         </div>
+                        <div class="col-4">
+                            <label for="total_cost" class="mb-2">Total Cost:</label>
+                            <input type="number" class="total_cost form-control" name="total_cost" readonly>
+                        </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-6">
@@ -257,10 +259,6 @@
                         <button type="button" class="btn dark-button x-button addStock_add" data-counter="1">Add Row</button>
                     </div>
                     <div class="row pt-3" style="margin-top: 15px;">
-                        <div class="col-4 mr-auto">
-                            <label for="total_cost" class="mb-0">Total Cost:</label>
-                            <input type="number" class="total_cost form-control" name="total_cost" readonly>
-                        </div>
                         <div class="col-4 ml-auto text-right">
                             <button type="button" class="btn dark-button" data-toggle="modal"
                                 data-target="#confirm-modal"> Create Stock-in
