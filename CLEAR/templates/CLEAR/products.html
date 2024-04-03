@@ -124,7 +124,7 @@
                                                                 <div class="col-1">
                                                                 </div>
                                                             </div>
-                                                            <div class="productComponentContainer" id="{{product_data.product.pk}}productComponentContainer{{forloop.counter}}" style="height:20%; overflow-y:scroll; padding: 0px 15px 0px 15px;">
+                                                            <div class="productComponentContainer" id="{{product_data.product.pk}}productComponentContainer{{forloop.counter}}" style="height:25%; overflow-y:scroll; padding: 0px 15px 0px 15px;">
                                                                 {% for component in textile_buffer.components %}
                                                                 <div class="productComponent_row row ml-2 mt-2" id="{{product_data.product.pk}}productComponent_row{{forloop.parentloop.counter}}_{{forloop.counter}}">
                                                                     <div class="col-4">
@@ -155,7 +155,8 @@
                                                                     data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close"> Continue Editing </button>
                                                                 
                                                                 
-                                                                    <button type="button" class="btn dark-button confirm-button"> Confirm </button>
+                                                                    <button type="button" class="btn dark-button confirm-button editTextile_btn"
+                                                                    data-modal="{{product_data.product.pk}}editTextile{{forloop.counter}}" data-modal-action="close"> Confirm </button>
                                                                 
                                                             </div>
                                                         </div>
@@ -537,7 +538,8 @@
                                     data-modal="editTextile1" data-modal-action="close"> Continue Editing </button>
                                 </div>
                                 <div class="col">
-                                    <button type="button" class="btn dark-button confirm-button"> Confirm </button>
+                                    <button type="button" class="btn dark-button confirm-button editTextile_btn"
+                                    data-modal="editTextile1" data-modal-action="close"> Confirm </button>
                                 </div>
                             </div>
                         </div>

@@ -167,16 +167,32 @@ class StockIn(models.Model):
     edit_reason  = models.CharField(max_length=200, null=True)
     accessories = models.ManyToManyField(Accessory, through="StockIn_Accessory")
     textiles = models.ManyToManyField(Textile, through="StockIn_Textile")
+    total_cost = models.FloatField(null=True)
+
+    def updateCost(self):
+        total_cost = 0
+        for stock_textile in self.stockin_textile_set.all():
+            quantity = stock_textile.quantity
+            cost = stock_textile.cost
+            total_cost += (quantity*cost)
+        for stock_accessory in self.stockin_accessory_set.all():
+            quantity = stock_textile.quantity
+            cost = stock_textile.cost
+            total_cost += (quantity*cost)
+        self.total_cost = total_cost
+        return self.total_cost
 
 class StockIn_Accessory(models.Model):
     accessory = models.ForeignKey(Accessory, on_delete=models.CASCADE)
     stock_in = models.ForeignKey(StockIn, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+    cost = models.FloatField()
 
 class StockIn_Textile(models.Model):
     textile = models.ForeignKey(Textile, on_delete=models.CASCADE)
     stock_in = models.ForeignKey(StockIn, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+    cost = models.FloatField()
     
 
 class Global_Value(models.Model):

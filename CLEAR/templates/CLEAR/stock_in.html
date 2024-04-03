@@ -25,89 +25,96 @@
                     <th scope="col"></th>
                 </thead>
                 <tbody>
-                    {% for stock_in in stock_ins %}
+                    {% for stockIn_data in stock_ins %}
                         <tr style="height:70px;">
-                            <td> {{ material_data.material.material_key.material_key }} </td>
-                            <td> {{ material_data.material.name }} </td>
-                            <td> {{ material_data.type|title }} </td>
-                            <td> {{ material_data.material.stock }} {{material_data.unit}}</td>
-                            <td> {{ material_data.material.cost }} </td>
+                            <td> {{ stockIn_data.stock_in.pk }} </td>
+                            <td> {{ stockIn_data.stock_in.transaction_date }} </td>
+                            <td> {{ stockIn_data.stock_in.total_cost }} </td>
                             <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
-                                    data-target="#editmat-modal{{material_data.material.material_key.material_key}}" style="border-radius: 30px;">Edit</button>
+                                    data-target="#editstock-modal{{stockIn_data.stock_in.pk}}" style="border-radius: 30px;">Edit</button>
                             </td>
                         </tr>
 
 
                         <!-- modal to edit materials -->
                     <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-                        <div class="modal" id="editmat-modal{{material_data.material.material_key.material_key}}" tabindex="-1" role="dialog">
+                        <div class="modal" id="editstock-modal{{stockIn_data.stock_in.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
                             <div class="modal-content">
                                 <div class="modal-body">
                                     <div class="container-fluid">
                                         <div class="row">
                                             <div class="col-11">
-                                                <h3 style="margin-bottom: 20px;">Edit Material</h3>
+                                                <h3 style="margin-bottom: 30px;">Edit Stock-in</h3>
                                             </div>
-                                            <div class="col-1"><button type="button" class="close btn-close"
-                                                    data-dismiss="modal" aria-label="Close"><span
-                                                        aria-hidden="true">&times;</span></button></div>
+                                            <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
+                                                    aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
                                         </div>
-                                        
-                                        <input type="hidden" name="edit_form" value="1"></input>
-                                        <input type="hidden" name="type" value="{{material_data.type}}"></input>
                                         <div class="row">
-                                            <div class="col">
-                                                <label for="pk">Material ID</label>
-                                                <input type="text" class="form-control" name="material_key" value="{{material_data.material.material_key.material_key}}" readonly>
+                                            <div class="col-4">
+                                                <label for="pk">Stock-in #</label>
+                                                <input type="number" class="pk form-control" value="{{stockIn_data.stock_in.pk}}" readonly>
                                             </div>
-                                            <div class="col">
-                                                <label for="name">Material Name</label>
-                                                <input type="text" class="form-control" id="name" name="name"
-                                                    value="{{material_data.material.name}}">
-                                            </div>
-                                            <div class="col">
-                                                <label for="type">Material Type</label>
-                                                <select class="input-select" disabled>
-                                                    <option value="textile" {% if 'textile' in material_data.type %}selected{% endif %}>Textile</option>
-                                                    <option value="accessory" {% if 'accessory' in material_data.type %}selected{% endif %}>Accessory</option>
-                                                </select>
+                                            <div class="col-4">
+                                                <label for="date">Stock-in Date</label>
+                                                <input type="date" class="date form-control" name="date" value="{{stockIn_data.stock_in.transaction_date}}">
                                             </div>
                                         </div>
-                                        <div class="row pt-3">
-                                            <div class="col">
-                                                <label for="stock">Stock</label>
-                                                <input type="number" class="form-control" id="stock" name="stock"
-                                                    value="{{material_data.material.stock}}" readonly>
+                                        <div class="row mt-3">
+                                            <div class="col-6">
+                                                Materials Bought
                                             </div>
-                                            <div class="col">
-                                                <label for="cost">Cost</label>
-                                                <input type="number" class="form-control" id="cost" name="cost"
-                                                    value="{{material_data.material.cost}}" step="0.01">
+                                            <div class="col-2">
+                                                Qty
                                             </div>
-                                            <div class="col">
-                                                <label for="unit">Unit</label>
-                                                <input type="text" class="form-control" 
-                                                    value=
-                                                    "{% if material_data.material.unit == 'M' %} per sq/m
-                                                    {% elif material_data.material.unit == 'IN' and material_data.type == 'textile' %} per sq/in
-                                                    {% elif material_data.material.unit == 'IN' %} per inch 
-                                                    {% elif material_data.material.unit == 'PC' %} per piece 
-                                                    {% elif material_data.material.unit == 'FT' %} per sq/ft {% endif %}" readonly>
+                                            <div class="col-3">
+                                                Cost
+                                            </div>
+                                            <div class="col-1">
                                             </div>
                                         </div>
-                                        <div class="row" style="margin: 30px 0px 10px 0px;">
-                                            <div class="col" style="margin-left: -16px;">
+                                        <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer" style="height:50%; overflow-x:visible; overflow-y:scroll;">
+                                            <div class="materialRow row mt-1" id="materialRow1">
+                                                <div class="col-3">
+                                                    <select class="material_type input-select" id="material_type1">
+                                                        <option value="textile"> Textile</option>
+                                                        <option value="accessory"> Accessory</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-3">
+                                                    <select class="stock_material input-select" id="stock_material1">
+                                                        <option value="delete"> None </option>
+                                                        {% for z in textiles %}
+                                                        <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="number" class="quantity form-control" name="quantity" placeholder="1" step="0.01">
+                                                </div>
+                                                <div class="col-3">
+                                                    <input type="number" class="cost form-control" name="cost" placeholder="Cost" step="0.01">
+                                                </div>
+                                                <div class="col-1">
+                                                    <button type="button" class="btn dark-button delete-row"
+                                                    data-row-id="materialRow1"> &times
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center mt-3">
+                                            <button type="button" class="btn dark-button x-button addStock_add" data-counter="1">Add Row</button>
+                                        </div>
+                                        <div class="row pt-3" style="margin-top: 15px;">
+                                            <div class="col-4 mr-auto">
+                                                <label for="total_cost" class="mb-0">Total Cost:</label>
+                                                <input type="number" class="total_cost form-control" name="total_cost" readonly>
+                                            </div>
+                                            <div class="col-4 ml-auto text-right">
                                                 <button type="button" class="btn dark-button" data-toggle="modal"
-                                                    data-target="#delconf-modal{{material_data.material.material_key.material_key}}"> Delete
-                                                    Material </button>
-                                            </div>
-                                            <div class="col-4 order-2 text-right">
-                                                <button type="button" class="btn dark-button" data-toggle="modal"
-                                                    data-target="#editconf-modal{{material_data.material.material_key.material_key}}" style="margin-left: 65px;">
-                                                    Save Edits </button>
+                                                    data-target="#confirm-modal"> Create Stock-in
+                                                </button>
                                             </div>
                                         </div>
-                                        
                                     </div>
                                 </div>
                             </div>
@@ -217,7 +224,7 @@
                         <div class="col-1">
                         </div>
                     </div>
-                    <div class="materialRowContainer" id="materialRowContainer">
+                    <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer" style="height:50%; overflow-x:visible; overflow-y:scroll;">
                         <div class="materialRow row mt-1" id="materialRow1">
                             <div class="col-3">
                                 <select class="material_type input-select" id="material_type1">
@@ -252,7 +259,7 @@
                     <div class="row pt-3" style="margin-top: 15px;">
                         <div class="col-4 mr-auto">
                             <label for="total_cost" class="mb-0">Total Cost:</label>
-                            <input type="number" class="total_cost form-control" name="total_cost">
+                            <input type="number" class="total_cost form-control" name="total_cost" readonly>
                         </div>
                         <div class="col-4 ml-auto text-right">
                             <button type="button" class="btn dark-button" data-toggle="modal"
@@ -278,7 +285,7 @@
                             Editing </button>
                     </div>
                     <div class="col">
-                        <button type="submit" class="submit_btn btn dark-button confirm-button" data-stockIn-id="" data-action="add_form"> Confirm </button>
+                        <button type="button" class="submit-btn btn dark-button confirm-button" data-action="add_form" data-id=""> Confirm </button>
                     </div>
                 </div>
             </div>
@@ -339,7 +346,7 @@
         }
 
         $(".submit-btn").click(function() {
-            let stockIn_id = $(this).data('stockIn-id');
+            let stockIn_id = $(this).data('id');
             let action = $(this).data('action');
 
             let stockIn_modal;
@@ -351,25 +358,26 @@
             }
 
             let materialRow_container = $('#materialRowContainer' + stockIn_id);
-
             material_data = []
             $.each(materialRow_container.find('.materialRow'), function(counter, row){
+                console.log(row)
                 temp = {
                     'material_type': $(row).find('.material_type').val(),
                     'stock_material': $(row).find('.stock_material').val(),
                     'quantity': $(row).find('.quantity').val(),
                     'cost': $(row).find('.cost').val(),
                 }
-                material_data.push()
+                material_data.push(temp)
             });
 
             submit_data = {
-                'pk': stockIn_modal.find('pk').val(),
-                'date': stockIn_modal.find('date').val(),
+                'pk': stockIn_modal.find('.pk').val(),
+                'date': stockIn_modal.find('.date').val(),
                 'materials': JSON.stringify(material_data),
-                "csrfmiddlewaretoken": stockIn_modal.find("[name=csrfmiddlewaretoken]").val(),
+                "csrfmiddlewaretoken": $("[name=csrfmiddlewaretoken]").val(),
                 'action': action,
             }
+
 
             $.ajax({
                 method: "post",
