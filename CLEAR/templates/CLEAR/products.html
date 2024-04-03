@@ -385,7 +385,9 @@
 
 <div class="modal-container fade-in" id="addProduct">
     <div class="modal-content modal-content-product fade-in">
-        <div class="row ml-auto" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
+        <div class="row mt-1"
+            style="margin-right: 5px; margin-top:0px; margin-bottom:0px; display: flexbox; justify-content: space-between;">
+            <h4 style="margin-left: 2%;">Add Product</h4>
             <span class="close" onclick="toggleModal('addProduct', 'close')">&times;</span>
         </div>
         <form method="POST" action="{% url 'products' %}"> {% csrf_token %}
@@ -406,14 +408,14 @@
             </div>
             <div class="row pt-3">
                 <div class="col-8">
-                    <div class="container" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                    <div class="container" style="">
                         <div class="row m-0">
                             <div class="col-4">Textiles:</div>
                             <div class="col-3">Unit</div>
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="productTextileContainer" id="productTextileContainer">
+                        <div class="productTextileContainer" id="productTextileContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
                             <div class="productTextile_row row align-items-center mt-2" id="productTextile_row1">
                                 <div class="col-4">
                                     <select class="product_textile input-select" name="product_textile">
@@ -441,15 +443,14 @@
                     </div>
                     <div class="row" style="margin: 25px 0px 25px 0px"></div>
                     <hr>
-                    <div class="row" style="margin: 25px 0px 25px 0px"></div> 
-                    <div class="container" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                    <div class="container">
                         <div class="row m-0">
                             <div class="col-4">Accessories:</div>
                             <div class="col-3">Unit</div>
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="productAccessoryContainer" id="productAccessoryContainer">
+                        <div class="productAccessoryContainer" id="productAccessoryContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
                             <div class="productAccessory_row row align-items-center mt-2" id="productAccessory_row1">
                                 <div class="col-4">
                                     <select class="product_accessory input-select" name="product_accessory">
@@ -486,8 +487,8 @@
                     <input type="number" class="product_misc form-control" name="product_misc" value="50">
                 </div>
             </div>
-            <div class="row" style="margin: 20px 5px 12px 5px;">
-                <div class="col-4 order-2 ml-auto text-right">
+            <div class="row">
+                <div class="col-4 order-2 ml-auto text-right" style="margin-right: 5px;">
                     <button type="button" class="btn dark-button" onclick="toggleModal('confirmAddProduct', 'open')">
                         Save Edits </button>
                 </div>

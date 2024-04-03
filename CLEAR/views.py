@@ -307,6 +307,7 @@ def materials(request):
     accessory_objects = Accessory.objects.all()
     material_objects = []
 
+    
     for textile in textile_objects:
         unit = textile.get_unit_display()
         unit = unit.removeprefix("per ")
@@ -380,7 +381,7 @@ def materials(request):
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
-          
+        
             if type == "accessory":
                 if isinstance(stock, float):
                     error_message = "Stock input cannot be a decimal number"
@@ -409,6 +410,10 @@ def materials(request):
             if type == "accessory":
                 Accessory.objects.filter(material_key=material_key_obj).delete()
             return redirect('materials')
+        
+        #if searchitem in request.GET:
+           # searchitem = request.GET['searchitem']
+           # data = Textile.objects.filter(name__unaccent__icontains=searchitem)
 
 
     return render(request, 'CLEAR/materials.html', {'materials':material_objects})
