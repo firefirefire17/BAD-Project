@@ -1,476 +1,444 @@
 {% extends "CLEAR/base.html" %}
 {% load static %}
 
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet4.css' %}">
+    <script src="{% static 'js/styling.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+</head>
+
+
 {% block content %}
+
 <div class="row pl-3 pt-3 pr-3" style="height:700px;">
     <div class="card main-card">
-        <div class="table-responsive card" style="height: 90%; overflow-y: auto; box-shadow:none; margin-bottom: 13px;">
-            <table class="table table-hover table-striped">
-                <thead style="background-color: #3f3e3e; color: #ffffff;">
-                    <th scope="col"> Order # </th>
-                    <th scope="col"> Purchase Mode</th>
-                    <th scope="col"> Status</th>
-                    <th scope="col"> Price </th>
-                    <th scope="col"></th>
+        <div class="table-responsive card"
+            style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
+            <table class="table table-hover table-striped" style="border-radius: 40px;">
+                <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
+                    <th scope="col"> Job Order # </th>
+                    <th scope="col"> File Date</th>
+                    <th scope="col"> Status </th>
+                    <th scope="col"> Completion Date</th>
+                    <th scope="col"> </th>
                 </thead>
                 <tbody>
-                    {% for order_data in orders %} <!-- see views for order_data breakdown -->
-                    <tr style="height: 70px;">
-                        <td>{{ order_data.order.pk }}</td>
-                        <td>{{ order_data.order.purchase_mode }}</td>
-                        <td>{{ order_data.order.order_status }}</td>
-                        <td>{{ order_data.order.order_price }}</td>
-                        <td>
-                            <button type="button" class="btn btn-outline-secondary" onclick="toggleModal('editOrder{{order_data.order.pk}}', 'open')" style="border-radius: 30px;">Edit</button>
-                        </td>
-                    </tr>
+                    {% for order_data in orders %}
+                        <tr style="height:70px;">
+                            <td> {{ order_data.order.pk }} </td>
+                            <td> {{ order_data.file_date|date:'Y-m-d' }} </td>
+                            <td> {{ order_data.status }} </td>
+                            <td> {{ order_data.completion_date }}</td>
+                            <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
+                                data-target="#editord-modal{{order_data.order.pk}}" 
+                                style="border-radius: 30px;">Edit</button> </td>
+                        </tr>
 
-                    <!-- modal to edit an order -->
-                    <div class="modal-container fade-in" id="editOrder{{ order_data.order.pk }}">
-                        <div class="modal-content modal-content-order fade-in"> 
-                            <div class="row ml-3 mt-0" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
-                                <h2 class="mr-auto"> Edit Order </h2>
-                                <span class="close ml-auto" onclick="toggleModal('editOrder{{order_data.order.pk}}', 'close')">&times;</span>
-                            </div>
-                            <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
-                                <input type="hidden" name="edit_form" value="1">
-                                <input type="hidden" name="order_pk" value="{{ order_data.order.pk }}">
-                                <!-- <input type="hidden" name="current_customer_pk" value="{{ order_data.customer.pk }}"> -->
-                                <div class="row m-2 justify-content-between">
-                                    <div class="col-6">
-                                        <div class="row mt-1">
-                                            <div class="col-4">
-                                                <label for="order_pk">Order ID</label>
-                                                <input type="text" class="form-control" name="order_pk" id="order_pk" value="{{ order_data.order.pk }}"readonly>
+
+                        <!-- modal to edit materials -->
+                    <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+                        <div class="modal" id="editmat-modal{{material_data.material.material_key.material_key}}" tabindex="-1" role="dialog">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-11">
+                                                <h3 style="margin-bottom: 20px;">Edit Material</h3>
                                             </div>
-                                            <div class="col-4">
-                                                <label for="payment_type">Payment Type</label>
-                                                <select class="input-select" class="form-control" name="payment_type" id="payment_type" value="{{order_data.order.payment_type}}">
-                                                    <option value="cash" {% if order_data.order.payment_type == 'cash' %}selected{% endif %}>Cash</option>
-                                                    <option value="card"{% if order_data.order.payment_type == 'card' %}selected{% endif %}>Card</option>
-                                                    <option value="bank_transfer"{% if order_data.order.payment_type == 'bank_transfer' %}selected{% endif %}>Bank Transfer</option>
-                                                </select>
+                                            <div class="col-1"><button type="button" class="close btn-close"
+                                                    data-dismiss="modal" aria-label="Close"><span
+                                                        aria-hidden="true">&times;</span></button></div>
+                                        </div>
+                                        
+                                        <input type="hidden" name="edit_form" value="1"></input>
+                                        <input type="hidden" name="type" value="{{material_data.type}}"></input>
+                                        <div class="row">
+                                            <div class="col">
+                                                <label for="pk">Material ID</label>
+                                                <input type="text" class="form-control" name="material_key" value="{{material_data.material.material_key.material_key}}" readonly>
                                             </div>
-                                            <div class="col-4">
-                                                <label for="purchase_mode">Purchase Mode</label>
-                                                <select class="input-select" class="form-control" name="purchase_mode" id="purchase_mode" value="{{ order_data.order.purchase_mode }}">
-                                                    <option value="onsite" {% if order_data.order.purchase_mode == 'onsite' %}selected{% endif %}>Onsite</option>
-                                                    <option value="website" {% if order_data.order.purchase_mode == 'website' %}selected{% endif %}>Website</option>
+                                            <div class="col">
+                                                <label for="name">Material Name</label>
+                                                <input type="text" class="form-control" id="name" name="name"
+                                                    value="{{material_data.material.name}}">
+                                            </div>
+                                            <div class="col">
+                                                <label for="type">Material Type</label>
+                                                <select class="input-select" disabled>
+                                                    <option value="textile" {% if 'textile' in material_data.type %}selected{% endif %}>Textile</option>
+                                                    <option value="accessory" {% if 'accessory' in material_data.type %}selected{% endif %}>Accessory</option>
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="row m-0 mt-5 mb-2">
-                                            <div class="col-3">Item #</div>
-                                            <div class="col-6">Product Name</div>
-                                            <div class="col-2"></div>
-                                            <div class="col-1"></div>
+                                        <div class="row pt-3">
+                                            <div class="col">
+                                                <label for="stock">Stock</label>
+                                                <input type="number" class="form-control" id="stock" name="stock"
+                                                    value="{{material_data.material.stock}}" readonly>
+                                            </div>
+                                            <div class="col">
+                                                <label for="cost">Cost</label>
+                                                <input type="number" class="form-control" id="cost" name="cost"
+                                                    value="{{material_data.material.cost}}" step="0.01">
+                                            </div>
+                                            <div class="col">
+                                                <label for="unit">Unit</label>
+                                                <input type="text" class="form-control" 
+                                                    value=
+                                                    "{% if material_data.material.unit == 'M' %} per sq/m
+                                                    {% elif material_data.material.unit == 'IN' and material_data.type == 'textile' %} per sq/in
+                                                    {% elif material_data.material.unit == 'IN' %} per inch 
+                                                    {% elif material_data.material.unit == 'PC' %} per piece 
+                                                    {% elif material_data.material.unit == 'FT' %} per sq/ft {% endif %}" readonly>
+                                            </div>
                                         </div>
-                                        <!-- iteration through all items in an order -->
-                                        {% for item_data in order_data.items %}
-                                        {% with item_number=forloop.counter %} <!-- sets item_number as the counter for items -->
-                                        <input type="hidden" name="hidden_item_pk{{forloop.counter}}" value="{{item_data.item.item.pk}}">
-                                        <input type="hidden" name="hidden_order_item_pk{{forloop.counter}}" value="{{item_data.item.pk}}">
-                                        <div class="row mt-2" id="{{order_data.order.pk}}order_item_row{{forloop.counter}}">
-                                            <div class="col-3 text-center">
-                                                {{ item_number }}
+                                        <div class="row" style="margin: 30px 0px 10px 0px;">
+                                            <div class="col" style="margin-left: -16px;">
+                                                <button type="button" class="btn dark-button" data-toggle="modal"
+                                                    data-target="#delconf-modal{{material_data.material.material_key.material_key}}"> Delete
+                                                    Material </button>
                                             </div>
-                                            <div class="col-5">
-                                                {{ item_data.product.name }}
-                                            </div>
-                                            <div class="col-3">
-                                                <button type="button" class="btn light-button" onclick="toggleModal('{{order_data.order.pk}}editOrderItem{{forloop.counter}}', 'open')"> Edit </button>
-                                            </div>
-                                            <div class="col-1">
-                                                <button type="button" class="btn dark-button" onclick="setToDeleteAndHide('{{order_data.order.pk}}item_productPK{{ forloop.counter }}','{{order_data.order.pk}}order_item_row{{forloop.counter}}')"> &times</button>
+                                            <div class="col-4 order-2 text-right">
+                                                <button type="button" class="btn dark-button" data-toggle="modal"
+                                                    data-target="#editconf-modal{{material_data.material.material_key.material_key}}" style="margin-left: 65px;">
+                                                    Save Edits </button>
                                             </div>
                                         </div>
                                         
-                                    
-                                        <!-- modal to edit an item  -->
-                                        <div class="modal-overlap-container fade-in" id="{{order_data.order.pk}}editOrderItem{{ forloop.counter }}">
-                                            <div class="modal-overlap-content" style="width: 40%; height: 65%; margin: 5% auto;">
-                                                <div class="row ml-3 mt-0" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
-                                                    <h2 class="mr-auto"> Edit Item </h2>
-                                                    <span class="close ml-auto" onclick="toggleModal('{{order_data.order.pk}}editOrderItem{{forloop.counter}}', 'close')">&times;</span>
-                                                </div>
-                                                <div class="row mt-2">
-                                                    <div class="col-2">
-                                                        <label for="order_item_number">Item #</label>
-                                                        <input type="text" class="form-control" name="order_item_number{{ forloop.counter }}" id="order_item_number{{ forloop.counter }}" value="{{ forloop.counter }}" readonly>
-                                                    </div>
-                                                    <div class="col-2">
-                                                        <label for="itemProduct_PK">Product</label>
-                                                        <select class="input-select" class="form-control" name="{{order_data.order.pk}}item_productPK{{ forloop.counter }}" id="{{order_data.order.pk}}item_productPK{{ forloop.counter }}" placeholder="Type">
-                                                            <option value="delete">None</option>
-                                                            {% for product in products %}
-                                                            <option value="{{ product.pk }}" {% if product.pk == item_data.product.pk %}selected{% endif %}> {{ product.name }}</option>
-                                                            {% endfor %}
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-2">
-                                                        <label for="item_quantity">Quantity</label>
-                                                        <input type="number" class="form-control" name="item_quantity{{ forloop.counter }}" id="item_quantity{{ forloop.counter }}" value="{{ item_data.item.quantity }}">
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <label for="itemproduct_name">Product Name:</label>
-                                                        <input type="number" class="form-control" name="item_productName{{ forloop.counter }}" id="item_productName{{ forloop.counter }}" value="{{ item_data.product.name }}" readonly>
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <label for="item_type">Type</label>
-                                                        <select class="input-select" class="form-control" name="item_type{{ forloop.counter }}" id="item_type{{ forloop.counter }}">
-                                                            <option value="bespoke" {% if item_data.item.item.type == 'bespoke' %}selected{% endif %}>Bespoke</option>
-                                                            <option value="regular" {% if item_data.item.item.type == 'regular' %}selected{% endif %}>Regular</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-0 mt-3">
-                                                    <div class="col-5">Materials:</div>
-                                                    <div class="col-2">QTY:</div>
-                                                    <div class="col-3">Unit:</div>
-                                                    <div class="col"></div>
-                                                </div>
-                                                <!-- iteration through the materials of each item -->
-                                                {% for material_data in item_data.materials %}
-                                                <input type="hidden" name="{{ item_number }}_item_material_number{{forloop.counter}}" value="{{forloop.counter}}">
-                                                <input type="hidden" name="{{ item_number }}_item_materialPK{{forloop.counter}}" value="{{ material_data.item_material.pk }}">
-                                                <div class="row mt-2" id="{{order_data.order.pk}}_{{item_number}}_item_material_row{{forloop.counter}}">
-                                                    <div class="col-5">
-                                                        <select class="input-select form-control" name="{{order_data.order.pk}}_{{ item_number }}_item_material_materialPK{{ forloop.counter }}" id="{{order_data.order.pk}}_{{ item_number }}_item_material_materialPK{{ forloop.counter }}">
-                                                            <option value="delete">None</option>
-                                                            {% for z in materials %}
-                                                                <option value="{{z.pk}}" {% if z.pk == material_data.material.pk %}selected{% endif %}>{{z.name}}</option>
-                                                            {% endfor %}
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-2">
-                                                        <input type="number" class="form-control" name="{{ item_number }}_item_material_quantity{{ forloop.counter }}" id="{{ item_number }}_item_material_quantity{{ forloop.counter }}" value="{{ material_data.quantity }}">
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <input type="text" class="form-control" name="{{ item_number }}_item_material_unit{{ forloop.counter }}" id="{{ item_number }}_item_material_unit{{ forloop.counter }}" value="{{ material_data.material.unit }}" readonly>
-                                                    </div>
-                                                    <div class="col">
-                                                        <button type="button" class="btn dark-button" onclick="setToDeleteAndHide('{{order_data.order.pk}}_{{ item_number }}_item_material_materialPK{{ forloop.counter }}', '{{order_data.order.pk}}_{{item_number}}_item_material_row{{forloop.counter}}')">&times</button>
-                                                    </div>
-                                                </div>
-        
-                                                {% endfor %}
-                                                {% endwith %}
-                                                
-                                                <!-- not sure how to push this element down the card -->
-                                                <div class="row">
-                                                    <div class="col">
-                                                        Item cost:
-                                                    </div>
-                                                    <div class="col">
-                                                        <button type="button" class="btn dark-button" onclick="handleAddItem('{{ forloop.counter }}')"> Add Item</button>
-                                                    </div>
-                                                </div>
-        
-        
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                        <button type="button" class="btn dark-button mt-4">Add Item</button>
-                                    </div>
-                                    <div class="col-5">
-                                        <div class="row">
-                                            <b>Customer Info</b>
-                                        </div>
-                                        <div class="row mt-1">
-                                            <label for="customer_name">Name:</label>
-                                            <input type="text" class="form-control" name="customer_name" id="customer_name" value="{{ order_data.order.customer }}">
-                                        </div>
-                                        <div class="row mt-1">
-                                            <label for="address_street">Address</label>
-                                            <input type="text" class="form-control" name="address_street" id="address_street" value="{{ order_data.order.address_street}}">
-                                        </div>
-                                        <div class="row mt-1">
-                                            <input type="text" class="form-control" name="address_barangay" id="address_barangay" value="{{ order_data.order.address_barangay }}">
-                                        </div>
-                                        <div class="row mt-1">
-                                            <div class="col-8">
-                                                <input type="text" class="form-control" name="address_city" id="address_city" value="{{ order_data.order.address_city}}">
-                                            </div>
-                                            <div class="col-4">
-                                                <input type="text" class="form-control" name="address_zip" id="address_zip" value="{{ order_data.order.address_zip}}">
-                                            </div>
-                                        </div>
-                                        <div class="row mt-1">
-                                            <label for="order_date">Order Date</label>
-                                            <input type="date" class="form-control" name="order_date" id="order_date" value="{{ order_data.order.order_date|date:"Y-m-d" }}">
-                                        </div>
-                                        <div class="row mt-1">
-                                            <label for="order_date">Mobile Number</label>
-                                            <input type="number" class="form-control" name="customer_number" id="customer_number" value="{{ order_data.order.contact_number }}">
-                                        </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-2">
-                                        <label for "order_status"> Order Status</label>
-                                        <select class="input-select" class="form-control" name="order_status" id="order_status" placeholder="Order Status">
-                                            <option value="in-queue" {% if order_data.order.order_status == 'in-queue' %}selected{% endif %}>In-queue</option>
-                                            <option value="in-process" {% if order_data.order.order_status == 'in-process' %}selected{% endif %}>In-process</option>
-                                            <option value="completed" {% if order_data.order.order_status == 'completed' %}selected{% endif %}>Completed</option>
-                                            <option value="cancelled" {% if order_data.order.order_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-2">
-                                        <label for="order_date">Delivery Date</label>
-                                        <input type="date" class="form-control" name="delivery_date" id="delivery_date" value="{{ order_data.order.delivery_date|date:"Y-m-d" }}">
-                                    </div>
-                                    <div class="col-4 ml-auto mt-auto">
-                                        <div class="row justify-content between">
-                                            <div class="col">
-                                                <button type="button" class="btn dark-button" onclick="toggleModal('confirmDeleteOrder{{order_data.order.pk}}', 'open')">Delete Order</button>
-                                            </div>
-                                            <div class="col">
-                                                <button type="submit" class="btn dark-button">Edit Order </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
 
+                        <!-- CONFIRM EDIT MATERIALS MODAL-->
 
-                    <!-- modal to delete an order -->
-                    <div class="modal-overlap-container fade-in" id="confirmDeleteOrder{{order_data.order.pk}}">
-                        <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
-                            <div class="modal-overlap-content fade-in">
-                                <input type="hidden" name="delete_form" value="1">
-                                <input type="hidden" name="order_pk" value="{{order_data.order.pk}}">
-                                <div class="container-fluid">
-                                    <div class="row">
-                                        <div class="col text-right">
-                                            <span class="close" onclick="toggleModal('confirmDeleteOrder{{order_data.order.pk}}', 'close')">&times;</span>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col text-center">
-                                            <h2> Delete Order? </h2>
-                                        </div>
+                        <div class="modal" id="editconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
+                            style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="col-12">
+                                        <h4 style="text-align: center;"> Confirm edits? </h4>
                                     </div>
                                     <div class="row text-center" style="margin-top: 15px;">
                                         <div class="col">
-                                            <button type="button" class="btn dark-button" onclick="toggleModal('confirmDeleteOrder{{order_data.order.pk}}', 'close')"> Continue Editing </button>
+                                            <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
+                                                Editing </button>
                                         </div>
                                         <div class="col">
-                                            <button type="submit" class="btn dark-button delete-button"> Confirm </button>
+                                            <button type="submit" class="btn dark-button confirm-button">
+                                                Confirm </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
-                    </div>
-                    {% endfor %}
-
-
-
-
-                </tbody>
-            </table>
-
-            <!-- modal to add an order -->
-            </div>
-            <div class="row ml-auto pr-3">
-                <button type="button" class="btn light-button" onclick="toggleModal('addOrder', 'open')"> Add Order</button>
-            </div> 
-            <div class="modal-container fade-in" id="addOrder">
-                <div class="modal-content modal-content-order fade-in"> 
-                    <div class="row ml-3 mt-0" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
-                        <h2 class="mr-auto"> Add Order </h2>
-                        <span class="close ml-auto" onclick="toggleModal('addOrder', 'close')">&times;</span>
-                    </div>
-                    <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
-                        <input type="hidden" name="add_form" value="1">
-                        <div class="row m-2 justify-content-between">
-                            <div class="col-6">
-                                <div class="row mt-1">
-                                    <div class="col-4">
-                                        <label for="order_pk">Order ID</label>
-                                        <input type="text" class="form-control" name="order_pk" id="order_pk" placeholder="Order #" readonly>
-                                    </div>
-                                    <div class="col-4">
-                                        <label for="payment_type">Payment Type</label>
-                                        <select class="input-select" class="form-control" name="payment_type" id="payment_type" placeholder="Payment Type">
-                                            <option value="cash">Cash</option>
-                                            <option value="card">Card</option>
-                                            <option value="bank_transfer">Bank Transfer</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-4">
-                                        <label for="purchase_mode">Purchase Mode</label>
-                                        <select class="input-select" class="form-control" name="purchase_mode" id="purchase_mode" placeholder="Purchase Mode">
-                                            <option value="onsite" selected>Onsite</option>
-                                            <option value="website">Website</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="row m-0 mt-5 mb-2">
-                                    <div class="col-3">Item #</div>
-                                    <div class="col-6">Product Name</div>
-                                    <div class="col-2"></div>
-                                    <div class="col-1"></div>
-                                </div>
-                                <!-- fixed iteration through 3 product rows -->
-                                {% for y in "123" %}
-                                <div class="row mt-2" id="order_item_row{{forloop.counter}}">
-                                    <div class="col-3 text-center">
-                                        {% cycle '1' '2' '3' as item_number %}
-                                    </div>
-                                    <div class="col-5">
-                                        product name
-                                    </div>
-                                    <div class="col-3">
-                                        <button type="button" class="btn light-button" onclick="toggleModal('addOrderItem{{forloop.counter}}', 'open')"> Edit </button>
-                                    </div>
-                                    <div class="col-1">
-                                        <button type="button" class="btn dark-button" onclick="setToDeleteAndHide('item_productPK{{ forloop.counter }}', 'order_item_row{{forloop.counter}}')"> &times</button>
-                                    </div>
-                                </div>
-                                
-                            
-                                <!-- modal to add an item  -->
-                                <div class="modal-overlap-container fade-in" id="addOrderItem{{ forloop.counter }}">
-                                    <div class="modal-overlap-content" style="width: 40%; height: 65%; margin: 5% auto;">
-                                        <div class="row ml-3 mt-0" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
-                                            <h2 class="mr-auto"> Add Item </h2>
-                                            <span class="close ml-auto" onclick="toggleModal('addOrderItem{{forloop.counter}}', 'close')">&times;</span>
-                                        </div>
-                                        <div class="row mt-2">
-                                            <div class="col-2">
-                                                <label for="order_item_number">Item #</label>
-                                                <input type="text" class="form-control" name="order_item_number{{ forloop.counter }}" id="order_item_number{{ forloop.counter }}" value="{{ forloop.counter }}" readonly>
-                                            </div>
-                                            <div class="col-2">
-                                                <label for="itemProduct_PK">Product</label>
-                                                <select class="input-select" class="form-control" name="item_productPK{{ forloop.counter }}" id="item_productPK{{ forloop.counter }}" placeholder="Type">
-                                                    <option value="delete" >None</option>
-                                                    {% for product in products %}
-                                                    <option value="{{ product.pk }}"> {{ product.name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                            <div class="col-2">
-                                                <label for="item_quantity">Quantity</label>
-                                                <input type="number" class="form-control" name="item_quantity{{ forloop.counter }}" id="item_quantity{{ forloop.counter }}">
-                                            </div>
-                                            <div class="col-3">
-                                                <label for="itemproduct_name">Product Name:</label>
-                                                <input type="number" class="form-control" name="item_productName{{ forloop.counter }}" id="item_productName{{ forloop.counter }}" readonly>
-                                            </div>
-                                            <div class="col-3">
-                                                <label for="item_type">Type</label>
-                                                <select class="input-select" class="form-control" name="item_type{{ forloop.counter }}" id="item_type{{ forloop.counter }}" placeholder="Type">
-                                                    <option value="bespoke">Bespoke</option>
-                                                    <option value="regular">Regular</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-0 mt-3">
-                                            <div class="col-5">Materials:</div>
-                                            <div class="col-2">QTY:</div>
-                                            <div class="col-3">Unit:</div>
-                                            <div class="col"></div>
-                                        </div>
-                                        <!-- fixed iteration through 2 item_materials -->
-                                        {% for x in "12" %}
-                                        <div class="row mt-2" id="{{item_number}}_item_material_row{{forloop.counter}}">
-                                            <div class="col-5">
-                                                <select class="input-select" class="form-control" name="{{ item_number }}_item_material_materialPK{{ forloop.counter }}" id="{{ item_number }}_item_material_materialPK{{ forloop.counter }}">
-                                                    <option value="delete" selected>None</option>
-                                                    {% for z in materials %}
-                                                        <option value="{{z.pk}}">{{z.name}}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                            <div class="col-2">
-                                                <input type="number" class="form-control" name="{{ item_number }}_item_material_quantity{{ forloop.counter }}" id="{{ item_number }}_item_material_quantity{{ forloop.counter }}">
-                                            </div>
-                                            <div class="col-3">
-                                                <input type="text" class="form-control" name="{{ item_number }}_item_material_unit{{ forloop.counter }}" id="{{ item_number }}_item_material_unit{{ forloop.counter }}" readonly>
-                                            </div>
-                                            <div class="col">
-                                                <button type="button" class="btn dark-button" onclick="setToDeleteAndHide('{{ item_number }}_item_material_materialPK{{ forloop.counter }}', '{{item_number}}_item_material_row{{forloop.counter}}')">&times</button>
-                                            </div>
-                                        </div>
-
-                                        {% endfor %}
-                                        
-                                        <div class="row">
-                                            <div class="col">
-                                                Item cost:
-                                            </div>
-                                            <div class="col">
-                                                <button type="button" class="btn dark-button" onclick="handleAddItem('{{ forloop.counter }}')"> Add Item</button>
-                                            </div>
-                                        </div>
-
-
-                                    </div>
-                                </div>
-                                {% endfor %}
-                                <button type="button" class="btn dark-button mt-4">Add Item</button>
-                            </div>
-                            <div class="col-5">
-                                <div class="row">
-                                    <b>Customer Info</b>
-                                </div>
-                                <div class="row mt-1">
-                                    <label for="customer_name">Name:</label>
-                                    <input type="text" class="form-control" name="customer_name" id="customer_name" placeholder="Customer Name">
-                                </div>
-                                <div class="row mt-1">
-                                    <label for="address_street">Address</label>
-                                    <input type="text" class="form-control" name="address_street" id="address_street" placeholder="Street">
-                                </div>
-                                <div class="row mt-1">
-                                    <input type="text" class="form-control" name="address_barangay" id="address_barangay" placeholder="Barangay">
-                                </div>
-                                <div class="row mt-1">
-                                    <div class="col-8">
-                                        <input type="text" class="form-control" name="address_city" id="address_city" placeholder="city">
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="text" class="form-control" name="address_zip" id="address_zip" placeholder="Zip Code">
-                                    </div>
-                                </div>
-                                <div class="row mt-1">
-                                    <label for="order_date">Order Date</label>
-                                    <input type="date" class="form-control" name="order_date" id="order_date">
-                                </div>
-                                <div class="row mt-1">
-                                    <label for="order_date">Mobile Number</label>
-                                    <input type="number" class="form-control" name="customer_number" id="customer_number" placeholder="Customer Number">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-2">
-                                <label for "order_status"> Order Status</label>
-                                <select class="input-select" class="form-control" name="order_status" id="order_status" placeholder="Order Status">
-                                    <option value="in-queue" selected>In-queue</option>
-                                    <option value="in-process">In-process</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="cancelled">Cancelled</option>
-                                </select>
-                            </div>
-                            <div class="col-2">
-                                <label for="order_date">Delivery Date</label>
-                                <input type="date" class="form-control" name="delivery_date" id="delivery_date">
-                            </div>
-                            <div class="col-2 ml-auto mt-auto">
-                                <button type="submit" class="btn dark-button">Add Order </button>
                             </div>
                         </div>
                     </form>
-                </div>
-            </div>
+                        
+                        <!-- CONFIRM DELETE MATERIALS MODAL-->
 
-        </div>
+                        <div class="modal" id="delconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
+                            style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="col-12">
+                                        <h4 style="text-align: center;"> Delete Material? </h4>
+                                    </div>
+                                    <div id="confirmDeleteMaterial{{material_data.material.material_key.material_key}}">
+                                        <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+                                            <input type="hidden" name="delete_form" value="1">
+                                            <input type="hidden" name="material_key" value="{{material_data.material.material_key.material_key}}">
+                                            <input type="hidden" name="type" value="{{material_data.type}}"></input>
+                                            <div class="container-fluid">
+                                                <div class="row text-center" style="margin-top: 15px;">
+                                                    <div class="col">
+                                                        <button type="button" class="btn dark-button" data-dismiss="modal">
+                                                            Continue Editing
+                                                        </button>
+                                                    </div>
+                                                    <div class="col">
+                                                        <button type="submit" class="btn dark-button delete-button"> Confirm </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+        </tbody>
+        </table>
+    </div>
+    <div class="row ml-auto pr-3">
+        <button type="button" class="btn light-button" data-toggle="modal" data-target="#addord"> Create Job Order
+        </button>
     </div>
 </div>
+</tbody>
+</table>
+
+<!-- ADD MATERIAL MODAL -->
+<form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+    <div class="modal" id="addord" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-11">
+                            <h3 style="margin-bottom: 30px;">Create Job Order</h3>
+                        </div>
+                        <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
+                                aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+                    </div>
+                    <div class="row justify-content-between mr-2 ml-2">
+                        <div class="col-5">
+                            <label for="name">Job Order #</label>
+                            <input type="number" class="pk form-control" value="" readonly>
+                        </div>
+                        <div class="col-5">
+                            <label for="name">File Date</label>
+                            <input type="date" class="file_date form-control">
+                        </div>
+                    </div>
+                    <div class="orderItemContainer" id="orderItemContainer">
+                        <div class="orderItem_instance" id="orderItem_instance1">
+                            <div class="row pt-3">
+                                <div class="col-4">
+                                    <label for="product">Product</label>
+                                    <select class="order_item input-select" id="order_item1">
+                                        <option value="delete">None</option>
+                                        {% for z in products %}
+                                        <option value="{{z.pk}}">{{z.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <label for="quantity">Quantity</label>
+                                    <input type="number" class="quantity form-control" value="">
+                                </div>
+                                <div class="col">
+                                    <label for "bespoke"> Bespoke</label>
+                                    <input type="checkbox" class="bespoke form-control" data-item-id="1">
+                                </div>
+                                <div class="col p-4">
+                                    <button type="button" class="btn dark-button delete-item"
+                                    data-row-id="orderItem_instance1"> &times
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="itemMaterialContainer" id="itemMaterialContainer1" style="display:none;">
+                            </div>
+                            <div class="button_row row justify-content-center" style="display:none;">
+                                <button type="button" class="addMaterial_add btn dark-button x-button mt-3 ml-1" id="addMaterial1"
+                                data-item-id="1" data-counter="0">Add Material</button>
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <button type="button" class="addItem_add btn dark-button x-button mt-3 ml-1"
+                        data-item-id="1" data-counter="1">Add Item</button>
+                    </div>
+                    <div class="row pt-3" style="margin-top: 15px;">
+                        <div class="col-4 mr-auto">
+                            <button type="button" class="btn dark-button" data-dismiss="modal"> Cancel
+                                Action</button>
+                        </div>
+                        <div class="col-4 ml-auto text-right">
+                            <button type="button" class="btn dark-button" data-toggle="modal"
+                                data-target="#confirm-modal"> Add Material
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRM ADD MODAL -->
+    <div class="modal" id="confirm-modal" tabindex="-1" style="margin-left: -10%; margin-top: 1%; width: 100%;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="col-12">
+                    <h4 style="text-align: center;"> Add Material? </h4>
+                </div>
+                <div class="row text-center" style="margin-top: 15px;">
+                    <div class="col">
+                        <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
+                            Editing </button>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn dark-button confirm-button"> Confirm </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="orderItem_instance" id="orderItem_instance_temp" style="display:none;">
+    <div class="row pt-3">
+        <div class="col-4">
+            <label for="product">Product</label>
+            <select class="order_item input-select" id="order_item1">
+                <option value="delete">None</option>
+                {% for z in products %}
+                <option value="{{z.pk}}">{{z.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-4">
+            <label for="quantity">Quantity</label>
+            <input type="number" class="quantity form-control" value="">
+        </div>
+        <div class="col">
+            <label for="bespoke"> Bespoke</label>
+            <input type="checkbox" class="bespoke form-control" data-item-id="1">
+        </div>
+        <div class="col p-4">
+            <button type="button" class="btn dark-button delete-item"
+            data-row-id=""> &times
+            </button>
+        </div>
+    </div>
+    <div class="itemMaterialContainer" id="itemMaterialContainer_temp" style="display:none;">
+    </div>
+    <div class="button_row row justify-content-center" style="display:none;">
+        <button type="button" class="addMaterial_add btn dark-button x-button mt-3 ml-1" id="addMaterial1"
+        data-item-id="1" data-counter="0">Add Material</button>
+    </div>
+    <hr>
+</div>
+
+<div class="materialRow row mt-1" id="materialRow_temp" style="display:none;">
+    <div class="col-4">
+        <select class="material_type input-select">
+            <option value="textile"> Textile</option>
+            <option value="accessory"> Accessory</option>
+        </select>
+    </div>
+    <div class="col-4">
+        <select class="item_material input-select" id="item_material">
+            <option value="delete"> None </option>
+            {% for z in textiles %}
+            <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-3">
+        <input type="number" class="bespoke_rate form-control" placeholder="1" step="0.01">
+    </div>
+    <div class="col-1">
+        <button type="button" class="btn dark-button delete-material" data-row-id=""> &times
+        </button>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    const materialRow_template = $('#materialRow_temp');
+    const item_template = $('#orderItem_instance_temp');
+    const addItem_container = $('#orderItemContainer');
+
+    function addMaterial_add(itemId, counter, button) {
+        counter++;
+
+        newRow = materialRow_template.clone()
+        newRow.attr('id', 'materialRow' + itemId + '_' + counter);
+        newRow.find('.item_material').attr('id', 'item_material' + itemId + '_' + counter).val('delete');
+        newRow.find('.bespoke_rate').val('');
+
+        newRow.find('.delete-material').attr('data-row-id', 'materialRow' + itemId + '_' + counter);
+        console.log(newRow.find('.item_material').attr('id'))
+        button.data('counter', counter);
+
+        let parent = $('#itemMaterialContainer' + itemId + '.itemMaterialContainer');
+
+        console.log(parent)
+
+        parent.append(newRow);
+        newRow.show();
+
+        console.log(newRow);
+    }
+    function addItem_add(counter, button) {
+        counter++; 
+
+        newItem = item_template.clone()
+
+        newItem.attr('id', 'orderItem_instance' + counter);
+        newItem.find('.order_item').attr('id', 'order_item' + counter).val('delete');
+        newItem.find('.quantity').val('');
+        newItem.find('.bespoke').prop('checked', false).attr('data-item-id', counter);
+
+        newItem.find('.delete-item').attr('data-row-id', 'orderitem_instance' + counter);
+
+        newItem.find('.itemMaterialContainer').attr('id', 'itemMaterialContainer' + counter);
+        newItem.find('.addMaterial_add').attr('data-item-id', counter);
+
+        addItem_container.append(newItem);
+        newItem.show();
+
+        button.data('counter', counter);
+
+        console.log(newItem);
+    }
+    $('#addord').on('change', '.bespoke', function() {
+        let itemId = $(this).data('item-id');
+        let itemContainer = $('#orderItem_instance' + itemId);
+        let materialContainer = itemContainer.find('.itemMaterialContainer');
+        let button = itemContainer.find('.button_row');
+        
+        if ($(this).is(":checked")) {
+            materialContainer.show(); 
+            button.show();
+        } else {
+            materialContainer.hide();
+            button.hide();
+        }
+    });
+    $(document).on('change', '.material_type', function() {
+        let materialType = $(this).val();
+        let select = $(this).closest('.materialRow').find('.stock_material'); 
+        $.ajax({
+            url: '/get_material_options/',
+            data: {
+                'material_type': materialType
+            },
+            dataType: 'json',
+            success: function(data) {
+                let options = data.options;
+                select.empty();
+                select.append('<option value="delete"> None </option>');
+                $.each(options, function(key, value) {
+                    select.append('<option value="' + key + '">' + value + '</option>');
+                });
+            }
+        });
+    });
+    $('#addord').on('click', '.addMaterial_add', function() {
+        let button = $(this);
+        let counter = $(this).data('counter');
+        let itemId = $(this).data('item-id');
+
+        addMaterial_add(itemId, counter, button)
+    })
+    $('.orderItemContainer').on('click', '.delete-material', function () {
+        let rowId = $(this).data('row-id');
+        let selectId = $('#' + rowId).find('.item_material').attr('id');
+
+        setToDeleteAndHide(selectId, rowId);
+    })
+    $('#addord').on('click', '.addItem_add', function() {
+        let counter = $(this).data('counter');
+        let button = $(this);
+
+        addItem_add(counter, button);
+    })
+});
+</script>
+
 
 {% endblock %}

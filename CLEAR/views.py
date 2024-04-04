@@ -406,9 +406,46 @@ def materials(request):
 
 @login_required(login_url="/login")
 def job_orders(request):
+    product_objects = Product.objects.all()
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
     order_list = []
 
-    return render(request, 'CLEAR/job_orders.html')
+    for order in Job_Order.objects.all():
+        order_data = {
+            'order': order,
+            'file_date': order.file_date,
+            'completion_date': order.completion_date,
+            'status': order.order_status,
+            'items': [],
+        }
+        for order_item in order.order_item_set.all():
+            item_data = {
+                'item': order_item.item,
+                'quantity': order_item.quantity,
+                'materials': [],
+            }
+            for item_textile in order_item.item.item_textile_set.all():
+                material_data = {
+                    'type': 'textile',
+                    'material': item_textile.textile,
+                    'bespoke_rate': item_textile.bespoke_rate,
+                    'quantity': item_textile.quantity,
+                }
+                item_data['materials'].append(material_data)
+            for item_accessory in order_item.item.item_accessory_set.all():
+                material_data = {
+                    'type': 'accessory',
+                    'material': item_accessory.accessory,
+                    'bespoke_rate': item_accessory.bespoke_rate,
+                    'quantity': item_accessory.quantity,
+                }
+                item_data['materials'].append(material_data)
+            order_data['items'].append(item_data)
+        order_list.append(order_data)
+
+
+    return render(request, 'CLEAR/job_orders.html', {'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects})
 
 
 @login_required(login_url="/login")
