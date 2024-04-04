@@ -75,7 +75,7 @@
                                             <div class="col-1">
                                             </div>
                                         </div>
-                                        <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer{{stockIn_data.stock_in.pk}}" style="height:50%; overflow-x:visible; overflow-y:scroll;">
+                                        <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer{{stockIn_data.stock_in.pk}}" style="height:150px; overflow-x:visible; overflow-y:scroll;">
                                             {% for material_data in stockIn_data.materials %}
                                             <div class="materialRow row mt-1" id="{{stockIn_data.stock_in.pk}}materialRow{{forloop.counter}}">
                                                 <div class="col-3">
@@ -234,7 +234,7 @@
                         <div class="col-1">
                         </div>
                     </div>
-                    <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer" style="height:50%; overflow-x:visible; overflow-y:scroll;">
+                    <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer" style="max-height:150px; overflow-x:visible; overflow-y:scroll;">
                         <div class="materialRow row mt-1" id="materialRow1">
                             <div class="col-3">
                                 <select class="material_type input-select">
