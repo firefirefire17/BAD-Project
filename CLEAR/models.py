@@ -193,7 +193,7 @@ class StockIn_Accessory(models.Model):
 class StockIn_Textile(models.Model):
     textile = models.ForeignKey(Textile, on_delete=models.CASCADE)
     stock_in = models.ForeignKey(StockIn, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    quantity = models.FloatField()
     cost = models.FloatField()
     
 

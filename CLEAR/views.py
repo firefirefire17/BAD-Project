@@ -406,6 +406,8 @@ def materials(request):
 
 @login_required(login_url="/login")
 def job_orders(request):
+    order_list = []
+
     return render(request, 'CLEAR/job_orders.html')
 
 
@@ -469,9 +471,12 @@ def stock_in(request):
                     if material_type == "textile":
                         material_object = Textile.objects.get(material_key__material_key = material_id)
                         StockIn_Textile.objects.create(textile=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)
+                        material_object.stock += float(quantity)
                     else:
                         material_object = Accessory.objects.get(material_key__material_key = material_id)
                         StockIn_Accessory.objects.create(accessory=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)   
+                        material_object.stock += int(quantity)
+                    material_object.save()
 
             new_stockIn.updateCost()
             new_stockIn.save()
@@ -493,9 +498,21 @@ def stock_in(request):
 
             stockIn_object.transaction_date = date
 
-            StockIn_Accessory.objects.filter(stock_in=stockIn_object).delete()
-            StockIn_Textile.objects.filter(stock_in=stockIn_object).delete()
-            for material in material_data:
+            acc_to_delete = StockIn_Accessory.objects.filter(stock_in=stockIn_object)
+            textile_to_delete = StockIn_Textile.objects.filter(stock_in=stockIn_object)
+
+            for stock_material in textile_to_delete:
+                stock_material.textile.stock -= stock_material.quantity
+                stock_material.textile.save()
+                stock_material.delete()
+            for stock_material in acc_to_delete:
+                stock_material.accessory.stock -= stock_material.quantity
+                stock_material.accessory.save()
+                stock_material.delete()
+
+
+            for material in material_data:  
+                print("pass")
                 material_id = material['stock_material']
                 material_type = material['material_type']
                 quantity = material['quantity']
@@ -505,12 +522,16 @@ def stock_in(request):
                     pass
                 else: 
                     if material_type == "textile":
+                        quantity = float(quantity)
                         material_object = Textile.objects.get(material_key__material_key = material_id)
                         StockIn_Textile.objects.create(textile=material_object, stock_in=stockIn_object, quantity=quantity, cost=cost)
+                        material_object.stock += quantity
                     else:
+                        print('accessory')
                         material_object = Accessory.objects.get(material_key__material_key = material_id)
                         StockIn_Accessory.objects.create(accessory=material_object, stock_in=stockIn_object, quantity=quantity, cost=cost)   
-
+                        material_object.stock += int(quantity)
+                    material_object.save()
             stockIn_object.updateCost()
             stockIn_object.save()
 

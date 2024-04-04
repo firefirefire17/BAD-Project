@@ -55,7 +55,7 @@
                                     </div>
                                     <div class="col-4">
                                         <label for="total_cost">Total Cost</label>
-                                        <input type="number" class="total_cost form-control" name="total_cost" value="{{product_data.product.total_cost}}" readonly>
+                                        <input type="number" class="total_cost form-control" name="total_cost" value="{{product_data.product.total_cost|floatformat:2}}" readonly>
                                     </div>
                                 </div>
                                 <div class="row pt-3">

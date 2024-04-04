@@ -31,7 +31,7 @@
                             <td> {{ material_data.material.material_key.material_key }} </td>
                             <td> {{ material_data.material.name }} </td>
                             <td> {{ material_data.type|title }} </td>
-                            <td> {{ material_data.material.stock }} {{material_data.unit}}</td>
+                            <td> {{ material_data.material.stock|floatformat:2 }} {{material_data.unit}}</td>
                             <td> {{ material_data.material.cost }} </td>
                             <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
                                     data-target="#editmat-modal{{material_data.material.material_key.material_key}}" style="border-radius: 30px;">Edit</button>
