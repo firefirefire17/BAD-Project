@@ -171,14 +171,16 @@ class StockIn(models.Model):
 
     def updateCost(self):
         total_cost = 0
-        for stock_textile in self.stockin_textile_set.all():
-            quantity = stock_textile.quantity
-            cost = stock_textile.cost
-            total_cost += (quantity*cost)
+        textiles = self.stockin_textile_set.all()
+        accessories = self.stockin_accessory_set.all()
+        for stock_textile in textiles:
+                quantity = stock_textile.quantity
+                cost = stock_textile.cost
+                total_cost += (quantity*cost)
         for stock_accessory in self.stockin_accessory_set.all():
-            quantity = stock_textile.quantity
-            cost = stock_textile.cost
-            total_cost += (quantity*cost)
+                quantity = stock_accessory.quantity
+                cost = stock_accessory.cost
+                total_cost += (quantity*cost)
         self.total_cost = total_cost
         return self.total_cost
 

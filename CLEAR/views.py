@@ -454,23 +454,25 @@ def stock_in(request):
     for stock_in in stockIn_objects:
         stock_data = {
             'stock_in': stock_in,
-            'textiles': [],
-            'accessories': [],
+            'materials': [],
         }
         for stockIn_textile in stock_in.stockin_textile_set.all():
             data = {
                 'textile': stockIn_textile.textile,
                 'quantity': stockIn_textile.quantity,
                 'cost': stockIn_textile.cost,
+                'type': 'textile',
             }
-            stock_data['textiles'].append(data)
+            stock_data['materials'].append(data)
         for stockIn_accessory in stock_in.stockin_accessory_set.all():
             data = {
                 'accessory': stockIn_accessory.accessory,
                 'quantity': stockIn_accessory.quantity,
                 'cost': stockIn_accessory.cost,
+                'type': 'accessory',
             }
-            stock_data['accessories'].append(data)
+            stock_data['materials'].append(data)
+        stock_data['material_count'] = len(stock_data['materials'])
         stockIn_material_list.append(stock_data)
 
     if(request.method=="POST"):
@@ -495,7 +497,10 @@ def stock_in(request):
                         material_object = Textile.objects.get(material_key__material_key = material_id)
                         StockIn_Textile.objects.create(textile=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)
                     else:
-                        material_object = Accessory.objects.get(material_key__material_key = material_id)   
+                        material_object = Accessory.objects.get(material_key__material_key = material_id)
+                        print(material_object)
+                        print(material_object.material_key.material_key)   
+                        print(material_id)
                         StockIn_Accessory.objects.create(accessory=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)   
 
             new_stockIn.updateCost()
@@ -508,6 +513,10 @@ def stock_in(request):
 
             # return dict to ajax
             return JsonResponse(response)
+        elif 'delete_form' in request.POST:
+            pk = request.POST.get("pk")
+            StockIn.objects.filter(pk=pk).delete()
+            return redirect('stock_in')
 
 
 

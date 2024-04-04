@@ -27,7 +27,7 @@
                     {% for stockIn_data in stock_ins %}
                         <tr style="height:70px;">
                             <td> {{ stockIn_data.stock_in.pk }} </td>
-                            <td> {{ stockIn_data.stock_in.transaction_date }} </td>
+                            <td> {{ stockIn_data.stock_in.transaction_date|date:"Y-m-d" }} </td>
                             <td> {{ stockIn_data.stock_in.total_cost }} </td>
                             <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
                                     data-target="#editstock-modal{{stockIn_data.stock_in.pk}}" style="border-radius: 30px;">Edit</button>
@@ -55,11 +55,11 @@
                                             </div>
                                             <div class="col-4">
                                                 <label for="date">Stock-in Date</label>
-                                                <input type="date" class="date form-control" name="date" value="{{stockIn_data.stock_in.transaction_date}}">
+                                                <input type="date" class="date form-control" name="date" value="{{stockIn_data.stock_in.transaction_date|date:"Y-m-d"}}">
                                             </div>
                                             <div class="col-4">
                                                 <label for="total_cost" class="mb-2">Total Cost:</label>
-                                                <input type="number" class="total_cost form-control" name="total_cost" readonly>
+                                                <input type="number" class="total_cost form-control" name="total_cost" value="{{stockIn_data.stock_in.total_cost}}" readonly>
                                             </div>
                                         </div>
                                         <div class="row mt-3">
@@ -75,40 +75,50 @@
                                             <div class="col-1">
                                             </div>
                                         </div>
-                                        <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer" style="height:50%; overflow-x:visible; overflow-y:scroll;">
-                                            <div class="materialRow row mt-1" id="materialRow1">
+                                        <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer{{stockIn_data.stock_in.pk}}" style="height:50%; overflow-x:visible; overflow-y:scroll;">
+                                            {% for material_data in stockIn_data.materials %}
+                                            <div class="materialRow row mt-1" id="{{stockIn_data.stock_in.pk}}materialRow{{forloop.counter}}">
                                                 <div class="col-3">
-                                                    <select class="material_type input-select" id="material_type1">
-                                                        <option value="textile"> Textile</option>
-                                                        <option value="accessory"> Accessory</option>
+                                                    <select class="material_type input-select" id="{{stockIn_data.stock_in.pk}}material_type{{forloop.counter}}">
+                                                        <option value="textile" {% if material_data.type == 'textile' %} selected {% endif %}> Textile</option>
+                                                        <option value="accessory" {% if material_data.type == 'accessory' %} selected {% endif %}> Accessory</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-3">
-                                                    <select class="stock_material input-select" id="stock_material1">
+                                                    <select class="stock_material input-select" id="{{stockIn_data.stock_in.pk}}stock_material{{forloop.counter}}">
                                                         <option value="delete"> None </option>
-                                                        {% for z in textiles %}
-                                                        <option value="{{z.material_key.material_key}}">{{z.name}}</option>
-                                                        {% endfor %}
+                                                        {% if material_data.type == 'textile' %}
+                                                            {% for z in textiles %}
+                                                            <option value="{{z.material_key.material_key}}" {% if material_data.textile.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            {% endfor %}
+
+                                                        {% elif material_data.type == 'accessory' %}
+                                                            {% for z in accessories %}
+                                                            <option value="{{z.material_key.material_key}}" {% if material_data.accessory.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            {% endfor %}
+                                                        {% endif %}
+
                                                     </select>
                                                 </div>
                                                 <div class="col-2">
-                                                    <input type="number" class="quantity form-control" name="quantity" placeholder="1" step="0.01">
+                                                    <input type="number" class="quantity form-control" name="quantity" value="{{material_data.quantity}}" step="0.01">
                                                 </div>
                                                 <div class="col-3">
-                                                    <input type="number" class="cost form-control" name="cost" placeholder="Cost" step="0.01">
+                                                    <input type="number" class="cost form-control" name="cost" value="{{material_data.cost}}" step="0.01">
                                                 </div>
                                                 <div class="col-1">
                                                     <button type="button" class="btn dark-button delete-row"
-                                                    data-row-id="materialRow1"> &times
+                                                    data-row-id="{{stockIn_data.stock_in.pk}}materialRow{{forloop.counter}}"> &times
                                                     </button>
                                                 </div>
                                             </div>
+                                            {% endfor %}
                                         </div>
                                         <div class="row justify-content-center mt-3">
-                                            <button type="button" class="btn dark-button x-button addStock_add" data-counter="1">Add Row</button>
+                                            <button type="button" class="btn dark-button x-button addStock_add" data-counter="{{stockIn_data.material_count}}">Add Row</button>
                                         </div>
                                         <div class="row pt-3" style="margin-top: 15px; display: flexbox; justify-content: space-between;">
-                                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="" style="border-radius: 35px; max-height: fit-content;">Delete Stock-in</button>
+                                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delconf-modal{{stockIn_data.stock_in.pk}}" style="border-radius: 35px; max-height: fit-content;">Delete Stock-in</button>
                                                 <button type="button" class="btn dark-button" data-toggle="modal"
                                                     data-target="#confirm-modal"> Create Stock-in
                                                 </button>
@@ -144,18 +154,17 @@
                         
                         <!-- CONFIRM DELETE MATERIALS MODAL-->
 
-                        <div class="modal" id="delconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
+                        <div class="modal" id="delconf-modal{{stockIn_data.stock_in.pk}}" tabindex="-1"
                             style=" margin-left: 15%; margin-top: 10%; width: 70%;">
                             <div class="modal-content">
                                 <div class="modal-body">
                                     <div class="col-12">
-                                        <h4 style="text-align: center;"> Delete Material? </h4>
+                                        <h4 style="text-align: center;"> Delete Stock_In? </h4>
                                     </div>
-                                    <div id="confirmDeleteMaterial{{material_data.material.material_key.material_key}}">
-                                        <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+                                    <div id="confirmDeleteMaterial{{stockIn_data.stock_in.pk}}">
+                                        <form method="POST" action="{% url 'stock_in' %}"> {% csrf_token %}
                                             <input type="hidden" name="delete_form" value="1">
-                                            <input type="hidden" name="material_key" value="{{material_data.material.material_key.material_key}}">
-                                            <input type="hidden" name="type" value="{{material_data.type}}"></input>
+                                            <input type="hidden" name="pk" value="{{stockIn_data.stock_in.pk}}">
                                             <div class="container-fluid">
                                                 <div class="row text-center" style="margin-top: 15px;">
                                                     <div class="col">
@@ -335,7 +344,6 @@
             newRow.find('.delete-row').attr('data-row-id', 'materialRow' + counter);
 
             addStock_parent.append(newRow);
-
             newRow.show();
             
             button.data('counter', counter);
