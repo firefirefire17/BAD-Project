@@ -576,6 +576,7 @@ def stock_in(request):
             response['status'] = True
             response['msg'] = "Form submitted."
             response['url'] = reverse('stock_in')
+            print(reverse('stock_in'))
 
             # return dict to ajax
             return JsonResponse(response)
