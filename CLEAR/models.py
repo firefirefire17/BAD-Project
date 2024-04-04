@@ -177,7 +177,7 @@ class StockIn(models.Model):
                 quantity = stock_textile.quantity
                 cost = stock_textile.cost
                 total_cost += (quantity*cost)
-        for stock_accessory in self.stockin_accessory_set.all():
+        for stock_accessory in accessories:
                 quantity = stock_accessory.quantity
                 cost = stock_accessory.cost
                 total_cost += (quantity*cost)

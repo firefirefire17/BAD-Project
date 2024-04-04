@@ -413,36 +413,6 @@ def job_orders(request):
 def reports(request):
     return render(request, 'CLEAR/reports.html')
 
-@login_required(login_url="/login")
-def stock_in(request):
-    textile_objects = Textile.objects.all()
-    accessory_objects = Accessory.objects.all()
-
-    if(request.method=="POST"):
-        action = request.POST.get("action")
-        if action == "add_form":
-            date = request.POST.get("date")
-
-            new_stockIn = StockIn.objects.create(transaction_date=date)
-            material_data = json.loads(request.POST.get("materials"))
-
-            for material in material_data:
-                material_id = material['stock_material']
-                material_type = material['material_type']
-                quantity = material['quantity']
-                cost = material['cost']
-                
-                if material_type == "textile":
-                    material_object = Textile.objects.get(material_key__material_key = material_id)
-                    StockIn_Textile.objects.create(textile=material_object, stock_in=new_stockIn, quantity=quantity)
-                else:
-                    material_object = Accessory.objects.get(material_key__material_key = material_id)
-
-                
-
-
-
-    return render(request, 'CLEAR/stock_in.html', {'textiles':textile_objects, 'accessories': accessory_objects})
 
 @login_required(login_url="/login")
 def stock_in(request):
@@ -462,6 +432,8 @@ def stock_in(request):
                 'quantity': stockIn_textile.quantity,
                 'cost': stockIn_textile.cost,
                 'type': 'textile',
+                'pk': stockIn_textile.textile.material_key.material_key,
+
             }
             stock_data['materials'].append(data)
         for stockIn_accessory in stock_in.stockin_accessory_set.all():
@@ -470,6 +442,7 @@ def stock_in(request):
                 'quantity': stockIn_accessory.quantity,
                 'cost': stockIn_accessory.cost,
                 'type': 'accessory',
+                'pk': stockIn_accessory.accessory.material_key.material_key,
             }
             stock_data['materials'].append(data)
         stock_data['material_count'] = len(stock_data['materials'])
@@ -498,13 +471,48 @@ def stock_in(request):
                         StockIn_Textile.objects.create(textile=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)
                     else:
                         material_object = Accessory.objects.get(material_key__material_key = material_id)
-                        print(material_object)
-                        print(material_object.material_key.material_key)   
-                        print(material_id)
                         StockIn_Accessory.objects.create(accessory=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)   
 
             new_stockIn.updateCost()
             new_stockIn.save()
+
+            response = {}
+            response['status'] = True
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('stock_in')
+
+            # return dict to ajax
+            return JsonResponse(response)
+        
+        elif action == 'edit_form':
+            date = request.POST.get("date")
+            pk = request.POST.get("pk")
+
+            stockIn_object = StockIn.objects.get(pk=pk)
+            material_data = json.loads(request.POST.get("materials"))
+
+            stockIn_object.transaction_date = date
+
+            StockIn_Accessory.objects.filter(stock_in=stockIn_object).delete()
+            StockIn_Textile.objects.filter(stock_in=stockIn_object).delete()
+            for material in material_data:
+                material_id = material['stock_material']
+                material_type = material['material_type']
+                quantity = material['quantity']
+                cost = material['cost']
+
+                if material_id == "delete":
+                    pass
+                else: 
+                    if material_type == "textile":
+                        material_object = Textile.objects.get(material_key__material_key = material_id)
+                        StockIn_Textile.objects.create(textile=material_object, stock_in=stockIn_object, quantity=quantity, cost=cost)
+                    else:
+                        material_object = Accessory.objects.get(material_key__material_key = material_id)
+                        StockIn_Accessory.objects.create(accessory=material_object, stock_in=stockIn_object, quantity=quantity, cost=cost)   
+
+            stockIn_object.updateCost()
+            stockIn_object.save()
 
             response = {}
             response['status'] = True

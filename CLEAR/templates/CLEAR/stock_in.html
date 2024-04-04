@@ -37,7 +37,7 @@
 
                         <!-- modal to edit materials -->
                     <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-                        <div class="modal" id="editstock-modal{{stockIn_data.stock_in.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
+                        <div class="modal edit_modal" id="editstock-modal{{stockIn_data.stock_in.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
                             <div class="modal-content">
                                 <div class="modal-body">
                                     <div class="container-fluid">
@@ -79,7 +79,7 @@
                                             {% for material_data in stockIn_data.materials %}
                                             <div class="materialRow row mt-1" id="{{stockIn_data.stock_in.pk}}materialRow{{forloop.counter}}">
                                                 <div class="col-3">
-                                                    <select class="material_type input-select" id="{{stockIn_data.stock_in.pk}}material_type{{forloop.counter}}">
+                                                    <select class="material_type input-select">
                                                         <option value="textile" {% if material_data.type == 'textile' %} selected {% endif %}> Textile</option>
                                                         <option value="accessory" {% if material_data.type == 'accessory' %} selected {% endif %}> Accessory</option>
                                                     </select>
@@ -89,15 +89,14 @@
                                                         <option value="delete"> None </option>
                                                         {% if material_data.type == 'textile' %}
                                                             {% for z in textiles %}
-                                                            <option value="{{z.material_key.material_key}}" {% if material_data.textile.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            <option value="{{z.material_key.material_key}}" {% if material_data.pk == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
                                                             {% endfor %}
 
                                                         {% elif material_data.type == 'accessory' %}
                                                             {% for z in accessories %}
-                                                            <option value="{{z.material_key.material_key}}" {% if material_data.accessory.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            <option value="{{z.material_key.material_key}}" {% if material_data.pk == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
                                                             {% endfor %}
                                                         {% endif %}
-
                                                     </select>
                                                 </div>
                                                 <div class="col-2">
@@ -115,12 +114,12 @@
                                             {% endfor %}
                                         </div>
                                         <div class="row justify-content-center mt-3">
-                                            <button type="button" class="btn dark-button x-button addStock_add" data-counter="{{stockIn_data.material_count}}">Add Row</button>
+                                            <button type="button" class="btn dark-button x-button addStock_edit" data-counter="{{stockIn_data.material_count}}" data-stock-id="{{stockIn_data.stock_in.pk}}">Add Row</button>
                                         </div>
                                         <div class="row pt-3" style="margin-top: 15px; display: flexbox; justify-content: space-between;">
                                                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delconf-modal{{stockIn_data.stock_in.pk}}" style="border-radius: 35px; max-height: fit-content;">Delete Stock-in</button>
                                                 <button type="button" class="btn dark-button" data-toggle="modal"
-                                                    data-target="#confirm-modal"> Create Stock-in
+                                                    data-target="#editconf-modal{{stockIn_data.stock_in.pk}}"> Confirm
                                                 </button>
                                         </div>
                                     </div>
@@ -130,7 +129,7 @@
 
                         <!-- CONFIRM EDIT MATERIALS MODAL-->
 
-                        <div class="modal" id="editconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
+                        <div class="modal" id="editconf-modal{{stockIn_data.stock_in.pk}}" tabindex="-1"
                             style=" margin-left: 15%; margin-top: 10%; width: 70%;">
                             <div class="modal-content">
                                 <div class="modal-body">
@@ -143,7 +142,7 @@
                                                 Editing </button>
                                         </div>
                                         <div class="col">
-                                            <button type="submit" class="btn dark-button confirm-button">
+                                            <button type="submit" class="submit-btn btn dark-button confirm-button" data-action="edit_form" data-id="{{stockIn_data.stock_in.pk}}">
                                                 Confirm </button>
                                         </div>
                                     </div>
@@ -238,7 +237,7 @@
                     <div class="materialRowContainer pl-4 pr-4" id="materialRowContainer" style="height:50%; overflow-x:visible; overflow-y:scroll;">
                         <div class="materialRow row mt-1" id="materialRow1">
                             <div class="col-3">
-                                <select class="material_type input-select" id="material_type1">
+                                <select class="material_type input-select">
                                     <option value="textile"> Textile</option>
                                     <option value="accessory"> Accessory</option>
                                 </select>
@@ -303,7 +302,7 @@
 
 <div class="materialRow row mt-1" id="materialRow_temp" style="display:none;">
     <div class="col-3">
-        <select class="material_type input-select" id="material_type1">
+        <select class="material_type input-select">
             <option value="textile"> Textile</option>
             <option value="accessory"> Accessory</option>
         </select>
@@ -336,14 +335,35 @@
             counter++
             newRow = materialRow_template.clone()
             newRow.attr('id', 'materialRow' + counter);
-            newRow.find('.material_type').val('textile').attr('id', 'materialRow' + counter);
-            newRow.find('.stock_material').val('delete');
+            newRow.find('.material_type').val('textile');
+            newRow.find('.stock_material').val('delete').attr('id', 'stock_material' + counter);
             newRow.find('.quantity').val('');
             newRow.find('.cost').val('');
 
             newRow.find('.delete-row').attr('data-row-id', 'materialRow' + counter);
 
             addStock_parent.append(newRow);
+            newRow.show();
+            
+            button.data('counter', counter);
+
+            console.log(newRow);
+        }
+
+        function addMaterial_edit(counter, button, stockId) {
+            counter++
+            newRow = materialRow_template.clone()
+            newRow.attr('id', stockId + 'materialRow' + counter);
+            newRow.find('.material_type').val('textile');
+            newRow.find('.stock_material').val('delete').attr('id', stockId + 'stock_material' + counter);
+            newRow.find('.quantity').val('');
+            newRow.find('.cost').val('');
+
+            newRow.find('.delete-row').attr('data-row-id', stockId + 'materialRow' + counter);
+
+            let parent = $('#materialRowContainer' + stockId + '.materialRowContainer')
+
+            parent.append(newRow);
             newRow.show();
             
             button.data('counter', counter);
@@ -431,7 +451,7 @@
                 }
             });
         });
-        $('#materialRowContainer').on('click', '.delete-row', function () {
+        $('.materialRowContainer').on('click', '.delete-row', function () {
             let rowId = $(this).data('row-id');
             let selectId = $('#' + rowId).find('.stock_material').attr('id');
 
@@ -442,6 +462,13 @@
             let button = $(this);
 
             addMaterial_add(counter, button);
+        });
+        $('.edit_modal').on('click', '.addStock_edit', function() {
+            let counter = $(this).data('counter');
+            let button = $(this);
+            let stockId = $(this).data('stock-id');
+
+            addMaterial_edit(counter, button, stockId);
         });
 
 
