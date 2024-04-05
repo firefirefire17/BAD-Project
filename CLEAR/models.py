@@ -182,7 +182,6 @@ class StockIn(models.Model):
                 cost = stock_accessory.cost
                 total_cost += (quantity*cost)
         self.total_cost = total_cost
-        return self.total_cost
 
 class StockIn_Accessory(models.Model):
     accessory = models.ForeignKey(Accessory, on_delete=models.CASCADE)

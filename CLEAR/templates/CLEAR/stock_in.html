@@ -36,7 +36,7 @@
 
 
                         <!-- modal to edit materials -->
-                    <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+                    <form method="POST" action="{% url 'stock_in' %}"> {% csrf_token %}
                         <div class="modal edit_modal" id="editstock-modal{{stockIn_data.stock_in.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
                             <div class="modal-content">
                                 <div class="modal-body">
@@ -428,8 +428,6 @@
                     alert("something broke")  // uncontrolled error
                 }
             });
-
-
         });
 
         $(document).on('change', '.material_type', function() {
