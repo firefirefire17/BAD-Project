@@ -33,13 +33,15 @@ class Accessory(models.Model):
     material_key = models.OneToOneField(MaterialKey, on_delete=models.CASCADE)
     
 class Product(models.Model):
-    # product_number = models.AutoField(primary_key=True) this thing is purely fucked up
     name = models.CharField(max_length=50)
     stock = models.IntegerField()
-    prod_margin = models.FloatField() # renamed from 'margin'
-    labor_time = models.IntegerField() 
-    misc_margin = models.IntegerField(default=50)
-    total_cost = models.FloatField(null=True) # renamed from 'cost'
+    prod_margin = models.FloatField(null=True) # renamed from 'margin'
+    labor_time = models.IntegerField(null=True) 
+    misc_margin = models.IntegerField(null=True)
+    calc_price = models.FloatField(null=True) # renamed from 'total_cost'
+    retail_price = models.FloatField(null=True)
+    last_update = models.DateField(null=True) # remove null once views has been finalized
+
     textiles = models.ManyToManyField(Textile, through='Product_Component')
     accessories = models.ManyToManyField(Accessory, through='Product_Accessory')
     
@@ -85,15 +87,15 @@ class Product(models.Model):
         labor_cost = wage*(int(labor_time)/60)
         total_cost = raw_material_cost + labor_cost + labor_cost*(float(misc_margin)/100)
         margin = total_cost*(float(prod_margin)/100)
-        selling_price = (total_cost + margin)*(1 + (vat/100))
-        self.total_cost = selling_price
+        calc_price = (total_cost + margin)*(1 + (vat/100))
+        self.calc_price = calc_price
 
         print(f"labor: {labor_cost}")
         print(f"total cost: {total_cost}")
         print(f"margin: {margin}")
 
-        print(selling_price)
-        return self.total_cost
+        print(calc_price)
+        return self.calc_price
 
 
 
@@ -124,10 +126,15 @@ class Product_Component(models.Model):
 class Job_Order(models.Model):
     order_status = models.CharField(max_length=50, default="In-queue")
     file_date = models.DateField()
-    completion_date = models.DateField(null=True)
+    start_date = models.DateField(null=True)
+    finish_date = models.DateField(null=True)
+    customer = models.CharField(max_length=50, null=True)
 
     def __str__(self):
         return f'{self.pk}_{self.file_date}'
+    
+class Store(models.Model):
+    store_name = models.CharField(max_length=50)
     
 class Item(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, db_column='product_number')
@@ -152,7 +159,7 @@ class Item_Accessory(models.Model):
     quantity = models.IntegerField()
 
     def __str__(self):
-        return f'{self.textile.name} in Item #{self.item.pk}'
+        return f'{self.accessory.name} in Item #{self.item.pk}'
 
 class Order_Item(models.Model):
     order = models.ForeignKey(Job_Order, on_delete=models.CASCADE)

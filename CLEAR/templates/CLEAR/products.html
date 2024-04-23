@@ -27,7 +27,7 @@
                         <td>{{ product_data.product.pk}}</td>
                         <td>{{ product_data.product.name }}</td>
                         <td>{{ product_data.product.stock }}</td>
-                        <td>{{ product_data.product.cost }}</td>
+                        <td>{{ product_data.product.retail_price|floatformat:2 }}</td>
                         <td>
                             <button type="button" class="btn btn-outline-secondary"
                                 onclick="toggleModal('editProduct{{product_data.product.pk}}', 'open')" style="border-radius: 30px;">Edit</button>
@@ -45,20 +45,25 @@
                             <form method="POST" action="{% url 'products' %}"> {% csrf_token %}
                                 <input type="hidden" name="edit_form" value="1">
                                 <div class="row">
-                                    <div class="col-3">
+                                    <div class="col-2">
                                         <label for="pk">Product ID</label>
                                         <input type="text" class="product_pk form-control" name="product_pk" value="{{product_data.product.pk}}" readonly>
                                     </div>
-                                    <div class="col-5">
+                                    <div class="col-4">
                                         <label for="name">Product Name</label>
                                         <input type="text" class="product_name form-control" id="name" name="name" value="{{product_data.product.name}}">
                                     </div>
-                                    <div class="col-4">
-                                        <label for="total_cost">Total Cost</label>
-                                        <input type="number" class="total_cost form-control" name="total_cost" value="{{product_data.product.total_cost|floatformat:2}}" readonly>
+                                    <div class="col-3">
+                                        <label for="retail_price">Retail Price</label>
+                                        <input type="number" class="retail_price form-control" name="retail_price" value="{{product_data.product.retail_price|floatformat:2}}">
+                                    </div>
+                                    <div class="col-3">
+                                        <label for="calc_price">Calculated Price</label>
+                                        <input type="number" class="calc_price form-control" name="calc_price" value="{{product_data.product.calc_price|floatformat:2}}" readonly>
                                     </div>
                                 </div>
-                                <div class="row pt-3">
+                                <hr style="margin: 20px 0; border-top:2px solid #767B85">
+                                <div class="row">
                                     <div class="col-8">
                                         <div class="container">
                                             <div class="row m-0">
@@ -67,7 +72,7 @@
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            <div class="productTextileContainer_edit pl-3 pr-3" id="{{product_data.product.pk}}productTextileContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                                            <div class="productTextileContainer_edit pl-3 pr-3" id="{{product_data.product.pk}}productTextileContainer" style="height:135px; overflow-x:visible; overflow-y:scroll;">
                                                 {% for textile_buffer in product_data.textile_buffers %}
                                                 <div class="productTextile_row row align-items-center mt-2" id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}">
                                                     <div class="col-4">
@@ -170,7 +175,7 @@
                                         <button type="button" class="btn dark-button x-button mt-3 mb-3 addTextile_edit"
                                             data-product-id="{{product_data.product.pk}}" data-counter="{{product_data.textile_count}}">Add Row</button>
                                         
-                                        <hr>
+                                        <hr style="margin: 20px 0; border-top:1px solid #767B85">
                                         
                                         <div class="container">
                                             <div class="row mb-1">
@@ -179,7 +184,7 @@
                                                 <div class="col-3">Quantity</div>
                                                 <div class="col-1"></div>
                                             </div>
-                                            <div class="productAccessoryContainer_edit pr-3 pl-3" id="{{product_data.product.pk}}productAccessoryContainer" style="height:125px; overflow-x:visible; overflow-y:scroll; display: flexbox; flex-direction: column-reverse;">
+                                            <div class="productAccessoryContainer_edit pr-3 pl-3" id="{{product_data.product.pk}}productAccessoryContainer" style="height:135px; overflow-x:visible; overflow-y:scroll; display: flexbox; flex-direction: column-reverse;">
                                                 {% for accessory_data in product_data.accessories %}
                                                 <div class="productAccessory_row row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row{{forloop.counter}}">
                                                     <div class="col-4">
@@ -209,15 +214,17 @@
                                         <button type="button" class="addAccessory_edit btn dark-button x-button mt-3 ml-1"
                                             data-product-id="{{product_data.product.pk}}" data-counter="{{product_data.accessory_count}}">Add Row</button>
                                     </div>
-                                    <div class="col-4 mt-3">
+                                    <div class="col-4 mt-3" style="border-left: 1px solid #767B85;">
                                         <label for="product_margin">Product Margin</label>
                                         <input type="number" class="product_margin form-control" name="product_margin"value="{{product_data.product.prod_margin}}">
-                                        <label class="mt-3" for="cost">Stock</label>
+                                        <label class="mt-3" for="stock">Stock</label>
                                         <input type="number" class="product_stock form-control" name="product_stock" value="{{product_data.product.stock}}">
                                         <label class="mt-3" for="stock">Labor Time</label>
                                         <input type="number" class="product_labor form-control" name="product_labor" value="{{product_data.product.labor_time}}">
                                         <label class="mt-3" for="stock">Miscellaneous Margin</label>
                                         <input type="number" class="product_misc form-control" name="product_misc" value="{{product_data.product.misc_margin}}">
+                                        <label class="mt-2" for="product_misc">Last Update Date</label>
+                                        <input type="date" class="last_update form-control" value="{{product_data.product.last_update|date:'Y-m-d'}}">
                                     </div>
                                 </div>
                                 <div class="row" style="margin: 20px 5px 12px 5px;">
@@ -394,20 +401,25 @@
         <form method="POST" action="{% url 'products' %}"> {% csrf_token %}
             <input type="hidden" name="add_form" value="1">
             <div class="row">
-                <div class="col-3">
+                <div class="col-2">
                     <label for="pk">Product ID</label>
                     <input type="text" class="form-control" placeholder="Product #" readonly>
                 </div>
-                <div class="col-5">
+                <div class="col-4">
                     <label for="name">Product Name</label>
                     <input type="text" class="product_name form-control" name="name" placeholder="Product Name">
                 </div>
-                <div class="col-4">
-                    <label for="total_cost">Total Cost</label>
-                    <input type="number" class="total_cost form-control" name="total_cost" value="" readonly>
+                <div class="col-3">
+                    <label for="retail_price">Retail Price</label>
+                    <input type="number" class="retail_price form-control" name="retail_price" placeholder="Selling Price">
+                </div>
+                <div class="col-3">
+                    <label for="calc_price">Calculated Price</label>
+                    <input type="number" class="calc_price form-control" name="calc_price" value="" readonly>
                 </div>
             </div>
-            <div class="row pt-3">
+            <hr style="margin: 20px 0; border-top:2px solid #767B85">
+            <div class="row">
                 <div class="col-8">
                     <div class="container" style="">
                         <div class="row m-0">
@@ -416,7 +428,7 @@
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="productTextileContainer pl-3 pr-3" id="productTextileContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                        <div class="productTextileContainer pl-3 pr-3" id="productTextileContainer" style="height:135px; overflow-x:visible; overflow-y:scroll;">
                             <div class="productTextile_row row align-items-center mt-2" id="productTextile_row1">
                                 <div class="col-4">
                                     <select class="product_textile input-select" name="product_textile">
@@ -442,8 +454,7 @@
                         </div>
                         <button type="button" class="btn dark-button x-button mt-4" id="addTextile_add">Add Row</button>
                     </div>
-                    <div class="row" style="margin: 25px 0px 25px 0px"></div>
-                    <hr>
+                    <hr style="margin: 20px 0; border-top:1px solid #767B85">
                     <div class="container">
                         <div class="row m-0">
                             <div class="col-4">Accessories:</div>
@@ -451,7 +462,7 @@
                             <div class="col-3">Quantity</div>
                             <div class="col-1"></div>
                         </div>
-                        <div class="productAccessoryContainer pr-3 pl-3" id="productAccessoryContainer" style="height:125px; overflow-x:visible; overflow-y:scroll;">
+                        <div class="productAccessoryContainer pr-3 pl-3" id="productAccessoryContainer" style="height:135px; overflow-x:visible; overflow-y:scroll;">
                             <div class="productAccessory_row row align-items-center mt-2" id="productAccessory_row1">
                                 <div class="col-4">
                                     <select class="product_accessory input-select" name="product_accessory">
@@ -476,16 +487,17 @@
                         <button type="button" class="btn dark-button x-button mt-4" id="addAccessory_add">Add Row</button>
                     </div>
                 </div>
-                
-                <div class="col-4 mt-3">
+                <div class="col-4 mt-1" style="border-left: 1px solid #767B85;">
                     <label for="product_margin">Product Margin</label>
                     <input type="number" class="product_margin form-control" name="product_margin" placeholder="Product Margin">
-                    <label class="mt-3" for="product_stock">Stock</label>
+                    <label class="mt-2" for="product_stock">Stock</label>
                     <input type="number" class="product_stock form-control" name="product_stock" placeholder="Stock">
-                    <label class="mt-3" for="product_labor">Labor Time</label>
+                    <label class="mt-2" for="product_labor">Labor Time</label>
                     <input type="number" class="product_labor form-control" name="product_labor" placeholder="Labor Time">
-                    <label class="mt-3" for="product_misc">Miscellaneous Margin</label>
+                    <label class="mt-2" for="product_misc">Miscellaneous Margin</label>
                     <input type="number" class="product_misc form-control" name="product_misc" value="50">
+                    <label class="mt-2" for="last_update">Last Update Date</label>
+                    <input type="date" class="last_update form-control" name="last_update">
                 </div>
             </div>
             <div class="row">
@@ -968,6 +980,8 @@
                 'stock': product_container.find('.product_stock').val(),
                 'labor': product_container.find('.product_labor').val(),
                 'misc': product_container.find('.product_misc').val(),
+                'retail': product_container.find('.retail_price').val(),
+                'last_update': product_container.find('.last_update').val(),
                 'textile_data': JSON.stringify(textile_data),
                 'accessory_data': JSON.stringify(accessory_data),
                 "csrfmiddlewaretoken": $("[name=csrfmiddlewaretoken]").val(),

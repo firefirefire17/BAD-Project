@@ -5,6 +5,7 @@ from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.urls import reverse
+from django.utils import timezone
 
 import json
 
@@ -69,7 +70,7 @@ def products(request):
             textile_buffer_data = {
                 'textile': textile,
                 'buffer': buffer,
-                'unit': textile.unit,
+                'unit': textile.get_unit_display(),
                 'components': []
             }
 
@@ -96,7 +97,7 @@ def products(request):
         product_material_list.append(product_data)
 
     if request.method == "POST":
-
+        print(request.POST)
         action = request.POST.get("action")
         if action == "add_form": # adding products
 
@@ -105,6 +106,8 @@ def products(request):
             stock = request.POST.get("stock")
             labor_time = request.POST.get("labor")
             misc_margin = request.POST.get("misc")
+            retail_price = request.POST.get("retail")
+            last_update = request.POST.get("last_update")
 
             new_product = Product.objects.create(name=name, 
                                                 stock=stock, 
@@ -132,7 +135,7 @@ def products(request):
                             height = component['height']
                             width = component['width']
                             component_quantity = component['quantity']
-                            buffer = component['buffer']
+                            buffer = component['buffer'] or 0
 
                             existing_component = Component.objects.filter(component_name=component_name).first()
 
@@ -154,7 +157,19 @@ def products(request):
                     accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
                     Product_Accessory.objects.create(product=new_product, accessory=accessory_object, accessory_quantity=quantity)
             
-            new_product.updateCost()
+            if retail_price:
+                new_product.updateCost()
+                new_product.retail_price = retail_price
+            else:
+                print("no retail")
+                new_product.retail_price = new_product.updateCost()
+
+            if last_update:
+                new_product.last_update = last_update
+            else:
+                new_product.last_update = timezone.now().date()
+            print(new_product.last_update)
+
             new_product.save()
 
             response = {}
@@ -174,6 +189,9 @@ def products(request):
             stock = request.POST.get("stock")
             labor_time = request.POST.get("labor")
             misc_margin = request.POST.get("misc")
+            retail_price = request.POST.get("retail")
+            last_update = request.POST.get("last_update")
+
 
             #update product attributes
             product.name = name
@@ -181,6 +199,12 @@ def products(request):
             product.prod_margin = prod_margin
             product.labor_time = labor_time
             product.misc_margin = int(misc_margin)
+            product.last_update = last_update
+
+            if float(retail_price) != product.retail_price:
+                print("diff retail")
+                product.retail_price = retail_price
+                product.last_update = timezone.now().date()
 
             product.save()
 
@@ -205,7 +229,7 @@ def products(request):
                             height = component['height']
                             width = component['width']
                             component_quantity = component['quantity']
-                            buffer = component['buffer']
+                            buffer = component['buffer'] or 0
 
                             existing_component = Component.objects.filter(component_name=component_name).first()
 
@@ -415,7 +439,7 @@ def job_orders(request):
         order_data = {
             'order': order,
             'file_date': order.file_date,
-            'completion_date': order.completion_date,
+            'completion_date': order.finish_date,
             'status': order.order_status,
             'items': [],
         }
@@ -456,7 +480,7 @@ def job_orders(request):
             status = request.POST.get("status")
             completion_date = request.POST.get("completion_date")
 
-            new_order = Job_Order.objects.create(file_date=file_date, order_status=status, completion_date=completion_date)
+            new_order = Job_Order.objects.create(file_date=file_date, order_status=status, finish_date=completion_date)
 
             item_data = json.loads(request.POST.get("items"))
             for item in item_data:
