@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Global_Value, Account, MaterialKey
+from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Global_Value, MaterialKey, Store
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
@@ -433,6 +433,8 @@ def job_orders(request):
     product_objects = Product.objects.all()
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
+    store_objects = Store.objects.all()
+    store_count = len(store_objects)
     order_list = []
 
     for order in Job_Order.objects.all():
@@ -516,9 +518,9 @@ def job_orders(request):
             pk = request.POST.get("pk")
             Job_Order.objects.filter(pk=pk).delete()
             return redirect('orders')
-
-
-
+        elif 'stores' in request.POST:
+            pass
+            return redirect('orders')
 
 
         response = {}
@@ -530,7 +532,7 @@ def job_orders(request):
         return JsonResponse(response)
 
 
-    return render(request, 'CLEAR/job_orders.html', {'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects})
+    return render(request, 'CLEAR/job_orders.html', {'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'store':store_objects, 'store_count':store_count})
 
 
 @login_required(login_url="/login")

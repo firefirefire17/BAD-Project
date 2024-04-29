@@ -45,7 +45,7 @@
                                         <div class="container-fluid">
                                             <div class="row">
                                                 <div class="col-11">
-                                                    <h3 style="margin-bottom: 30px;">Create Job Order</h3>
+                                                    <h3 style="margin-bottom: 30px;">Edit Job Order</h3>
                                                 </div>
                                                 <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
                                                         aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
@@ -116,7 +116,7 @@
                                                                 <input type="number" class="bespoke_rate form-control" value="{{material_data.bespoke_rate}}" step="0.01">
                                                             </div>
                                                             <div class="col-2">
-                                                                <input type="numer" class="quantity form-control" value="{{material_data.quantity}}">
+                                                                <input type="number" class="quantity form-control" value="{{material_data.quantity}}">
                                                             </div>
                                                             <div class="col-1">
                                                                 <button type="button" class="btn dark-button delete-material" data-row-id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}"> &times
@@ -224,8 +224,14 @@
         </table>
     </div>
     <div class="row ml-auto pr-3">
-        <button type="button" class="btn light-button" data-toggle="modal" data-target="#addord"> Create Job Order
-        </button>
+        <div class="col">
+            <button type="button" class="btn light-button" data-toggle="modal" data-target="#stores"> Stores
+            </button>
+        </div>
+        <div class="col">
+            <button type="button" class="btn light-button" data-toggle="modal" data-target="#addord"> Create Job Order
+            </button>
+        </div>
     </div>
 </div>
 </tbody>
@@ -295,7 +301,7 @@
                         data-item-id="1" data-counter="1">Add Item</button>
                     </div>
                     <div class="row pt-3 align-items-center" style="margin-top: 15px;">
-                        <div class="col-4 mr-auto">
+                        <div class="col-2 mr-auto">
                             <label for="status">Job Order Status</label>
                             <select class="status input-select">
                                 <option value="in-queue">In-queue</option>
@@ -304,7 +310,7 @@
                                 <option value="in-progress">In-progress</option>
                             </select>
                         </div>
-                        <div class="col-4 mr-auto">
+                        <div class="col-2 mr-auto">
                             <label for="Completion Date">Completion Date</label>
                             <input type="date" class="completion_date form-control" value="">
                         </div>
@@ -340,6 +346,48 @@
     </div>
 </form>
 
+<div class="modal" id="stores" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
+    <div class="modal-content"  style="height:60%; width:40%">
+        <div class="modal-body">
+            <div class="container-fluid">    
+                <input type="hidden" name="add_form" value="1"></input>
+                <div class="row">
+                    <div class="col-11">
+                        <h3 style="margin-bottom: 30px;">Stores</h3>
+                    </div>
+                    <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
+                            aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Store Name:
+                    </div>
+                </div>
+                <div class="storeContainer">
+                {% for store in stores %}
+                {% endfor %}
+                </div>
+                <div class="row">
+                    <button type="button" class="addStore btn dark-button x-button mt-3 ml-1" id="store1"
+                    data-counter="{{store_count}}">Add Store</button>
+                </div>
+            </div>
+            <div class="row pt-3" style="margin-top: 15px;">
+                    <div class="col-4 mr-auto">
+                        <button type="button" class="btn dark-button" data-dismiss="modal"> Cancel
+                            Action</button>
+                    </div>
+                    <div class="col-4 ml-auto text-right">
+                        <button type="button" class="btn dark-button" data-toggle="modal"
+                            data-target="#confirm-modal"> Add Material
+                        </button>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+<!-- TEMPLATES -->
 <div class="orderItem_instance" id="orderItem_instance_temp" style="display:none;">
     <div class="row pt-3">
         <div class="col-4">
@@ -394,10 +442,21 @@
         <input type="number" class="bespoke_rate form-control" placeholder="Bespoke Rate" step="0.01">
     </div>
     <div class="col-2">
-        <input type="numer" class="quantity form-control" placeholder="Quantity">
+        <input type="number" class="quantity form-control" placeholder="Quantity">
     </div>
     <div class="col-1">
         <button type="button" class="btn dark-button delete-material" data-row-id=""> &times
+        </button>
+    </div>
+</div>
+
+<div class="storeRow row mt-2" id="storeRow_temp" style="display:none;">
+    <div class="col">
+        <input type="text" class="store_name form-control"> 
+    </div>
+    <div class="col-2">
+        <button type="button" class="btn dark-button delete-store"
+        data-row-id=""> &times
         </button>
     </div>
 </div>
@@ -407,6 +466,8 @@ $(document).ready(function() {
     const materialRow_template = $('#materialRow_temp');
     const item_template = $('#orderItem_instance_temp');
     const addItem_container = $('#orderItemContainer');
+    const store_template = $('#storeRow_temp');
+    const store_parent = $('.storeContainer');
 
     function addMaterial_add(itemId, counter, button) {
         counter++;
@@ -450,6 +511,20 @@ $(document).ready(function() {
         button.data('counter', counter);
 
         console.log(newItem);
+    }
+    function addStore(counter, button) {
+        counter++;
+
+        newRow = store_template.clone();
+        newRow.attr('id', 'store' + counter);
+
+        newRow.find('.delete-store').attr('data-row-id', 'store' + counter);
+        store_parent.append(newRow);
+        newRow.show();
+
+
+
+        button.data('counter', counter);
     }
     $('#addord').on('change', '.bespoke', function() {
         let itemId = $(this).data('item-id');
@@ -506,6 +581,17 @@ $(document).ready(function() {
     $('.orderItemContainer').on('click', '.delete-item', function () {
         let rowId = $(this).data('row-id'); 
         let row = $('.orderItemContainer').find('#' + rowId)
+        row.remove()
+    })
+    $('#stores').on('click', '.addStore', function () {
+        let button = $(this);
+        let counter = button.data('counter');
+
+        addStore(counter, button);
+    })
+    $('#stores').on('click', '.delete-store', function() {
+        let rowId = $(this).data('row-id');
+        let row = $('#stores').find('#' + rowId);
         row.remove()
     })
 

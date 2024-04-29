@@ -127,7 +127,7 @@ class Job_Order(models.Model):
     order_status = models.CharField(max_length=50, default="In-queue")
     file_date = models.DateField()
     start_date = models.DateField(null=True)
-    finish_date = models.DateField(null=True)
+    completion_date = models.DateField(null=True)
     customer = models.CharField(max_length=50, null=True)
 
     def __str__(self):
@@ -135,6 +135,7 @@ class Job_Order(models.Model):
     
 class Store(models.Model):
     store_name = models.CharField(max_length=50)
+    job_order = models.ForeignKey(Job_Order, on_delete=models.CASCADE)
     
 class Item(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, db_column='product_number')
