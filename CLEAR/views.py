@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Global_Value, MaterialKey, Store
+from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Global_Value, MaterialKey, Outlet
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
@@ -12,7 +12,6 @@ import json
 
 
 # Create your views here.
-
 @login_required(login_url="/login") # this is to restrict access if not logged in
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
@@ -433,16 +432,19 @@ def job_orders(request):
     product_objects = Product.objects.all()
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
-    store_objects = Store.objects.all()
-    store_count = len(store_objects)
+    outlet_objects = Outlet.objects.all()
+    outlet_count = len(outlet_objects)
+    print(outlet_objects)
     order_list = []
 
     for order in Job_Order.objects.all():
         order_data = {
             'order': order,
             'file_date': order.file_date,
-            'completion_date': order.finish_date,
+            'completion_date': order.completion_date,
             'status': order.order_status,
+            'customer': order.customer,
+            'outlet': order.outlet,
             'items': [],
         }
         for order_item in order.order_item_set.all():
@@ -477,12 +479,25 @@ def job_orders(request):
     if (request.method == "POST"):
         action = request.POST.get("action")
         print(request.POST)
-        if action == 'add_form':
-            file_date = request.POST.get("file_date") 
-            status = request.POST.get("status")
-            completion_date = request.POST.get("completion_date")
 
-            new_order = Job_Order.objects.create(file_date=file_date, order_status=status, finish_date=completion_date)
+        file_date = request.POST.get("file_date") 
+        status = request.POST.get("status")
+        completion_date = request.POST.get("completion_date")
+        start_date = request.POST.get("start_date")
+        outlet = request.POST.get("outlet")
+        customer = request.POST.get("customer")
+
+        print(file_date)
+
+        if action == 'add_form':
+            outlet_object = Outlet.objects.get(pk=outlet)
+            new_order = Job_Order.objects.create(file_date=file_date, order_status=status, customer=customer, outlet=outlet_object)
+            if start_date:
+                new_order.start_date = start_date
+                new_order.save()
+            if completion_date:
+                new_order.completion_date = completion_date
+                new_order.save()
 
             item_data = json.loads(request.POST.get("items"))
             for item in item_data:
@@ -514,25 +529,51 @@ def job_orders(request):
                             accessory_object = Accessory.objects.get(material_key__material_key = item_material)
                             Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
                 Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
+            response = {}
+            response['status'] = True
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('orders')
+
+            # return dict to ajax
+            return JsonResponse(response)
+        elif action == "edit_form":
+            pass
         elif 'delete_form' in request.POST:
             pk = request.POST.get("pk")
             Job_Order.objects.filter(pk=pk).delete()
             return redirect('orders')
-        elif 'stores' in request.POST:
-            pass
-            return redirect('orders')
+        elif action == 'outlets':
+            print(request.POST)
+            outlet_data = json.loads(request.POST.get("outlets"))
+            print(outlet_data)
+
+            for outlet in outlet_data:
+                outlet_id = outlet['outlet_id']
+                outlet_name = outlet['outlet_name']
+                print(outlet_id)
+                if outlet_id:
+                    outlet_object = Outlet.objects.get(pk=outlet_id)
+                    print(outlet_id)
+                    if outlet_name == 'delete':
+                        outlet_object.delete()
+                        outlet_object.save()
+                    else:
+                        outlet_object.outlet_name = outlet_name
+                        outlet_object.save()
+                else:
+                    print('pass')
+                    Outlet.objects.create(outlet_name=outlet_name)
+            response = {}
+            response['status'] = True
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('orders')
+
+            # return dict to ajax
+            return JsonResponse(response)
 
 
-        response = {}
-        response['status'] = True
-        response['msg'] = "Form submitted."
-        response['url'] = reverse('orders')
 
-        # return dict to ajax
-        return JsonResponse(response)
-
-
-    return render(request, 'CLEAR/job_orders.html', {'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'store':store_objects, 'store_count':store_count})
+    return render(request, 'CLEAR/job_orders.html', {'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count})
 
 
 @login_required(login_url="/login")

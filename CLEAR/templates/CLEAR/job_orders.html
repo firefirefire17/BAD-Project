@@ -40,7 +40,7 @@
                         <!-- modal to edit materials -->
                         <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
                             <div class="modal" id="editord-modal{{order_data.order.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
-                                <div class="modal-content">
+                                <div class="modal-content" style="width:60%;">
                                     <div class="modal-body">
                                         <div class="container-fluid">
                                             <div class="row">
@@ -50,95 +50,107 @@
                                                 <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
                                                         aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
                                             </div>
-                                            <div class="row justify-content-between mr-2 ml-2">
-                                                <div class="col-5">
+                                            <div class="row justify-content-between">
+                                                <div class="col-4">
                                                     <label for="name">Job Order #</label>
-                                                    <input type="number" class="pk form-control" value="{{order_data.order.pk}}" readonly>
+                                                    <input type="number" class="pk form-control" value="" readonly>
                                                 </div>
-                                                <div class="col-5">
-                                                    <label for="name">File Date</label>
-                                                    <input type="date" class="file_date form-control" value="{{ order_data.file_date|date:'Y-m-d' }}">
+                                                <div class="col-4">
+                                                    <label for="name">Customer</label>
+                                                    <input type="text" class="customer form-control">
                                                 </div>
-                                            </div>
-                                            <div class="orderItemContainer" id="orderItemContainer{{order_data.order.pk}}">
-                                            {% for item_data in order_data.items %}
-                                                <div class="orderItem_instance" id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}">
-                                                    <div class="row pt-3">
-                                                        <div class="col-4">
-                                                            <label for="product">Product</label>
-                                                            <select class="order_item input-select" id="order_item1">
-                                                                <option value="delete">None</option>
-                                                                {% for z in products %}
-                                                                <option value="{{z.pk}}"{% if item_data.item.product.pk == z.pk %} selected {% endif %}>{{z.name}}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-4">
-                                                            <label for="quantity">Quantity</label>
-                                                            <input type="number" class="quantity form-control" value="{{item_data.quantity}}">
-                                                        </div>
-                                                        <div class="col">
-                                                            <label for "bespoke"> Bespoke? </label>
-                                                            <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="{{forloop.counter}}" {% if item_data.bespoke == 'yes' %}checked{% endif %}>
-                                                        </div>
-                                                        <div class="col p-4">
-                                                            <button type="button" class="btn dark-button delete-item"
-                                                            data-row-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}"> &times
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="itemMaterialContainer" id="{{order_data.order.pk}}itemMaterialContainer{{forloop.counter}}">
-                                                        <div class="row ml-1 pb-0"> Add-Ons </div>
-                                                        {% for material_data in item_data.materials %}
-                                                        <div class="materialRow row mt-1" id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}">
-                                                            <div class="col-3">
-                                                                <select class="material_type input-select">
-                                                                    <option value="textile"> Textile</option>
-                                                                    <option value="accessory" {% if material_data.type == accessory %}selected{% endif %}> Accessory</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-3">
-                                                                <select class="item_material input-select" id="item_material">
-                                                                    <option value="delete"> None </option>
-                                                                    {% if material_data.type == 'textile' %}
-                                                                        {% for z in textiles %}
-                                                                        <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
-                                                                        {% endfor %}
-        
-                                                                    {% elif material_data.type == 'accessory' %}
-                                                                        {% for z in accessories %}
-                                                                        <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
-                                                                        {% endfor %}
-                                                                    {% endif %}
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-3">
-                                                                <input type="number" class="bespoke_rate form-control" value="{{material_data.bespoke_rate}}" step="0.01">
-                                                            </div>
-                                                            <div class="col-2">
-                                                                <input type="number" class="quantity form-control" value="{{material_data.quantity}}">
-                                                            </div>
-                                                            <div class="col-1">
-                                                                <button type="button" class="btn dark-button delete-material" data-row-id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}"> &times
-                                                                </button>
-                                                            </div>
-                                                        </div>
+                                                <div class="col-4">
+                                                    <label for="outlet">Outlet</label>
+                                                    <select class="outlet input-select" id="order_item1">
+                                                        <option value="delete">None</option>
+                                                        {% for z in outlets %}
+                                                        <option value="{{z.pk}}">{{z.outlet_name}}</option>
                                                         {% endfor %}
-                                                    </div>
-                                                    <div class="button_row row justify-content-center">
-                                                        <button type="button" class="addMaterial_edit btn dark-button x-button mt-3 ml-1" id="addMaterial1"
-                                                        data-item-id="1" data-counter="0">Add Material</button>
-                                                    </div>
-                                                    <hr>
+                                                    </select>
                                                 </div>
-                                            {% endfor %}
                                             </div>
+                                            <hr style="margin: 20px 0; border-top:2px solid #767B85">
                                             <div class="row">
-                                                <button type="button" class="addItem_add btn dark-button x-button mt-3 ml-1"
-                                                data-item-id="1" data-counter="1">Add Item</button>
-                                            </div>
-                                            <div class="row pt-3 align-items-center" style="margin-top: 15px;">
-                                                <div class="col-4 mr-auto">
+                                                <div class="col-9">
+                                                    <div class="orderItemContainer" id="orderItemContainer{{order_data.order.pk}}">
+                                                    {% for item_data in order_data.items %}
+                                                        <div class="orderItem_instance" id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}">
+                                                            <div class="row pt-3">
+                                                                <div class="col-4">
+                                                                    <label for="product">Product</label>
+                                                                    <select class="order_item input-select" id="order_item1">
+                                                                        <option value="delete">None</option>
+                                                                        {% for z in products %}
+                                                                        <option value="{{z.pk}}"{% if item_data.item.product.pk == z.pk %} selected {% endif %}>{{z.name}}</option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <label for="quantity">Quantity</label>
+                                                                    <input type="number" class="quantity form-control" value="{{item_data.quantity}}">
+                                                                </div>
+                                                                <div class="col">
+                                                                    <label for "bespoke"> Bespoke? </label>
+                                                                    <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="{{forloop.counter}}" {% if item_data.bespoke == 'yes' %}checked{% endif %}>
+                                                                </div>
+                                                                <div class="col p-4">
+                                                                    <button type="button" class="btn dark-button delete-item"
+                                                                    data-row-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}"> &times
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="itemMaterialContainer" id="{{order_data.order.pk}}itemMaterialContainer{{forloop.counter}}"{% if item_data.bespoke == 'no' %}style="display:none;"{% endif %}>
+                                                                <div class="row ml-1 pb-0"> Add-Ons </div>
+                                                                {% for material_data in item_data.materials %}
+                                                                <div class="materialRow row mt-1" id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}">
+                                                                    <div class="col-3">
+                                                                        <select class="material_type input-select">
+                                                                            <option value="textile"> Textile</option>
+                                                                            <option value="accessory" {% if material_data.type == accessory %}selected{% endif %}> Accessory</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-3">
+                                                                        <select class="item_material input-select" id="item_material">
+                                                                            <option value="delete"> None </option>
+                                                                            {% if material_data.type == 'textile' %}
+                                                                                {% for z in textiles %}
+                                                                                <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                                                {% endfor %}
+                
+                                                                            {% elif material_data.type == 'accessory' %}
+                                                                                {% for z in accessories %}
+                                                                                <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                                                {% endfor %}
+                                                                            {% endif %}
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-3">
+                                                                        <input type="number" class="bespoke_rate form-control" value="{{material_data.bespoke_rate}}" step="0.01">
+                                                                    </div>
+                                                                    <div class="col-2">
+                                                                        <input type="number" class="quantity form-control" value="{{material_data.quantity}}">
+                                                                    </div>
+                                                                    <div class="col-1">
+                                                                        <button type="button" class="btn dark-button delete-material" data-row-id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}"> &times
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <div class="button_row row justify-content-center">
+                                                                <button type="button" class="addMaterial_edit btn dark-button x-button mt-3 ml-1" id="addMaterial1"
+                                                                data-item-id="1" data-counter="0">Add Material</button>
+                                                            </div>
+                                                            <hr style="margin: 20px 0; border-top:1px solid #767B85;">
+                                                        </div>
+                                                    {% endfor %}
+                                                    </div>
+                                                    <div class="row">
+                                                        <button type="button" class="addItem_add btn dark-button x-button mt-3 ml-1"
+                                                        data-item-id="1" data-counter="1">Add Item</button>
+                                                    </div>
+                                                </div>
+                                                <div class="col" style="border-left:1px solid #767B85;">
                                                     <label for="status">Job Order Status</label>
                                                     <select class="status input-select" value="{{order_data.status}}">
                                                         <option value="in-queue">In-queue</option>
@@ -146,18 +158,27 @@
                                                         <option value="cancelled"{% if order_data.status == 'cancelled' %} selected{% endif %}>Cancelled</option>
                                                         <option value="in-progress"{% if order_data.status == 'in-progress' %} selected{% endif %}>In-progress</option>
                                                     </select>
-                                                </div>
-                                                <div class="col-4 mr-auto">
+
+                                                    <label for="File Date" class="mt-2">File Date</label>
+                                                    <input type="date" class="file_date form-control" value="">
+                        
+                                                    <label for="Start Date" class="mt-2">Start Date</label>
+                                                    <input type="date" class="start_date form-control" value="">
+
                                                     <label for="Completion Date">Completion Date</label>
                                                     <input type="date" class="completion_date form-control" value="{{ order_data.completion_date|date:'Y-m-d' }}">
                                                 </div>
-                                                <div class="col-4 ml-auto">
-                                                    <button type="button" class="btn dark-button m-2" data-toggle="modal"
-                                                        data-target="#editconf-modal{{order_data.order.pk}}"> Edit Job Order
-                                                    </button>
+                                            </div>
+                                            <div class="row mt-3">
+                                                <div class="col-3 mr-auto">
                                                     <button type="button" class="btn dark-button m-2" data-toggle="modal"
                                                     data-target="#delconf-modal{{order_data.order.pk}}"> Delete
                                                     Material </button>
+                                                </div>
+                                                <div class="col-3 ml-auto">
+                                                    <button type="button" class="btn dark-button m-2" data-toggle="modal"
+                                                    data-target="#editconf-modal{{order_data.order.pk}}"> Edit Job Order
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -225,7 +246,7 @@
     </div>
     <div class="row ml-auto pr-3">
         <div class="col">
-            <button type="button" class="btn light-button" data-toggle="modal" data-target="#stores"> Stores
+            <button type="button" class="btn light-button" data-toggle="modal" data-target="#outlets"> Outlets
             </button>
         </div>
         <div class="col">
@@ -240,7 +261,7 @@
 <!-- ADD MATERIAL MODAL -->
 <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
     <div class="modal" id="addord" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
-        <div class="modal-content">
+        <div class="modal-content" style="width:60%;">
             <div class="modal-body">
                 <div class="container-fluid">
                     <div class="row">
@@ -250,58 +271,66 @@
                         <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
                                 aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
                     </div>
-                    <div class="row justify-content-between mr-2 ml-2">
-                        <div class="col-5">
+                    <div class="row justify-content-between">
+                        <div class="col-4">
                             <label for="name">Job Order #</label>
                             <input type="number" class="pk form-control" value="" readonly>
                         </div>
-                        <div class="col-5">
-                            <label for="name">File Date</label>
-                            <input type="date" class="file_date form-control">
+                        <div class="col-4">
+                            <label for="name">Customer</label>
+                            <input type="text" class="customer form-control">
+                        </div>
+                        <div class="col-4">
+                            <label for="outlet">Outlet</label>
+                            <select class="outlet input-select" id="order_item1">
+                                <option value="delete">None</option>
+                                {% for z in outlets %}
+                                <option value="{{z.pk}}">{{z.outlet_name}}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    <div class="orderItemContainer" id="orderItemContainer">
-                        <div class="orderItem_instance" id="orderItem_instance1">
-                            <div class="row pt-3">
-                                <div class="col-4">
-                                    <label for="product">Product</label>
-                                    <select class="order_item input-select" id="order_item1">
-                                        <option value="delete">None</option>
-                                        {% for z in products %}
-                                        <option value="{{z.pk}}">{{z.name}}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label for="quantity">Quantity</label>
-                                    <input type="number" class="quantity form-control" value="">
-                                </div>
-                                <div class="col">
-                                    <label for "bespoke"> Bespoke</label>
-                                    <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="1">
-                                </div>
-                                <div class="col p-4">
-                                    <button type="button" class="btn dark-button delete-item"
-                                    data-row-id="orderItem_instance1"> &times
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="itemMaterialContainer" id="itemMaterialContainer1" style="display:none;">
-                                <div class="row ml-1 pb-0"> Add-Ons </div>
-                            </div>
-                            <div class="button_row row justify-content-center" style="display:none;">
-                                <button type="button" class="addMaterial_add btn dark-button x-button mt-3 ml-1" id="addMaterial1"
-                                data-item-id="1" data-counter="0">Add Material</button>
-                            </div>
-                            <hr>
-                        </div>
-                    </div>
+                    <hr style="margin: 20px 0; border-top:2px solid #767B85">
                     <div class="row">
-                        <button type="button" class="addItem_add btn dark-button x-button mt-3 ml-1"
-                        data-item-id="1" data-counter="1">Add Item</button>
-                    </div>
-                    <div class="row pt-3 align-items-center" style="margin-top: 15px;">
-                        <div class="col-2 mr-auto">
+                        <div class="col-9">
+                            <div class="orderItemContainer" id="orderItemContainer">
+                                <div class="orderItem_instance" id="orderItem_instance1">
+                                    <div class="row pt-3 pb=3">
+                                        <div class="col-4">
+                                            <label for="product">Product</label>
+                                            <select class="order_item input-select" id="order_item1">
+                                                <option value="delete">None</option>
+                                                {% for z in products %}
+                                                <option value="{{z.pk}}">{{z.name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <label for="quantity">Quantity</label>
+                                            <input type="number" class="quantity form-control" value="">
+                                        </div>
+                                        <div class="col">
+                                            <label for "bespoke"> Bespoke</label>
+                                            <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="orderItem_instance1">
+                                        </div>
+                                        <div class="col p-4">
+                                            <button type="button" class="btn dark-button delete-item"
+                                            data-row-id="orderItem_instance1"> &times
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="itemMaterialContainer" id="itemMaterialContainer1" style="display:none;">
+                                        <div class="row ml-1 pb-0"> Add-Ons </div>
+                                    </div>
+                                    <div class="button_row row justify-content-center" style="display:none;">
+                                        <button type="button" class="addMaterial_add btn dark-button x-button mt-3 ml-1" id="addMaterial1"
+                                        data-item-id="1" data-counter="0">Add Material</button>
+                                    </div>
+                                    <hr style="margin: 20px 0; border-top:1px solid #767B85">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col" style="border-left: 1px solid #767B85;">
                             <label for="status">Job Order Status</label>
                             <select class="status input-select">
                                 <option value="in-queue">In-queue</option>
@@ -309,11 +338,23 @@
                                 <option value="cancelled">Cancelled</option>
                                 <option value="in-progress">In-progress</option>
                             </select>
-                        </div>
-                        <div class="col-2 mr-auto">
-                            <label for="Completion Date">Completion Date</label>
+
+                            <label for="File Date" class="mt-2">File Date</label>
+                            <input type="date" class="file_date form-control" value="">
+
+                            <label for="Start Date" class="mt-2">Start Date</label>
+                            <input type="date" class="start_date form-control" value="">
+
+                            <label for="Completion Date" class="mt-2">Completion Date</label>
                             <input type="date" class="completion_date form-control" value="">
+
                         </div>
+                    </div>
+                    <div class="row">
+                        <button type="button" class="addItem_add btn dark-button x-button mt-3 ml-1"
+                        data-item-id="1" data-counter="1">Add Item</button>
+                    </div>
+                    <div class="row pt-3" style="margin-top: 15px;">
                         <div class="col-4 ml-auto text-right">
                             <button type="button" class="btn dark-button" data-toggle="modal"
                                 data-target="#confirm-modal"> Create Job Order
@@ -346,47 +387,86 @@
     </div>
 </form>
 
-<div class="modal" id="stores" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
-    <div class="modal-content"  style="height:60%; width:40%">
-        <div class="modal-body">
-            <div class="container-fluid">    
-                <input type="hidden" name="add_form" value="1"></input>
-                <div class="row">
-                    <div class="col-11">
-                        <h3 style="margin-bottom: 30px;">Stores</h3>
+<form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
+    <div class="modal" id="outlets" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
+        <div class="modal-content"  style="height:60%; width:40%">
+            <div class="modal-body">
+                <div class="container-fluid">    
+                    <input type="hidden" name="add_form" value="1"></input>
+                    <div class="row">
+                        <div class="col-11">
+                            <h3 style="margin-bottom: 30px;">Outlet</h3>
+                        </div>
+                        <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
+                                aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
                     </div>
-                    <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
-                            aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        Store Name:
+                    <div class="row">
+                        <div class="col">
+                            Outlet #
+                        </div>
+                        <div class="col">
+                            Outlet Name
+                        </div>
+                        <div class="col-2">
+                        </div>
+                    </div>
+                    <div class="outletContainer">
+                    {% for outlet in outlets %}
+                    <div class="outletRow row mt-2" id="outletRow{{forloop.counter}}">
+                        <div class="col">
+                            <input type="number" class="outlet_id form-control" value="{{outlet.pk}}" readonly>
+                        </div>
+                        <div class="col">
+                            <input type="text" class="outlet_name form-control" value="{{outlet.outlet_name}}"> 
+                        </div>
+                        <div class="col-2">
+                            <button type="button" class="btn dark-button delete-outlet"
+                            data-row-id="outletRow{{forloop.counter}}"> &times
+                            </button>
+                        </div>
+                    </div>                    
+                    {% endfor %}
+                    </div>
+                    <div class="row">
+                        <button type="button" class="addOutlet btn dark-button x-button mt-3 ml-1" id="outlet1"
+                        data-counter="{{outlet_count}}">Add Row</button>
                     </div>
                 </div>
-                <div class="storeContainer">
-                {% for store in stores %}
-                {% endfor %}
-                </div>
-                <div class="row">
-                    <button type="button" class="addStore btn dark-button x-button mt-3 ml-1" id="store1"
-                    data-counter="{{store_count}}">Add Store</button>
-                </div>
+                <div class="row pt-3" style="margin-top: 15px;">
+                        <div class="col-4 mr-auto">
+                            <button type="button" class="btn dark-button" data-dismiss="modal"> Cancel
+                                Action</button>
+                        </div>
+                        <div class="col-4 ml-auto text-right">
+                            <button type="button" class="btn dark-button" data-toggle="modal"
+                                data-target="#outletconf"> Save
+                            </button>
+                        </div>
+                    </div>
             </div>
-            <div class="row pt-3" style="margin-top: 15px;">
-                    <div class="col-4 mr-auto">
-                        <button type="button" class="btn dark-button" data-dismiss="modal"> Cancel
-                            Action</button>
-                    </div>
-                    <div class="col-4 ml-auto text-right">
-                        <button type="button" class="btn dark-button" data-toggle="modal"
-                            data-target="#confirm-modal"> Add Material
-                        </button>
-                    </div>
-                </div>
         </div>
     </div>
-</div>
 
+    <div class="modal" id="outletconf" tabindex="-1" style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="col-12">
+                    <h4 style="text-align: center;"> Confirm edits? </h4>
+                </div>
+                <div class="row text-center" style="margin-top: 15px;">
+                    <div class="col">
+                        <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
+                            Editing </button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn dark-button confirm-button submit-btn-outlet">
+                            Confirm </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
 <!-- TEMPLATES -->
 <div class="orderItem_instance" id="orderItem_instance_temp" style="display:none;">
     <div class="row pt-3">
@@ -405,7 +485,7 @@
         </div>
         <div class="col">
             <label for="bespoke"> Bespoke</label>
-            <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="1">
+            <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="orderItem_instance1">
         </div>
         <div class="col p-4">
             <button type="button" class="btn dark-button delete-item"
@@ -420,10 +500,10 @@
         <button type="button" class="addMaterial_add btn dark-button x-button mt-3 ml-1" id="addMaterial1"
         data-item-id="1" data-counter="0">Add Material</button>
     </div>
-    <hr>
+    <hr style="margin: 20px 0; border-top:1px solid #767B85">
 </div>
 
-<div class="materialRow row mt-1" id="materialRow_temp" style="display:none;">
+<div class="materialRow row mt-1 pr-2" id="materialRow_temp" style="display:none;">
     <div class="col-3">
         <select class="material_type input-select">
             <option value="textile"> Textile</option>
@@ -442,7 +522,7 @@
         <input type="number" class="bespoke_rate form-control" placeholder="Bespoke Rate" step="0.01">
     </div>
     <div class="col-2">
-        <input type="number" class="quantity form-control" placeholder="Quantity">
+        <input type="number" class="quantity form-control" placeholder="Qty">
     </div>
     <div class="col-1">
         <button type="button" class="btn dark-button delete-material" data-row-id=""> &times
@@ -450,12 +530,15 @@
     </div>
 </div>
 
-<div class="storeRow row mt-2" id="storeRow_temp" style="display:none;">
+<div class="outletRow row mt-2" id="outletRow_temp" style="display:none;">
     <div class="col">
-        <input type="text" class="store_name form-control"> 
+        <input type="number" class="outlet_id form-control" readonly>
+    </div>
+    <div class="col">
+        <input type="text" class="outlet_name form-control"> 
     </div>
     <div class="col-2">
-        <button type="button" class="btn dark-button delete-store"
+        <button type="button" class="btn dark-button delete-outlet"
         data-row-id=""> &times
         </button>
     </div>
@@ -466,8 +549,8 @@ $(document).ready(function() {
     const materialRow_template = $('#materialRow_temp');
     const item_template = $('#orderItem_instance_temp');
     const addItem_container = $('#orderItemContainer');
-    const store_template = $('#storeRow_temp');
-    const store_parent = $('.storeContainer');
+    const outlet_template = $('#outletRow_temp');
+    const outlet_parent = $('.outletContainer');
 
     function addMaterial_add(itemId, counter, button) {
         counter++;
@@ -498,6 +581,49 @@ $(document).ready(function() {
         newItem.attr('id', 'orderItem_instance' + counter);
         newItem.find('.order_item').attr('id', 'order_item' + counter).val('delete');
         newItem.find('.quantity').val('');
+        newItem.find('.bespoke').prop('checked', false).attr('data-item-id', 'orderItem_instance' + counter);
+
+        newItem.find('.delete-item').attr('data-row-id', 'orderitem_instance' + counter);
+
+        newItem.find('.itemMaterialContainer').attr('id', 'itemMaterialContainer' + counter);
+        newItem.find('.addMaterial_add').attr('data-item-id', counter);
+
+        addItem_container.append(newItem);
+        newItem.show();
+
+        button.data('counter', counter);
+
+        console.log(newItem);
+    }
+    function addMaterial_edit(orderid, itemId, counter, button) {
+        counter++;
+
+        newRow = materialRow_template.clone()
+        newRow.attr('id', 'materialRow' + itemId + '_' + counter);
+        newRow.find('.item_material').attr('id', 'item_material' + itemId + '_' + counter).val('delete');
+        newRow.find('.bespoke_rate').val('');
+
+        newRow.find('.delete-material').attr('data-row-id', 'materialRow' + itemId + '_' + counter);
+        console.log(newRow.find('.item_material').attr('id'))
+        button.data('counter', counter);
+
+        let parent = $('#itemMaterialContainer' + itemId + '.itemMaterialContainer');
+
+        console.log(parent)
+
+        parent.append(newRow);
+        newRow.show();
+
+        console.log(newRow);
+    }
+    function addItem_edit(orderId, counter, button) {
+        counter++; 
+
+        newItem = item_template.clone()
+
+        newItem.attr('id', 'orderItem_instance' + counter);
+        newItem.find('.order_item').attr('id', 'order_item' + counter).val('delete');
+        newItem.find('.quantity').val('');
         newItem.find('.bespoke').prop('checked', false).attr('data-item-id', counter);
 
         newItem.find('.delete-item').attr('data-row-id', 'orderitem_instance' + counter);
@@ -512,20 +638,19 @@ $(document).ready(function() {
 
         console.log(newItem);
     }
-    function addStore(counter, button) {
+    function addOutlet(counter, button) {
         counter++;
 
-        newRow = store_template.clone();
-        newRow.attr('id', 'store' + counter);
+        newRow = outlet_template.clone();
+        newRow.attr('id', 'outlet' + counter);
 
-        newRow.find('.delete-store').attr('data-row-id', 'store' + counter);
-        store_parent.append(newRow);
+        newRow.find('.delete-outlet').attr('data-row-id', 'outlet' + counter);
+        outlet_parent.append(newRow);
         newRow.show();
-
-
 
         button.data('counter', counter);
     }
+
     $('#addord').on('change', '.bespoke', function() {
         let itemId = $(this).data('item-id');
         let itemContainer = $('#orderItem_instance' + itemId);
@@ -583,16 +708,22 @@ $(document).ready(function() {
         let row = $('.orderItemContainer').find('#' + rowId)
         row.remove()
     })
-    $('#stores').on('click', '.addStore', function () {
+    $('#outlets').on('click', '.addOutlet', function () {
         let button = $(this);
         let counter = button.data('counter');
 
-        addStore(counter, button);
+        addOutlet(counter, button);
     })
-    $('#stores').on('click', '.delete-store', function() {
+    $('#outlets').on('click', '.delete-outlet', function() {
         let rowId = $(this).data('row-id');
-        let row = $('#stores').find('#' + rowId);
-        row.remove()
+        let row = $("#" + rowId);
+        let name = row.find('.outlet_name');
+
+        console.log(rowId);
+        console.log(row)
+        
+        row.hide();
+        name.val('delete');
     })
 
     $(".submit-btn").click(function() {
@@ -630,7 +761,10 @@ $(document).ready(function() {
 
         submit_data = {
             'pk': modal.find('.pk').val(),
+            'customer': modal.find('.customer').val(),
+            'outlet': modal.find('.outlet').val(),
             'file_date': modal.find('.file_date').val(),
+            'start_date': modal.find('.start_date').val(),
             'completion_date': modal.find('.completion-date').val(),
             'status': modal.find('.status').val(),
             'items': JSON.stringify(item_data),
@@ -660,8 +794,49 @@ $(document).ready(function() {
                 alert("something broke")  // uncontrolled error
             }
         });
-
     });
+    $('.submit-btn-outlet').click(function() {
+        console.log('pass');
+        let outlet_data = [];
+        let submit_data = {};
+        $.each(outlet_parent.find('.outletRow'), function(counter, row) { 
+            temp = {
+                'outlet_id': $(row).find('.outlet_id').val(),
+                'outlet_name': $(row).find('.outlet_name').val(),
+            };
+            outlet_data.push(temp);
+        });
+        submit_data = {
+            'outlets': JSON.stringify(outlet_data),
+            'action': 'outlets',
+            "csrfmiddlewaretoken": $("[name=csrfmiddlewaretoken]").val(),
+        }
+        console.log(submit_data)
+
+        $.ajax({
+            method: "post",
+            data: submit_data,
+            success: function(data){
+                console.log(data["status"])
+                if (data["status"]){
+                    // redirect to returned url
+                    window.location = data["url"];
+                } else{
+                    // controlled error, display message
+                    alert(data["msg"]);
+                }
+            },
+            error: function(xhr, textStatus, errorThrown){
+                // Basic `xhr.status` Key
+                // 0    = Server didn't Reply (Server Down)
+                // 400  = Bad Request         (Syntax Error)
+                // 403  = Forbidden           (Login Token Expired)
+                // 403  = Not Found           (Invalid Url)
+                // 500  = Server Error        (Django Crash)
+                alert("something broke")  // uncontrolled error
+            }
+        });
+    })
 });
 </script>
 
