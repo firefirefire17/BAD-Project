@@ -34,7 +34,7 @@ class Accessory(models.Model):
     
 class Product(models.Model):
     name = models.CharField(max_length=50)
-    stock = models.IntegerField()
+    stock = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999)])
     prod_margin = models.FloatField(null=True) # renamed from 'margin'
     labor_time = models.IntegerField(null=True) 
     misc_margin = models.IntegerField(null=True)
