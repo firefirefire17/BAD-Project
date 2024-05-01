@@ -271,7 +271,7 @@
                                     </div>
                             </form>
                             <div class="col-4 order-1 mr-auto text-left">
-                                <button type="button" class="btn dark-button"
+                                <button type="button" class="btn dark-button delete-button"
                                     onclick="toggleModal('confirmDeleteProduct{{product_data.product.pk}}', 'open')">
                                     Delete Product
                                 </button>
@@ -323,7 +323,7 @@
     <div class="row ml-auto pr-3 mt-3">
         <button type="button" class="btn light-button mr-3" onclick="toggleModal('globalValues', 'open')"
         style="margin-top: -5%;">
-        Global Values</button>
+        Financial Values</button>
         <button type="button" class="btn light-button" onclick="toggleModal('addProduct', 'open')"
         style="margin-top: -5%;">
         Add Product</button>
@@ -334,7 +334,7 @@
     <div class="modal-content modal-content fade-in">
         <div class="row" style="margin-right: 5px; margin-top:0px; margin-bottom:0px;">
             <div class="col">
-                <h2> Global Values</h2>
+                <h2> Financial Value</h2>
             </div>
             <div class="col">
                 <span class="close" onclick="toggleModal('globalValues', 'close')">&times;</span>
@@ -503,7 +503,7 @@
             <div class="row">
                 <div class="col-4 order-2 ml-auto text-right" style="margin-right: 5px;">
                     <button type="button" class="btn dark-button" onclick="toggleModal('confirmAddProduct', 'open')">
-                        Save Edits </button>
+                        Add Product </button>
                 </div>
             </div>
 

@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.functions import Now
 from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator
+import hashlib
 
 # Create your models here.
 # https://docs.djangoproject.com/en/5.0/topics/db/models/  Extra fields on many-to-many relationships
@@ -98,9 +99,6 @@ class Product(models.Model):
         return self.calc_price
 
 
-
-
-
 class Product_Accessory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     accessory = models.ForeignKey(Accessory, on_delete=models.CASCADE)
@@ -145,6 +143,24 @@ class Item(models.Model):
     cost = models.FloatField(null=True)
     accessories = models.ManyToManyField(Accessory, through='Item_Accessory')
     textiles = models.ManyToManyField(Textile, through='Item_Textile')
+
+    #this is honestly from ChatGPT, I needed a way to find duplicates for items bc sir wouldnt let us make item the assoc entity (sigh)
+    def generate_hash(self):
+        # Concatenate all relevant attributes, quantities, and bespoke rates, and calculate the hash
+        attributes_string = f"{self.product.pk}-{self.type}-{self.cost}"
+        accessory_info = '-'.join(f"{acc.pk}:{acc.quantity}:{acc.bespoke_rate}" for acc in self.item_accessory_set.all())
+        textile_info = '-'.join(f"{txt.pk}:{txt.quantity}:{txt.bespoke_rate}" for txt in self.item_textile_set.all())
+        attributes_string += f"-{accessory_info}-{textile_info}"
+        return hashlib.md5(attributes_string.encode()).hexdigest()
+
+    def is_duplicate(self):
+        # Check if a similar Item already exists by comparing hashes
+        current_hash = self.generate_hash()
+        existing_items = Item.objects.exclude(pk=self.pk)  # Exclude current item
+        for existing_item in existing_items:
+            if existing_item.generate_hash() == current_hash:
+                return existing_item
+        return False
 
 class Item_Textile(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, db_column='product_number')
@@ -197,16 +213,16 @@ class StockIn_Accessory(models.Model):
     accessory = models.ForeignKey(Accessory, on_delete=models.CASCADE)
     stock_in = models.ForeignKey(StockIn, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    cost = models.FloatField()
+    cost = models.FloatField(null=True)
 
 class StockIn_Textile(models.Model):
     textile = models.ForeignKey(Textile, on_delete=models.CASCADE)
     stock_in = models.ForeignKey(StockIn, on_delete=models.CASCADE)
     quantity = models.FloatField()
-    cost = models.FloatField()
+    cost = models.FloatField(null=True)
     
 
-class Global_Value(models.Model):
+class Financial_Value(models.Model):
     name = models.CharField(max_length=50)
     value = models.IntegerField()
 

@@ -39,7 +39,7 @@
 
                         <!-- modal to edit materials -->
                         <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
-                            <div class="modal" id="editord-modal{{order_data.order.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
+                            <div class="modal edit_modal" id="editord-modal{{order_data.order.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
                                 <div class="modal-content" style="width:60%;">
                                     <div class="modal-body">
                                         <div class="container-fluid">
@@ -53,18 +53,18 @@
                                             <div class="row justify-content-between">
                                                 <div class="col-4">
                                                     <label for="name">Job Order #</label>
-                                                    <input type="number" class="pk form-control" value="" readonly>
+                                                    <input type="number" class="pk form-control" value="{{ order_data.order.pk }}" readonly>
                                                 </div>
                                                 <div class="col-4">
                                                     <label for="name">Customer</label>
-                                                    <input type="text" class="customer form-control">
+                                                    <input type="text" class="customer form-control" value="{{order_data.order.customer}}">
                                                 </div>
                                                 <div class="col-4">
                                                     <label for="outlet">Outlet</label>
                                                     <select class="outlet input-select" id="order_item1">
                                                         <option value="delete">None</option>
                                                         {% for z in outlets %}
-                                                        <option value="{{z.pk}}">{{z.outlet_name}}</option>
+                                                        <option value="{{z.pk}}" {% if order_data.order.outlet.pk == z.pk %} selected {% endif %}>{{z.outlet_name}}</option>
                                                         {% endfor %}
                                                     </select>
                                                 </div>
@@ -91,7 +91,7 @@
                                                                 </div>
                                                                 <div class="col">
                                                                     <label for "bespoke"> Bespoke? </label>
-                                                                    <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="{{forloop.counter}}" {% if item_data.bespoke == 'yes' %}checked{% endif %}>
+                                                                    <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}" {% if item_data.bespoke == 'yes' %}checked{% endif %}>
                                                                 </div>
                                                                 <div class="col p-4">
                                                                     <button type="button" class="btn dark-button delete-item"
@@ -138,16 +138,16 @@
                                                                 {% endfor %}
                                                             </div>
                                                             <div class="button_row row justify-content-center">
-                                                                <button type="button" class="addMaterial_edit btn dark-button x-button mt-3 ml-1" id="addMaterial1"
-                                                                data-item-id="1" data-counter="0">Add Material</button>
+                                                                <button type="button" class="addMaterial addMaterial_edit btn dark-button x-button mt-3 ml-1" id="{{order_data.order.pk}}editMaterial{{forloop.counter}}"
+                                                                data-order-id="{{order_data.order.pk}}" data-item-id="{{forloop.counter}}" data-counter="{{item_data.material_count}}" {% if item_data.bespoke == 'no' %}style="display:none;"{% endif %}>Add Material</button>
                                                             </div>
                                                             <hr style="margin: 20px 0; border-top:1px solid #767B85;">
                                                         </div>
                                                     {% endfor %}
                                                     </div>
                                                     <div class="row">
-                                                        <button type="button" class="addItem_add btn dark-button x-button mt-3 ml-1"
-                                                        data-item-id="1" data-counter="1">Add Item</button>
+                                                        <button type="button" class="addItem_edit btn dark-button x-button mt-3 ml-1"
+                                                        data-order-id="{{order_data.order.pk}}" data-counter="{{order_data.item_count}}">Add Item</button>
                                                     </div>
                                                 </div>
                                                 <div class="col" style="border-left:1px solid #767B85;">
@@ -160,10 +160,10 @@
                                                     </select>
 
                                                     <label for="File Date" class="mt-2">File Date</label>
-                                                    <input type="date" class="file_date form-control" value="">
+                                                    <input type="date" class="file_date form-control" value="{{ order_data.file_date|date:'Y-m-d' }}">
                         
                                                     <label for="Start Date" class="mt-2">Start Date</label>
-                                                    <input type="date" class="start_date form-control" value="">
+                                                    <input type="date" class="start_date form-control" value="{{ order_data.start_date|date:'Y-m-d' }}">
 
                                                     <label for="Completion Date">Completion Date</label>
                                                     <input type="date" class="completion_date form-control" value="{{ order_data.completion_date|date:'Y-m-d' }}">
@@ -171,13 +171,12 @@
                                             </div>
                                             <div class="row mt-3">
                                                 <div class="col-3 mr-auto">
-                                                    <button type="button" class="btn dark-button m-2" data-toggle="modal"
-                                                    data-target="#delconf-modal{{order_data.order.pk}}"> Delete
-                                                    Material </button>
+                                                    <button type="button" class="btn dark-button delete-button m-2" data-toggle="modal"
+                                                    data-target="#delconf-modal{{order_data.order.pk}}"> Delete Job Order </button>
                                                 </div>
                                                 <div class="col-3 ml-auto">
                                                     <button type="button" class="btn dark-button m-2" data-toggle="modal"
-                                                    data-target="#editconf-modal{{order_data.order.pk}}"> Edit Job Order
+                                                    data-target="#editconf-modal{{order_data.order.pk}}"> Save Edits
                                                     </button>
                                                 </div>
                                             </div>
@@ -322,9 +321,9 @@
                                     <div class="itemMaterialContainer" id="itemMaterialContainer1" style="display:none;">
                                         <div class="row ml-1 pb-0"> Add-Ons </div>
                                     </div>
-                                    <div class="button_row row justify-content-center" style="display:none;">
-                                        <button type="button" class="addMaterial_add btn dark-button x-button mt-3 ml-1" id="addMaterial1"
-                                        data-item-id="1" data-counter="0">Add Material</button>
+                                    <div class="button_row row justify-content-center">
+                                        <button type="button" class="addMaterial_add addMaterial btn dark-button x-button mt-3 ml-1" id="addMaterial1"
+                                        data-item-id="1" data-counter="0" style="display:none;">Add Material</button>
                                     </div>
                                     <hr style="margin: 20px 0; border-top:1px solid #767B85">
                                 </div>
@@ -496,9 +495,9 @@
     <div class="itemMaterialContainer" id="itemMaterialContainer_temp" style="display:none;">
         <div class="row ml-1 pb-0"> Add-Ons </div>
     </div>
-    <div class="button_row row justify-content-center" style="display:none;">
-        <button type="button" class="addMaterial_add btn dark-button x-button mt-3 ml-1" id="addMaterial1"
-        data-item-id="1" data-counter="0">Add Material</button>
+    <div class="button_row row justify-content-center">
+        <button type="button" class="addMaterial addMaterial_add btn dark-button x-button mt-3 ml-1" id="addMaterial1"
+        data-item-id="1" data-counter="0" style="display:none;">Add Material</button>
     </div>
     <hr style="margin: 20px 0; border-top:1px solid #767B85">
 </div>
@@ -586,7 +585,7 @@ $(document).ready(function() {
         newItem.find('.delete-item').attr('data-row-id', 'orderitem_instance' + counter);
 
         newItem.find('.itemMaterialContainer').attr('id', 'itemMaterialContainer' + counter);
-        newItem.find('.addMaterial_add').attr('data-item-id', counter);
+        newItem.find('.addMaterial_add').attr('id', 'addMaterial' + counter).attr('data-item-id', counter);
 
         addItem_container.append(newItem);
         newItem.show();
@@ -595,19 +594,19 @@ $(document).ready(function() {
 
         console.log(newItem);
     }
-    function addMaterial_edit(orderid, itemId, counter, button) {
+    function addMaterial_edit(orderId, itemId, counter, button) {
         counter++;
 
         newRow = materialRow_template.clone()
-        newRow.attr('id', 'materialRow' + itemId + '_' + counter);
-        newRow.find('.item_material').attr('id', 'item_material' + itemId + '_' + counter).val('delete');
+        newRow.attr('id', orderId + 'materialRow' + itemId + '_' + counter);
+        newRow.find('.item_material').attr('id', orderId + 'item_material' + itemId + '_' + counter).val('delete');
         newRow.find('.bespoke_rate').val('');
 
-        newRow.find('.delete-material').attr('data-row-id', 'materialRow' + itemId + '_' + counter);
+        newRow.find('.delete-material').attr('data-row-id', orderId + 'materialRow' + itemId + '_' + counter);
         console.log(newRow.find('.item_material').attr('id'))
         button.data('counter', counter);
 
-        let parent = $('#itemMaterialContainer' + itemId + '.itemMaterialContainer');
+        let parent = $('#' + orderId + 'itemMaterialContainer' + itemId);
 
         console.log(parent)
 
@@ -621,17 +620,23 @@ $(document).ready(function() {
 
         newItem = item_template.clone()
 
-        newItem.attr('id', 'orderItem_instance' + counter);
-        newItem.find('.order_item').attr('id', 'order_item' + counter).val('delete');
+        newItem.attr('id', orderId + 'orderItem_instance' + counter);
+        newItem.find('.order_item').attr('id', orderId + 'order_item' + counter).val('delete');
         newItem.find('.quantity').val('');
-        newItem.find('.bespoke').prop('checked', false).attr('data-item-id', counter);
+        newItem.find('.bespoke').prop('checked', false).attr('data-item-id', orderId + 'orderItem_instance' + counter);
 
-        newItem.find('.delete-item').attr('data-row-id', 'orderitem_instance' + counter);
+        newItem.find('.delete-item').attr('data-row-id', orderId + 'orderItem_instance' + counter);
 
-        newItem.find('.itemMaterialContainer').attr('id', 'itemMaterialContainer' + counter);
-        newItem.find('.addMaterial_add').attr('data-item-id', counter);
+        newItem.find('.itemMaterialContainer').attr('id', orderId + 'itemMaterialContainer' + counter);
+        newItem.find('.addMaterial_add')
+        .removeClass('addMaterial_add')
+        .addClass('addMaterial_edit')    
+        .attr('data-item-id', counter)
+        .attr('data-order-id', orderId); 
 
-        addItem_container.append(newItem);
+        parent = $('#orderItemContainer' + orderId)
+        parent.append(newItem);
+
         newItem.show();
 
         button.data('counter', counter);
@@ -651,17 +656,22 @@ $(document).ready(function() {
         button.data('counter', counter);
     }
 
-    $('#addord').on('change', '.bespoke', function() {
+    $(document).on('change', '.bespoke', function() {
         let itemId = $(this).data('item-id');
-        let itemContainer = $('#orderItem_instance' + itemId);
+        let itemContainer = $('#' + itemId);
         let materialContainer = itemContainer.find('.itemMaterialContainer');
-        let button = itemContainer.find('.button_row');
+        let button = itemContainer.find('.addMaterial')
+
+        console.log(itemContainer)
+        console.log(materialContainer)
+        console.log(button)
         
         if ($(this).is(":checked")) {
             materialContainer.show(); 
             button.show();
         } else {
             materialContainer.hide();
+            materialContainer.empty();
             button.hide();
         }
     });
@@ -724,6 +734,25 @@ $(document).ready(function() {
         
         row.hide();
         name.val('delete');
+    })
+    $('.edit_modal').on('click', '.addItem_edit', function () {
+        let button = $(this);
+        let counter = $(this).data('counter');
+        let orderId = $(this).data('order-id');
+
+        addItem_edit(orderId, counter, button)
+    })
+    $('.edit_modal').on('click', '.addMaterial_edit', function () {
+        let button = $(this);
+        let counter = $(this).data('counter');
+        let orderId = $(this).data('order-id');
+        let itemId = $(this).data('item-id')
+
+        console.log(counter)
+        console.log(orderId)
+        console.log(itemId)
+
+        addMaterial_edit(orderId, itemId, counter, button)
     })
 
     $(".submit-btn").click(function() {

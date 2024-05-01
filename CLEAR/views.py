@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Global_Value, MaterialKey, Outlet
+from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Financial_Value, MaterialKey, Outlet
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
@@ -27,13 +27,13 @@ def products(request):
 
     # assign global values if they exist
     try:
-        wage_object = Global_Value.objects.get(name="labor_wage")
+        wage_object = Financial_Value.objects.get(name="labor_wage")
         wage = wage_object.value
     except: # if the global value doesn't exist, assign it to false to flag it for creation later
         wage_object = False
 
     try:
-        vat_object = Global_Value.objects.get(name="vat")
+        vat_object = Financial_Value.objects.get(name="vat")
         vat = vat_object.value
     except:
         vat_object = False
@@ -281,14 +281,14 @@ def products(request):
             vat_update = request.POST.get("VAT")
 
             if wage_object:
-                Global_Value.objects.filter(name="labor_wage").update(value=wage_update)
+                Financial_Value.objects.filter(name="labor_wage").update(value=wage_update)
             else:
-                Global_Value.objects.create(name="labor_wage", value=wage_update)
+                Financial_Value.objects.create(name="labor_wage", value=wage_update)
             
             if vat_object:
-                Global_Value.objects.filter(name="vat").update(value=vat_update)
+                Financial_Value.objects.filter(name="vat").update(value=vat_update)
             else:
-                Global_Value.objects.create(name="vat", value=vat_update)
+                Financial_Value.objects.create(name="vat", value=vat_update)
             
             return redirect('products')
 
@@ -434,7 +434,6 @@ def job_orders(request):
     accessory_objects = Accessory.objects.all()
     outlet_objects = Outlet.objects.all()
     outlet_count = len(outlet_objects)
-    print(outlet_objects)
     order_list = []
 
     for order in Job_Order.objects.all():
@@ -473,7 +472,9 @@ def job_orders(request):
                 item_data['bespoke'] = 'yes'
             else:
                 item_data['bespoke'] = 'no'
+            item_data['item_count'] = len(item_data['materials'])
             order_data['items'].append(item_data)
+        order_data['item_count'] = len(order_data['items'])
         order_list.append(order_data)
     
     if (request.method == "POST"):
@@ -501,34 +502,47 @@ def job_orders(request):
 
             item_data = json.loads(request.POST.get("items"))
             for item in item_data:
-                product = Product.objects.get(pk = item['order_item'])
-                quantity = item['quantity']
-                if item['materials']:
-                    type = "bespoke"
+                product_id = item['order_item']
+                if product_id == 'delete':
+                    pass
                 else:
-                    type = "regular"
-
-                new_item = Item.objects.create(product=product, type=type)
-
-                for material in item['materials']:
-                    material_type = material['material_type']
-                    item_material = material['item_material']
-                    bespoke_rate = material['bespoke_rate']
-                    quantity = material['quantity']
-                    print(material_type)
-                    print(item_material)
-                    if item_material == "delete":
-                        pass
+                    product = Product.objects.get(pk = item['order_item'])
+                    quantity = item['quantity']
+                    if item['materials']:
+                        type = "bespoke"
                     else:
-                        if material_type == 'textile':
-                            print('textile')
-                            textile_object = Textile.objects.get(material_key__material_key = item_material)
-                            Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                        type = "regular"
+
+                    new_item = Item.objects.create(product=product, type=type)
+
+                    for material in item['materials']:
+                        material_type = material['material_type']
+                        item_material = material['item_material']
+                        bespoke_rate = material['bespoke_rate']
+                        quantity = material['quantity']
+                        print(material_type)
+                        print(item_material)
+                        if item_material == "delete":
+                            pass
                         else:
-                            print('accessory')
-                            accessory_object = Accessory.objects.get(material_key__material_key = item_material)
-                            Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
-                Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
+                            if material_type == 'textile':
+                                print('textile')
+                                textile_object = Textile.objects.get(material_key__material_key = item_material)
+                                Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                            else:
+                                print('accessory')
+                                accessory_object = Accessory.objects.get(material_key__material_key = item_material)
+                                Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                    
+                    existing_item = new_item.is_duplicate()
+                    print(existing_item)
+                    if not existing_item:
+                        print('pass')
+                        Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
+                    else:
+                        new_item.delete()
+                        Order_Item.objects.create(order=new_order, item=existing_item, quantity=quantity)
+        
             response = {}
             response['status'] = True
             response['msg'] = "Form submitted."
@@ -537,7 +551,73 @@ def job_orders(request):
             # return dict to ajax
             return JsonResponse(response)
         elif action == "edit_form":
-            pass
+            outlet_object = Outlet.objects.get(pk=outlet)
+
+            pk = request.POST.get("pk")
+            order = Job_Order.objects.get(pk=pk)
+
+            if start_date:
+                order.start_date = start_date
+            if completion_date:
+                order.completion_date = completion_date
+            
+            order.file_date=file_date
+            order.order_status=status
+            order.customer=customer
+            order.outlet=outlet_object
+
+            Order_Item.objects.filter(order=order).delete()
+            
+            item_data = json.loads(request.POST.get("items"))
+            for item in item_data:
+                product_id = item['order_item']
+                if product_id == 'delete':
+                    pass
+                else:
+                    product = Product.objects.get(pk = item['order_item'])
+                    quantity = item['quantity']
+                    if item['materials']:
+                        type = "bespoke"
+                    else:
+                        type = "regular"
+
+                    new_item = Item.objects.create(product=product, type=type)
+
+                    for material in item['materials']:
+                        material_type = material['material_type']
+                        item_material = material['item_material']
+                        bespoke_rate = material['bespoke_rate']
+                        quantity = material['quantity']
+                        print(material_type)
+                        print(item_material)
+                        if item_material == "delete":
+                            pass
+                        else:
+                            if material_type == 'textile':
+                                print('textile')
+                                textile_object = Textile.objects.get(material_key__material_key = item_material)
+                                Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                            else:
+                                print('accessory')
+                                accessory_object = Accessory.objects.get(material_key__material_key = item_material)
+                                Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                    
+                    existing_item = new_item.is_duplicate()
+                    print(existing_item)
+                    if not existing_item:
+                        print('pass')
+                        Order_Item.objects.create(order=order, item=new_item, quantity=quantity)
+                    else:
+                        new_item.delete()
+                        Order_Item.objects.create(order=order, item=existing_item, quantity=quantity)
+            order.save() 
+            response = {}
+            response['status'] = True
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('orders')
+
+            # return dict to ajax
+            return JsonResponse(response)
         elif 'delete_form' in request.POST:
             pk = request.POST.get("pk")
             Job_Order.objects.filter(pk=pk).delete()
