@@ -123,19 +123,21 @@ class Product_Component(models.Model):
     buffer = models.FloatField(null=True)  
 
     
+    
+class Outlet(models.Model):
+    outlet_name = models.CharField(max_length=50)
+
 class Job_Order(models.Model):
     order_status = models.CharField(max_length=50, default="In-queue")
     file_date = models.DateField()
     start_date = models.DateField(null=True)
     completion_date = models.DateField(null=True)
     customer = models.CharField(max_length=50, null=True)
+    outlet = models.ForeignKey(Outlet, on_delete=models.CASCADE)
+    total_price = models.FloatField(null=True)
 
     def __str__(self):
         return f'{self.pk}_{self.file_date}'
-    
-class Store(models.Model):
-    store_name = models.CharField(max_length=50)
-    job_order = models.ForeignKey(Job_Order, on_delete=models.CASCADE)
     
 class Item(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, db_column='product_number')
