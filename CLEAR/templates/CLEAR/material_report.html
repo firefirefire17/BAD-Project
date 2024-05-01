@@ -1,0 +1,132 @@
+{% extends "CLEAR/base.html" %}
+{% load static %}
+
+<!--PLEASE FIX THE BUTTON DESIGN-->
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet4.css' %}">
+    <script src="{% static 'js/styling.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+</head>
+
+{% block content %}
+
+<div class="row pl-3 pt-3 pr-3" style="height:700px;">
+    <div class="card main-card">
+        <div class="table-responsive card"
+            style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
+            <table class="table table-hover table-striped" style="border-radius: 40px;">
+                <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
+                    <th scope="col"> Material # </th>
+                    <th scope="col"> Name</th>
+                    <th scope="col"> Material Type </th>
+                    <th scope="col"> Stock</th>
+                    <th scope="col"> Cost </th>
+                    <th scope="col"></th>
+                </thead>
+                <tbody>
+                    {% for material_data in materials %}
+                        <tr style="height:70px;">
+                            <td> {{ material_data.material.material_key.material_key }} </td>
+                            <td> {{ material_data.material.name }} </td>
+                            <td> {{ material_data.type|title }} </td>
+                            <td> {{ material_data.material.stock|floatformat:2 }} {{material_data.unit}}</td>
+                            <td> {{ material_data.material.cost }} </td>
+                            <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
+                                    data-target="#editmat-modal{{material_data.material.material_key.material_key}}" style="border-radius: 30px;">Edit</button>
+                            </td>
+                        </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+        </div>
+        <div class="row" style="display: flexbox; justify-content: flex-end; margin-right: 15px;">
+            <div class="col">
+                <button type="button" class="btn light-button download-button">
+                    Download
+                </button>
+            </div>
+            <div class="col">
+                <button type="button" class="btn light-button" data-toggle="modal" data-target="#generateReportModal">
+                    Generate Report
+                </button>
+            </div>
+        </div>
+        <!--GENERATE REPORT MODAL-->
+        <div class="modal" id="generateReportModal" tabindex="-1" role="dialog" aria-labelledby="generateReportModalLabel">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content"  style="width: 350px;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="generateReportModalLabel">Generate Report</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body ml-4">
+                        <div class="row" style="display: flexbox; align-items: baseline;">
+                            <label for="reptype">Report type</label>
+                            <select class="reptype input-select" name="reptype" style="width: 150px; border-radius: 100px; margin-left: 20px;">
+                                <option value="materials">Materials</option>
+                                <option value="production">Production</option>
+                                <option value="pricing">Pricing</option>
+                                <option value="shopping_list">Shopping List</option>
+                            </select>
+                        </div>
+                        <div class="editContainer">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display: flexbox; justify-content: space-between;">
+                        <button type="button" class="btn dark-button" style="border-radius: 100px;" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn dark-button" >Generate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+        const editContainer = $('.editContainer');
+        $(document).on('change', '.reptype', function() {
+            console.log('pass');
+            let reptype = $(this).val();
+    
+            if (reptype == "production") {
+                editContainer.empty(); 
+                editContainer.append('<div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">' +
+                    '<label for="reportDate">Date</label>' +
+                    '<input type="date" class="last_update form-control"' +
+                    'style="width: 150px; border-radius: 100px; margin-left: 70px;">' +
+                    '</div>');
+            } else if (reptype == "shopping_list") {
+                editContainer.empty();
+                editContainer.append('<div>Shopping list here</div>');
+            } else {
+                editContainer.empty();
+            }
+        });
+        $("#downloadButton").click(function() {
+            $.ajax({
+                url: '/generate_material_pdf/',
+                type: 'GET',
+                success: function(data) {
+                    // Handle success (optional)
+                    console.log('PDF generated successfully');
+                },
+                error: function(xhr, status, error) {
+                    // Handle error (optional)
+                    console.error('Error generating PDF:', error);
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

@@ -15,26 +15,26 @@
 
 <div class="row pl-3 pt-3 pr-3" style="height:700px;">
     <div class="card main-card">
-            <div class="table-responsive card"
-                style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
-                <table class="table table-hover table-striped" style="border-radius: 40px;">
-                    <thead style="background-color: #3f3e3e; color: #ffffff;">
-                        <th scope="col"> Material # </th>
-                        <th scope="col"> Name</th>
-                        <th scope="col"> Amount Needed To Buy </th>
-                        <th scope="col"> Cost Per Item </th>
-                        <th scope="col"> Estimated Total </th>
-                        <th scope="col"></th>
-                    </thead>
-                </table>
+        <div class="table-responsive card"
+            style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
+            <table class="table table-hover table-striped" style="border-radius: 40px;">
+                <thead style="background-color: #3f3e3e; color: #ffffff;">
+                    <th scope="col"> Material # </th>
+                    <th scope="col"> Name</th>
+                    <th scope="col"> Amount Needed To Buy </th>
+                    <th scope="col"> Cost Per Item </th>
+                    <th scope="col"> Estimated Total </th>
+                    <th scope="col"></th>
+                </thead>
+            </table>
         </div>
         <div class="row" style="display: flexbox; justify-content: flex-end; margin-right: 15px;">
-                <button type="button" class="btn light-button" data-toggle="modal" data-target="#generateReportModal">
-                    Generate Report
-                </button>
+            <button type="button" class="btn light-button" data-toggle="modal" data-target="#generateReportModal">
+                Generate Report
+            </button>
         </div>
         <!--GENERATE REPORT MODAL-->
-        <div class="modal" id="generateReportModal" tabindex="-1" role="dialog" aria-labelledby="generateReportModalLabel" aria-hidden="true">
+        <div class="modal" id="generateReportModal" tabindex="-1" role="dialog" aria-labelledby="generateReportModalLabel">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content"  style="width: 350px;">
                     <div class="modal-header">
@@ -43,27 +43,23 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body ml-4">
-                                    <div class="row" style="display: flexbox; align-items: baseline;">
-                                        <label for="reptype">Report type</label>
-                                        <select class="input-select" name="reptype" style="width: 150px; border-radius: 100px; margin-left: 20px;" placeholder="Select">
-                                            <option value="materials">Materials</option>
-                                            <option value="materials">Production</option>
-                                            <option value="materials">Pricing</option>
-                                        </select>
-                                    </div>
-                        <!-- this part should show up ONLY when production is selected -->
-                        <div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">
-                            <label for="reportDate">Date</label>
-                            <!-- change variable names for the date field below i just copy pasted this -cisha -->
-                            <input type="date" class="last_update form-control" value="{{product_data.product.last_update|date:'Y-m-d'}}"
-                            style="width: 150px; border-radius: 100px; margin-left: 70px;">
+                    <form method="POST" action="{% url 'reports' %}"> {% csrf_token %}
+                        <div class="modal-body ml-4">
+                            <div class="row" style="display: flexbox; align-items: baseline;">
+                                <label for="reptype">Report type</label>
+                                <select class="reptype input-select" name="reptype" style="width: 150px; border-radius: 100px; margin-left: 20px;">
+                                    <option value="materials">Materials</option>
+                                    <option value="production">Production</option>
+                                    <option value="pricing">Pricing</option>
+                                    <option value="shopping_list">Shopping List</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="modal-footer" style="display: flexbox; justify-content: space-between;">
-                        <button type="button" class="btn dark-button" style="border-radius: 100px;" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn dark-button" >Generate</button>
-                    </div>
+                        <div class="modal-footer" style="display: flexbox; justify-content: space-between;">
+                            <button type="button" class="btn dark-button" style="border-radius: 100px;" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn dark-button" >Generate</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -72,5 +68,9 @@
         
     </div>
 </div>
+
+
+<script>
+</script>
 
 {% endblock %}

@@ -16,8 +16,7 @@
                 <thead style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Product # </th>
                     <th scope="col"> Name</th>
-                    <th scope="col"> Stock</th>
-                    <th scope="col"> Cost </th>
+                    <th scope="col"> Retail Price </th>
                     <th scope="col"></th>
                 </thead>
                 <tbody>
@@ -26,7 +25,6 @@
                     <tr style="height: 75px;">
                         <td>{{ product_data.product.pk}}</td>
                         <td>{{ product_data.product.name }}</td>
-                        <td>{{ product_data.product.stock }}</td>
                         <td>{{ product_data.product.retail_price|floatformat:2 }}</td>
                         <td>
                             <button type="button" class="btn btn-outline-secondary"
@@ -215,8 +213,6 @@
                                     <div class="col-4 mt-4">
                                         <label for="product_margin">Product Margin</label>
                                         <input type="number" class="product_margin form-control" name="product_margin"value="{{product_data.product.prod_margin}}">
-                                        <label class="mt-3" for="stock">Stock</label>
-                                        <input type="number" class="product_stock form-control" name="product_stock" value="{{product_data.product.stock}}">
                                         <label class="mt-3" for="stock">Labor Time</label>
                                         <input type="number" class="product_labor form-control" name="product_labor" value="{{product_data.product.labor_time}}">
                                         <label class="mt-3" for="stock">Miscellaneous Margin</label>
@@ -226,7 +222,7 @@
                                     </div>
                                 </div>
                                 <div class="row" style="margin: 40px 5px 12px 5px;">
-                                    <button type="button" class="btn dark-button"
+                                    <button type="button" class="btn dark-button delete-button"
                                         onclick="toggleModal('confirmDeleteProduct{{product_data.product.pk}}', 'open')">
                                         Delete Product
                                     </button>
@@ -274,10 +270,6 @@
                                     </div>
                             </form>
                             <div class="col-4 order-1 mr-auto text-left">
-                                <button type="button" class="btn dark-button delete-button"
-                                    onclick="toggleModal('confirmDeleteProduct{{product_data.product.pk}}', 'open')">
-                                    Delete Product
-                                </button>
                             </div>
 
                             <!-- modal to confirm deletion of product -->
@@ -491,8 +483,6 @@
                 <div class="col-4 mt-4" style="margin-top: 30px;">
                     <label for="product_margin">Product Margin</label>
                     <input type="number" class="product_margin form-control" name="product_margin" placeholder="Product Margin">
-                    <label class="mt-2" for="product_stock">Stock</label>
-                    <input type="number" class="product_stock form-control" name="product_stock" placeholder="Stock">
                     <label class="mt-2" for="product_labor">Labor Time</label>
                     <input type="number" class="product_labor form-control" name="product_labor" placeholder="Labor Time">
                     <label class="mt-2" for="product_misc">Miscellaneous Margin</label>
@@ -978,7 +968,6 @@
                 'pk': product_container.find('.product_pk').val(),
                 'name': product_container.find('.product_name').val(),
                 'margin': product_container.find('.product_margin').val(),
-                'stock': product_container.find('.product_stock').val(),
                 'labor': product_container.find('.product_labor').val(),
                 'misc': product_container.find('.product_misc').val(),
                 'retail': product_container.find('.retail_price').val(),

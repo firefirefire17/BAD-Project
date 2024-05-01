@@ -19,6 +19,7 @@
             <table class="table table-hover table-striped" style="border-radius: 40px;">
                 <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Job Order # </th>
+                    <th scope="col"> </th>
                     <th scope="col"> File Date</th>
                     <th scope="col"> Status </th>
                     <th scope="col"> Completion Date</th>
@@ -28,6 +29,7 @@
                     {% for order_data in orders %}
                         <tr style="height:70px;">
                             <td> {{ order_data.order.pk }} </td>
+                            <td> {{ order_data.order.customer}}, {{order_data.order.outlet.outlet_name}}</td>
                             <td> {{ order_data.file_date|date:'Y-m-d' }} </td>
                             <td> {{ order_data.status|title }} </td>
                             <td> {{ order_data.completion_date }}</td>

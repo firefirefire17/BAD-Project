@@ -3,13 +3,18 @@ from .models import Textile, Accessory, Product, Product_Accessory, Component, P
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.utils import timezone
 
+import matplotlib.pyplot as plt
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+import matplotlib.backends.backend_pdf
+
 import json
-
-
 
 # Create your views here.
 @login_required(login_url="/login") # this is to restrict access if not logged in
@@ -22,6 +27,7 @@ def products(request):
     product_objects = Product.objects.all()
     accessory_objects = Accessory.objects.all()
     textile_objects = Textile.objects.all()
+
 
     product_material_list = []
 
@@ -41,6 +47,7 @@ def products(request):
 
     #create a list of dicts
     for product in product_objects:
+        product.updateCost()
         product_data = {
             'product':product,
             'textile_buffers': [],
@@ -102,14 +109,12 @@ def products(request):
 
             name = request.POST.get("name")
             prod_margin = request.POST.get("margin")
-            stock = request.POST.get("stock")
             labor_time = request.POST.get("labor")
             misc_margin = request.POST.get("misc")
             retail_price = request.POST.get("retail")
             last_update = request.POST.get("last_update")
 
             new_product = Product.objects.create(name=name, 
-                                                stock=stock, 
                                                prod_margin=prod_margin, 
                                                labor_time=labor_time, 
                                              misc_margin=misc_margin)
@@ -185,7 +190,6 @@ def products(request):
 
             name = request.POST.get("name")
             prod_margin = request.POST.get("margin")
-            stock = request.POST.get("stock")
             labor_time = request.POST.get("labor")
             misc_margin = request.POST.get("misc")
             retail_price = request.POST.get("retail")
@@ -194,7 +198,6 @@ def products(request):
 
             #update product attributes
             product.name = name
-            product.stock = stock
             product.prod_margin = prod_margin
             product.labor_time = labor_time
             product.misc_margin = int(misc_margin)
@@ -557,6 +560,14 @@ def job_orders(request):
                 order.start_date = start_date
             if completion_date:
                 order.completion_date = completion_date
+
+            original_status = order.order_status
+            if original_status == "completed":
+                if status != "completed":
+                    order.rollback_stocks(order.get_stocks())
+            else:
+                if status == "completed":
+                    order.deduct_stocks(order.get_stocks())
             
             order.file_date=file_date
             order.order_status=status
@@ -658,7 +669,68 @@ def job_orders(request):
 
 @login_required(login_url="/login")
 def reports(request):
+    if request.method == "POST":
+        reptype = request.POST.get("reptype")
+        if reptype == 'materials':
+            return redirect('material_report') 
+        elif reptype == 'production':
+            return redirect('production_reports')  
+        elif reptype == 'pricing':
+            return redirect('pricing_reports')
+        elif reptype == 'shopping_list':
+            return redirect('shopping_list_reports')  
     return render(request, 'CLEAR/reports.html')
+
+@login_required(login_url="/login")
+def material_report(request):
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_data = []
+
+    
+    for textile in textile_objects:
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        material_data.append({'type': 'textile', 'pk': textile, 'unit': unit})
+
+    for accessory in accessory_objects:
+        unit = accessory.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        if accessory.stock > 1:
+            if unit == 'inch':
+                unit = unit + "es"
+            else:
+                unit = unit + "s"
+
+        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+
+    # Create a dictionary to hold the data for each column
+    data_dict = {
+        "Material Key": [item["pk"] for item in material_data],
+        "Name": [item["name"] for item in material_data],
+        "Type": [item["type"].title() for item in material_data],  # Title-case the type
+        "Stock": [f"{item['stock']:.2f} {item['unit']}" for item in material_data],  # Format stock and unit
+        "Cost": [item["cost"] for item in material_data]
+    }
+
+    material_objects = sorted(material_objects, key=lambda x: x['material'].stock)
+    datenow = timezone.now().date()
+
+    return render(request, 'CLEAR/material_report.html', {'materials':material_objects, 'today': datenow,})
+
+@login_required(login_url="/login")
+def production_report(request):
+    return render(request, 'CLEAR/production_report.html')
+
+@login_required(login_url="/login")
+def pricing_report(request):
+    return render(request, 'CLEAR/pricing_report.html')
+
+@login_required(login_url="/login")
+def shopping_list(request):
+    return render(request, 'CLEAR/shopping_list.html')
 
 
 @login_required(login_url="/login")
@@ -844,6 +916,36 @@ def get_material_options(request): # function used to change materials in stock-
         options[pk] = name 
  
     return JsonResponse({'options': options}) 
+
+def generate_material_pd(request):
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_objects = []
+
+    
+    for textile in textile_objects:
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        material_objects.append({'type': 'textile', 'material': textile, 'unit': unit})
+
+    for accessory in accessory_objects:
+        unit = accessory.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        if accessory.stock > 1:
+            if unit == 'inch':
+                unit = unit + "es"
+            else:
+                unit = unit + "s"
+
+        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+    pdf_bytes = pandas_df_to_table(dataframe)
+
+    # Serve PDF file as response
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="output.pdf"'
+    return response
  
 # this is a function used in products to get the cost of each product component 
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost): 
@@ -859,3 +961,24 @@ def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost):
     final_quantity = final_unit*float(quantity) 
     final_cost = final_quantity*float(textile_cost) 
     return final_cost 
+
+def pandas_df_to_table(dataframe):
+    # Convert DataFrame to matplotlib table
+    fig, ax = plt.subplots(figsize=(7, 3))  # Adjust size as needed
+    ax.axis('tight')
+    ax.axis('off')
+    table = ax.table(cellText=dataframe.values, colLabels=dataframe.columns, loc='center')
+
+    # Convert matplotlib table to PDF table
+    pdf_bytes = BytesIO()
+    pdf = matplotlib.backends.backend_pdf.PdfPages(pdf_bytes)
+    pdf.savefig(fig, bbox_inches='tight')
+    pdf.close()
+
+    return pdf_bytes.getvalue()
+
+def save_pdf(pdf_bytes, output_filename):
+    # Write PDF bytes to a file
+    with open(output_filename, 'wb') as f:
+        f.write(pdf_bytes)
+

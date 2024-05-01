@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.db.models.functions import Now
 from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator
 import hashlib
@@ -6,6 +6,8 @@ import hashlib
 # Create your models here.
 # https://docs.djangoproject.com/en/5.0/topics/db/models/  Extra fields on many-to-many relationships
 # 
+class InsufficientStockError(Exception):
+    pass
 
 class MaterialKey(models.Model):
     material_key = models.AutoField(primary_key=True)
@@ -35,7 +37,6 @@ class Accessory(models.Model):
     
 class Product(models.Model):
     name = models.CharField(max_length=50)
-    stock = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999)])
     prod_margin = models.FloatField(null=True) # renamed from 'margin'
     labor_time = models.IntegerField(null=True) 
     misc_margin = models.IntegerField(null=True)
@@ -51,10 +52,10 @@ class Product(models.Model):
     
     def updateCost(self):
         print("pass")
-        wage_object = Global_Value.objects.get(name="labor_wage")
+        wage_object = Financial_Value.objects.get(name="labor_wage")
         wage = wage_object.value
         
-        vat_object = Global_Value.objects.get(name="vat")
+        vat_object = Financial_Value.objects.get(name="vat")
         vat = vat_object.value
 
         print(wage)
@@ -131,6 +132,113 @@ class Job_Order(models.Model):
     customer = models.CharField(max_length=50, null=True)
     outlet = models.ForeignKey(Outlet, on_delete=models.CASCADE)
     total_price = models.FloatField(null=True)
+
+
+    def get_stocks(self):
+        order_items = self.order_item_set.all()
+        qty_list = []
+        for order_item in order_items:
+            order_itemQty = order_item.quantity
+
+            item = order_item.item
+            product = item.product
+            for product_component in product.product_component_set.all():
+                height = product_component.height
+                width = product_component.width
+                quantity = product_component.quantity
+                textile_unit = product_component.textile.unit
+                buffer = product_component.buffer
+                sq_inch  = float(height)*float(width)*float(buffer/100 + 1)
+                if textile_unit == "FT":
+                    final_unit = sq_inch / 144
+                elif textile_unit == "M":
+                    final_unit = sq_inch / 1550.0031
+                else:
+                    final_unit = sq_inch
+                
+                final_quantity = final_unit*float(quantity)
+                
+                textile = product_component.textile
+
+                temp = {
+                    'id': textile.material_key.material_key,
+                    'type': 'textile',
+                    'qty': final_quantity*order_itemQty,
+                } 
+                qty_list.append(temp)
+
+            
+            for product_accessory in product.product_accessory_set.all():
+                quantity = product_accessory.accessory_quantity
+                
+                temp = {
+                    'id': product_accessory.accessory.material_key.material_key,
+                    'type': 'accessory',
+                    'qty': quantity*order_itemQty,
+                } 
+                qty_list.append(temp)
+
+            if item.type == "bespoke":  
+                for item_accessory in item.item_accessory_set.all():
+                    quantity = item_accessory.quantity
+                    
+                    temp = {
+                        'id': item_accessory.accessory.material_key.material_key,
+                        'type': 'accessory',
+                        'qty': quantity*order_itemQty,
+                    }
+                    qty_list.append(temp)
+
+                for item_textile in item.item_textile_set.all():
+                    quantity = item_textile.quantity
+                    
+                    temp = {
+                        'id': item_textile.textile.material_key.material_key,
+                        'type': 'textile',
+                        'qty': quantity*order_itemQty,
+                    }
+                    qty_list.append(temp)
+        print(qty_list)
+        return qty_list
+    def deduct_stocks(self, qty_list):
+        insufficient_stock = False
+        with transaction.atomic():
+            print('pass')
+            for material_data in qty_list:
+                if material_data['type'] == "textile":
+                    textile = Textile.objects.get(material_key__material_key = material_data['id'])
+                    if material_data['qty'] <= textile.stock:
+                        print(f'{material_data['qty']}')
+                        textile.stock -= material_data['qty']
+                        textile.save()
+                    else:
+                        insufficient_stock = True
+                else:
+                    accessory = Accessory.objects.get(material_key__material_key = material_data['id'])
+                    if material_data['qty'] <= accessory.stock:
+                        accessory.stock -= material_data['qty']
+                        accessory.save()
+                    else:
+                        insufficient_stock = True
+                print('pass1')
+            if insufficient_stock:
+                print('insufficient')
+                raise InsufficientStockError
+    def rollback_stocks(self, qty_list):
+        for material_data in qty_list:
+            if material_data['type'] == "textile":
+                textile = Textile.objects.get(material_key__material_key = material_data['id'])
+                textile.stock += material_data['qty']
+                textile.save()
+            else:
+                accessory = Accessory.objects.get(material_key__material_key = material_data['id'])
+                accessory.stock += material_data['qty']
+                accessory.save()
+                    
+
+
+
+
 
     def __str__(self):
         return f'{self.pk}_{self.file_date}'
