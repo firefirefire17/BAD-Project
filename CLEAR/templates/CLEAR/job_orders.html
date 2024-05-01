@@ -102,16 +102,16 @@
                                                             <div class="itemMaterialContainer" id="{{order_data.order.pk}}itemMaterialContainer{{forloop.counter}}"{% if item_data.bespoke == 'no' %}style="display:none;"{% endif %}>
                                                                 <div class="row ml-1 pb-0"> Add-Ons </div>
                                                                 {% for material_data in item_data.materials %}
-                                                                <div class="materialRow row mt-1" id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}">
+                                                                <div class="materialRow row mt-1 pr-2" id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}">
                                                                     <div class="col-3">
                                                                         <select class="material_type input-select">
                                                                             <option value="textile"> Textile</option>
-                                                                            <option value="accessory" {% if material_data.type == accessory %}selected{% endif %}> Accessory</option>
+                                                                            <option value="accessory" {% if material_data.type == 'accessory' %}selected{% endif %}> Accessory</option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="col-3">
                                                                         <select class="item_material input-select" id="item_material">
-                                                                            <option value="delete"> None </option>
+                                                                            <option value="delete"> {{material_data.type}} </option>
                                                                             {% if material_data.type == 'textile' %}
                                                                                 {% for z in textiles %}
                                                                                 <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
@@ -163,10 +163,10 @@
                                                     <input type="date" class="file_date form-control" value="{{ order_data.file_date|date:'Y-m-d' }}">
                         
                                                     <label for="Start Date" class="mt-2">Start Date</label>
-                                                    <input type="date" class="start_date form-control" value="{{ order_data.start_date|date:'Y-m-d' }}">
+                                                    <input type="date" class="start_date form-control" value="{{ order_data.order.start_date|date:'Y-m-d' }}">
 
                                                     <label for="Completion Date">Completion Date</label>
-                                                    <input type="date" class="completion_date form-control" value="{{ order_data.completion_date|date:'Y-m-d' }}">
+                                                    <input type="date" class="completion_date form-control" value="{{ order_data.order.completion_date|date:'Y-m-d' }}">
                                                 </div>
                                             </div>
                                             <div class="row mt-3">
@@ -294,7 +294,7 @@
                         <div class="col-9">
                             <div class="orderItemContainer" id="orderItemContainer">
                                 <div class="orderItem_instance" id="orderItem_instance1">
-                                    <div class="row pt-3 pb=3">
+                                    <div class="row pt-3">
                                         <div class="col-4">
                                             <label for="product">Product</label>
                                             <select class="order_item input-select" id="order_item1">
@@ -438,7 +438,7 @@
                         </div>
                         <div class="col-4 ml-auto text-right">
                             <button type="button" class="btn dark-button" data-toggle="modal"
-                                data-target="#outletconf"> Save
+                                data-target="#outletconf"> Save Edits
                             </button>
                         </div>
                     </div>
@@ -673,6 +673,8 @@ $(document).ready(function() {
             materialContainer.hide();
             materialContainer.empty();
             button.hide();
+
+            materialContainer.append('<div class="row ml-1 pb-0"> Add-Ons </div>')
         }
     });
     $(document).on('change', '.material_type', function() {

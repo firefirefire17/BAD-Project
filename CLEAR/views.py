@@ -520,17 +520,14 @@ def job_orders(request):
                         item_material = material['item_material']
                         bespoke_rate = material['bespoke_rate']
                         quantity = material['quantity']
-                        print(material_type)
-                        print(item_material)
+                        print(quantity)
                         if item_material == "delete":
                             pass
                         else:
                             if material_type == 'textile':
-                                print('textile')
                                 textile_object = Textile.objects.get(material_key__material_key = item_material)
                                 Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
                             else:
-                                print('accessory')
                                 accessory_object = Accessory.objects.get(material_key__material_key = item_material)
                                 Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
                     
@@ -566,6 +563,8 @@ def job_orders(request):
             order.customer=customer
             order.outlet=outlet_object
 
+            order.save()
+
             Order_Item.objects.filter(order=order).delete()
             
             item_data = json.loads(request.POST.get("items"))
@@ -590,6 +589,7 @@ def job_orders(request):
                         quantity = material['quantity']
                         print(material_type)
                         print(item_material)
+                        print(quantity)
                         if item_material == "delete":
                             pass
                         else:
