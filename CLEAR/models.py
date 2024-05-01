@@ -34,7 +34,7 @@ class Accessory(models.Model):
     
 class Product(models.Model):
     name = models.CharField(max_length=50)
-    stock = models.IntegerField()
+    stock = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999)])
     prod_margin = models.FloatField(null=True) # renamed from 'margin'
     labor_time = models.IntegerField(null=True) 
     misc_margin = models.IntegerField(null=True)
@@ -97,10 +97,6 @@ class Product(models.Model):
         print(calc_price)
         return self.calc_price
 
-
-
-
-
 class Product_Accessory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     accessory = models.ForeignKey(Accessory, on_delete=models.CASCADE)
@@ -119,11 +115,9 @@ class Product_Component(models.Model):
     component = models.ForeignKey(Component, on_delete=models.CASCADE)
     height = models.FloatField()
     width = models.FloatField()
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999)])
     buffer = models.FloatField(null=True)  
 
-    
-    
 class Outlet(models.Model):
     outlet_name = models.CharField(max_length=50)
 
@@ -214,10 +208,6 @@ class Account(models.Model):
     username = models.CharField(max_length=50)
     password = models.IntegerField()
     role = models.CharField(max_length=50)
-
-
-
-
 
 # function used in products to get cost of a product component
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost, buffer):
