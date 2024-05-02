@@ -208,7 +208,7 @@ class Job_Order(models.Model):
                 if material_data['type'] == "textile":
                     textile = Textile.objects.get(material_key__material_key = material_data['id'])
                     if material_data['qty'] <= textile.stock:
-                        print(f'{material_data['qty']}')
+                        print(f'{material_data["qty"]}')
                         textile.stock -= material_data['qty']
                         textile.save()
                     else:

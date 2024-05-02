@@ -2,11 +2,7 @@
 {% load static %}
 
 <head>
-    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet4.css' %}">
-    <script src="{% static 'js/styling.js' %}"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="{% static '/stylesheet3.css' %}">
 </head>
 
 
@@ -16,6 +12,7 @@
     <div class="card main-card">
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
+
             <table class="table table-hover table-striped" style="border-radius: 40px;">
                 <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Job Order # </th>
@@ -55,7 +52,7 @@
                                             <div class="row justify-content-between">
                                                 <div class="col-4">
                                                     <label for="name">Job Order #</label>
-                                                    <input type="number" class="pk form-control" value="{{ order_data.order.pk }}" readonly>
+                                                    <input type="number" class="pk form-control" value="{{ order_data.order.pk }}" style="border-radius: 100px; width: 170px;" readonly>
                                                 </div>
                                                 <div class="col-4">
                                                     <label for="name">Customer</label>
@@ -71,10 +68,8 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <hr style="margin: 20px 0; border-top:2px solid #767B85">
-                                            <div class="row">
-                                                <div class="col-9">
-                                                    <div class="orderItemContainer" id="orderItemContainer{{order_data.order.pk}}">
+                                            <div class="row mt-5" style="display: flex; justify-content: center;">
+                                                    <div class="orderItemContainer" id="orderItemContainer{{order_data.order.pk}}" style="height:250px; overflow-y:scroll;">
                                                     {% for item_data in order_data.items %}
                                                         <div class="orderItem_instance" id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}">
                                                             <div class="row pt-3">
@@ -93,8 +88,11 @@
                                                                 </div>
                                                                 <div class="col">
                                                                     <label for "bespoke"> Bespoke? </label>
-                                                                    <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}" {% if item_data.bespoke == 'yes' %}checked{% endif %}>
+                                                                    <input type="checkbox" class="bespoke form-control" role="switch" value="yes" 
+                                                                            style="height: 20px; margin-top: 8px;"
+                                                                            data-item-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}" {% if item_data.bespoke == 'yes' %}checked{% endif %}>                                                          
                                                                 </div>
+
                                                                 <div class="col p-4">
                                                                     <button type="button" class="btn dark-button delete-item"
                                                                     data-row-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}"> &times
@@ -147,28 +145,31 @@
                                                         </div>
                                                     {% endfor %}
                                                     </div>
-                                                    <div class="row">
-                                                        <button type="button" class="addItem_edit btn dark-button x-button mt-3 ml-1"
-                                                        data-order-id="{{order_data.order.pk}}" data-counter="{{order_data.item_count}}">Add Item</button>
-                                                    </div>
                                                 </div>
-                                                <div class="col" style="border-left:1px solid #767B85;">
-                                                    <label for="status">Job Order Status</label>
-                                                    <select class="status input-select" value="{{order_data.status}}">
-                                                        <option value="in-queue">In-queue</option>
-                                                        <option value="completed"{% if order_data.status == 'completed' %} selected{% endif %}> Completed</option>
-                                                        <option value="cancelled"{% if order_data.status == 'cancelled' %} selected{% endif %}>Cancelled</option>
-                                                        <option value="in-progress"{% if order_data.status == 'in-progress' %} selected{% endif %}>In-progress</option>
-                                                    </select>
+                                                <div class="row" style="display: flexbox; justify-content: center;">
+                                                    <button type="button" class="addItem_edit btn dark-button x-button mt-1 ml-1 mb-5" data-order-id="{{order_data.order.pk}}"
+                                                        data-counter="{{order_data.item_count}}">Add Item</button>
+                                                </div>
+                                                <div class="row" style="display: flex; justify-content: center;">
+                                                    <div class="col-5">
+                                                        <label for="status">Job Order Status</label>
+                                                        <select class="status input-select mb-3" value="{{order_data.status}}" style="border-radius: 100px;">
+                                                            <option value="in-queue">In-queue</option>
+                                                            <option value="completed"{% if order_data.status == 'completed' %} selected{% endif %}> Completed</option>
+                                                            <option value="cancelled"{% if order_data.status == 'cancelled' %} selected{% endif %}>Cancelled</option>
+                                                            <option value="in-progress"{% if order_data.status == 'in-progress' %} selected{% endif %}>In-progress</option>
+                                                        </select>
 
-                                                    <label for="File Date" class="mt-2">File Date</label>
-                                                    <input type="date" class="file_date form-control" value="{{ order_data.file_date|date:'Y-m-d' }}">
-                        
-                                                    <label for="Start Date" class="mt-2">Start Date</label>
-                                                    <input type="date" class="start_date form-control" value="{{ order_data.order.start_date|date:'Y-m-d' }}">
-
-                                                    <label for="Completion Date">Completion Date</label>
-                                                    <input type="date" class="completion_date form-control" value="{{ order_data.order.completion_date|date:'Y-m-d' }}">
+                                                        <label for="File Date" class="mt-2">File Date</label>
+                                                        <input type="date" class="file_date form-control" value="{{ order_data.file_date|date:'Y-m-d' }}" style="border-radius: 100px;">
+                                                    </div>
+                                                    <div class="col-5" style="margin-top: -9px;">
+                                                        <label for="Start Date" class="mt-2">Start Date</label>
+                                                        <input type="date" class="start_date form-control mb-4" value="{{ order_data.order.start_date|date:'Y-m-d' }}" style="border-radius: 100px;">
+                                                        
+                                                        <label for="Completion Date">Completion Date</label>
+                                                        <input type="date" class="completion_date form-control" value="{{ order_data.order.completion_date|date:'Y-m-d' }}" style="border-radius: 100px;">
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row mt-3">
@@ -275,7 +276,7 @@
                     <div class="row justify-content-between">
                         <div class="col-4">
                             <label for="name">Job Order #</label>
-                            <input type="number" class="pk form-control" value="" readonly>
+                            <input type="number" class="pk form-control" value="" style="border-radius: 100px; width: 170px;" readonly>
                         </div>
                         <div class="col-4">
                             <label for="name">Customer</label>
@@ -291,10 +292,10 @@
                             </select>
                         </div>
                     </div>
-                    <hr style="margin: 20px 0; border-top:2px solid #767B85">
-                    <div class="row">
+
+                    <div class="row mt-5" style="display: flex; justify-content: center;">
                         <div class="col-9">
-                            <div class="orderItemContainer" id="orderItemContainer">
+                            <div class="orderItemContainer" id="orderItemContainer" style="height:250px; overflow-y:scroll;">
                                 <div class="orderItem_instance" id="orderItem_instance1">
                                     <div class="row pt-3">
                                         <div class="col-4">
@@ -312,7 +313,7 @@
                                         </div>
                                         <div class="col">
                                             <label for "bespoke"> Bespoke</label>
-                                            <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="orderItem_instance1">
+                                            <input type="checkbox" class="bespoke form-control" style="height: 20px; margin-top: 8px;" value="yes" data-item-id="orderItem_instance1">
                                         </div>
                                         <div class="col p-4">
                                             <button type="button" class="btn dark-button delete-item"
@@ -330,30 +331,35 @@
                                     <hr style="margin: 20px 0; border-top:1px solid #767B85">
                                 </div>
                             </div>
+                            <div class="row" style="display: flex; justify-content: center;">
+                                <button type="button" class="addItem_add btn dark-button x-button mt-3 ml-1 mb-5" data-item-id="1" data-counter="1">Add
+                                    Item</button>
+                            </div>
                         </div>
-                        <div class="col" style="border-left: 1px solid #767B85;">
+                        
+                    </div>
+                    <div class="row" style="display: flex; justify-content: center;">
+                        <div class="col-5 mr-3">
                             <label for="status">Job Order Status</label>
-                            <select class="status input-select">
+                            <select class="status input-select mb-3">
                                 <option value="in-queue">In-queue</option>
                                 <option value="completed"> Completed</option>
                                 <option value="cancelled">Cancelled</option>
                                 <option value="in-progress">In-progress</option>
                             </select>
-
+                    
                             <label for="File Date" class="mt-2">File Date</label>
-                            <input type="date" class="file_date form-control" value="">
-
-                            <label for="Start Date" class="mt-2">Start Date</label>
-                            <input type="date" class="start_date form-control" value="">
-
-                            <label for="Completion Date" class="mt-2">Completion Date</label>
-                            <input type="date" class="completion_date form-control" value="">
-
+                            <input type="date" class="file_date form-control" value="" style="border-radius: 100px;">
                         </div>
-                    </div>
-                    <div class="row">
-                        <button type="button" class="addItem_add btn dark-button x-button mt-3 ml-1"
-                        data-item-id="1" data-counter="1">Add Item</button>
+                        <div class="col-5" style="margin-top: -9px;">
+                            <label for="Start Date" class="mt-2">Start Date</label>
+                            <input type="date" class="start_date form-control mb-3" value="" style="border-radius: 100px;">
+                    
+                            <label for="Completion Date" class="mt-2">Completion Date</label>
+                            <input type="date" class="completion_date form-control" value="" style="border-radius: 100px;">
+                    
+                        </div>
+                    
                     </div>
                     <div class="row pt-3" style="margin-top: 15px;">
                         <div class="col-4 ml-auto text-right">
@@ -390,7 +396,7 @@
 
 <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
     <div class="modal" id="outlets" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
-        <div class="modal-content"  style="height:60%; width:40%">
+        <div class="modal-content"  style="height:54%; width:40%;">
             <div class="modal-body">
                 <div class="container-fluid">    
                     <input type="hidden" name="add_form" value="1"></input>
@@ -411,7 +417,7 @@
                         <div class="col-2">
                         </div>
                     </div>
-                    <div class="outletContainer">
+                    <div class="outletContainer" style="height: 180px; overflow-y: scroll;">
                     {% for outlet in outlets %}
                     <div class="outletRow row mt-2" id="outletRow{{forloop.counter}}">
                         <div class="col">
@@ -428,7 +434,7 @@
                     </div>                    
                     {% endfor %}
                     </div>
-                    <div class="row">
+                    <div class="row" style="display: flex; justify-content: center;">
                         <button type="button" class="addOutlet btn dark-button x-button mt-3 ml-1" id="outlet1"
                         data-counter="{{outlet_count}}">Add Row</button>
                     </div>
@@ -486,7 +492,7 @@
         </div>
         <div class="col">
             <label for="bespoke"> Bespoke</label>
-            <input type="checkbox" class="bespoke form-control" value="yes" data-item-id="orderItem_instance1">
+            <input type="checkbox" class="bespoke form-control" value="yes" style="height: 20px; margin-top: 8px;" data-item-id="orderItem_instance1">
         </div>
         <div class="col p-4">
             <button type="button" class="btn dark-button delete-item"
@@ -546,6 +552,11 @@
 </div>
 
 <script>
+
+$(function () {
+    $('#toggle-bespoke').bootstrapToggle();
+})
+
 $(document).ready(function() {
     const materialRow_template = $('#materialRow_temp');
     const item_template = $('#orderItem_instance_temp');
