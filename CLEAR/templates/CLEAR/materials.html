@@ -14,6 +14,9 @@
 
 <div class="row pl-3 pt-3 pr-3" style="height:700px;">
     <div class="card main-card">
+        {% if error_message %}
+            <h5 style="color: #FF0000;"> {{error_message}}</h5>
+        {%endif%}
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
             <table class="table table-hover table-striped" style="border-radius: 40px;">
@@ -29,10 +32,10 @@
                     {% for material_data in materials %}
                         <tr style="height:70px;">
                             <td> {{ material_data.material.material_key.material_key }} </td>
-                            <td> {{ material_data.material.name }} </td>
+                            <td> {{ material_data.material.name|title }} </td>
                             <td> {{ material_data.type|title }} </td>
                             <td> {{ material_data.material.stock|floatformat:2 }} {{material_data.unit}}</td>
-                            <td> {{ material_data.unit }} </td>
+                            <td> {{ material_data.material.cost }} </td>
                             <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
                                     data-target="#editmat-modal{{material_data.material.material_key.material_key}}" style="border-radius: 30px;">Edit</button>
                             </td>

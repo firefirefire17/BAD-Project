@@ -134,7 +134,14 @@ def products(request):
                         if component_name == 'delete':
                             pass
                         elif not component_name:
-                            pass
+                            error_message = "Please input component name"
+                            return render(request, 'CLEAR/products.html', {'products':product_objects, 
+                                                   'product_material_list':product_material_list,
+                                                   'accessories':accessory_objects,
+                                                   'textiles':textile_objects,
+                                                   'VAT':vat,
+                                                   'wage': wage,
+                                                   })
                         else: 
                             height = component['height']
                             width = component['width']
@@ -227,6 +234,15 @@ def products(request):
 
                         if component_name == 'delete':
                             pass
+                        elif not component_name:
+                            error_message = "Please input component name"
+                            return render(request, 'CLEAR/products.html', {'products':product_objects, 
+                                                   'product_material_list':product_material_list,
+                                                   'accessories':accessory_objects,
+                                                   'textiles':textile_objects,
+                                                   'VAT':vat,
+                                                   'wage': wage,
+                                                   })
                         else: 
                             height = component['height']
                             width = component['width']
@@ -345,10 +361,18 @@ def materials(request):
         print(request.POST)
 
         if "add_form" in request.POST:
-            name = request.POST.get("name")
+            name = request.POST.get("name").lower()
             stock = request.POST.get("stock")
             cost = float(request.POST.get("cost"))
             unit = request.POST.get("unit")
+
+            if not stock:
+                error_message = "Please input a valid stock number"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if not cost:
+                error_message = "Please input a valid cost"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
 
             try:
                 stock = int(stock)
@@ -374,15 +398,32 @@ def materials(request):
                 error_message = "Input cannot be negative"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
             
+            if not name:
+                error_message = "Please input a material name"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+
+            
             material_key = MaterialKey.objects.create()
             print(material_key)
 
+
             if type == "textile": 
-                print("pass")
-                Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key, unit=unit)
+                existing_material = Textile.objects.filter(name=name)
+                if existing_material:
+                    error_message = "Material already exists"
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                else:
+                    print("pass")
+                    Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key, unit=unit)
             if type == "accessory":
-                print("pass")
-                Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key, unit=unit)
+                existing_material = Accessory.objects.filter(name=name)                
+                if existing_material:
+                    error_message = "Material already exists"
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                else:
+                    print("pass")
+                    Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key, unit=unit)
             return redirect('materials')
 
         elif "edit_form" in request.POST:
