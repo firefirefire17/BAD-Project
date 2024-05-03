@@ -37,12 +37,12 @@ class Accessory(models.Model):
     
 class Product(models.Model):
     name = models.CharField(max_length=50)
-    prod_margin = models.FloatField() # renamed from 'margin'
+    prod_margin = models.FloatField() 
     labor_time = models.IntegerField() 
     misc_margin = models.IntegerField()
-    calc_price = models.FloatField(null=True) # renamed from 'total_cost'
+    calc_price = models.FloatField(null=True)
     retail_price = models.FloatField(null=True)
-    last_update = models.DateField(null=True) # remove null once views has been finalized
+    last_update = models.DateField(null=True)
 
     textiles = models.ManyToManyField(Textile, through='Product_Component')
     accessories = models.ManyToManyField(Accessory, through='Product_Accessory')
@@ -50,7 +50,7 @@ class Product(models.Model):
     def __str__(self):
         return str(self.name)
     
-    def updateCost(self):
+    def updateCost(self, action):
         wage_object = Financial_Value.objects.get(name="labor_wage")
         wage = wage_object.value
         
@@ -84,10 +84,14 @@ class Product(models.Model):
         total_cost = raw_material_cost + labor_cost + labor_cost*(float(misc_margin)/100)
         margin = total_cost*(float(prod_margin)/100)
         calc_price = (total_cost + margin)*(1 + (vat/100))
-        self.calc_price = float(calc_price)
 
-        print(calc_price)
-        return self.calc_price
+        if action == 'update':
+            self.calc_price = float(calc_price)
+            print(calc_price)
+            return self.calc_price
+        else: 
+            return calc_price
+
 
 
 class Product_Accessory(models.Model):

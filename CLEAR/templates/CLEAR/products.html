@@ -76,7 +76,7 @@
                                                 {% for textile_buffer in product_data.textile_buffers %}
                                                 <div class="productTextile_row row align-items-center mt-2" id="{{product_data.product.pk}}productTextile_row{{forloop.counter}}">
                                                     <div class="col-4">
-                                                        <select class="product_textile input-select" id="{{product_data.product.pk}}product_textile{{forloop.counter}}">
+                                                        <select class="product_textile input-select dynamic_pricing" data-product-pk="{{product_data.product.pk}}" id="{{product_data.product.pk}}product_textile{{forloop.counter}}">
                                                             <option value="delete">None</option>
                                                             {% for z in textiles %}
                                                             <option value="{{z.material_key.material_key}}" {% if z.material_key.material_key == textile_buffer.textile.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
@@ -110,7 +110,7 @@
                                                                     <label for="component_buffer">Buffer</label>
                                                                 </div>
                                                                 <div>
-                                                                    <input type="number" class="component_buffer form-control" value="{{textile_buffer.buffer}}">
+                                                                    <input type="number" class="component_buffer form-control dynamic_pricing" data-product-pk="{{product_data.product.pk}}" value="{{textile_buffer.buffer}}">
                                                                 </div>
                                                             </div>
                                                             <div class="row ml-2 mt-4">
@@ -136,13 +136,13 @@
                                                                         <input type="text" class="component_name form-control" value="{{component.name}}">
                                                                     </div>
                                                                     <div class="col-2">
-                                                                        <input type="number" class="height form-control" value="{{component.height}}">
+                                                                        <input type="number" class="height form-control dynamic_pricing" data-product-pk="{{product_data.product.pk}}" value="{{component.height}}">
                                                                     </div>
                                                                     <div class="col-2">
-                                                                        <input type="number" class="width form-control" value="{{component.width}}">
+                                                                        <input type="number" class="width form-control dynamic_pricing" data-product-pk="{{product_data.product.pk}}" value="{{component.width}}">
                                                                     </div>
                                                                     <div class="col-2">
-                                                                        <input type="number" class="quantity form-control" value="{{component.quantity}}">
+                                                                        <input type="number" class="quantity form-control dynamic_pricing" data-product-pk="{{product_data.product.pk}}" value="{{component.quantity}}">
                                                                     </div>
                                                                     <div class="col-1">
                                                                         <button type="button" class="btn dark-button delete-component" data-row-id="{{product_data.product.pk}}productComponent_row{{forloop.parentloop.counter}}_{{forloop.counter}}"> &times </button>
@@ -185,7 +185,7 @@
                                             </div>
                                             <div class="productAccessoryContainer_edit pr-3 pl-3" id="{{product_data.product.pk}}productAccessoryContainer" style="height:135px; overflow-x:visible; overflow-y:scroll; display: flexbox; flex-direction: column-reverse;">
                                                 {% for accessory_data in product_data.accessories %}
-                                                <div class="productAccessory_row row align-items-center mt-2" id="{{product_data.product.pk}}productAccessory_row{{forloop.counter}}">
+                                                <div class="productAccessory_row row align-items-center mt-2 dynamic_pricing" data-product-pk="{{product_data.product.pk}}" id="{{product_data.product.pk}}productAccessory_row{{forloop.counter}}">
                                                     <div class="col-4">
                                                         <select class="product_accessory input-select" id="{{product_data.product.pk}}product_accessory{{forloop.counter}}">
                                                             <option value="delete">None</option>
@@ -198,7 +198,7 @@
                                                         <input type="text" class="unit form-control" value="{{accessory_data.unit}}" readonly>
                                                     </div>
                                                     <div class="col-3">
-                                                        <input type="number" class="quantity form-control" value="{{accessory_data.quantity}}">
+                                                        <input type="number" class="quantity form-control dynamic_pricing" data-product-pk="{{product_data.product.pk}}" value="{{accessory_data.quantity}}">
                                                     </div>
                                                     <div class="col-1">
                                                         <button type="button" class="btn dark-button delete-productMaterial"
@@ -215,11 +215,11 @@
                                     </div>
                                     <div class="col-4 mt-4">
                                         <label for="product_margin">Product Margin</label>
-                                        <input type="number" class="product_margin form-control" name="product_margin"value="{{product_data.product.prod_margin}}">
+                                        <input type="number" class="product_margin form-control dynamic_pricing" data-product-pk="{{product_data.product.pk}}" name="product_margin"value="{{product_data.product.prod_margin}}">
                                         <label class="mt-3" for="stock">Labor Time</label>
-                                        <input type="number" class="product_labor form-control" name="product_labor" value="{{product_data.product.labor_time}}">
+                                        <input type="number" class="product_labor form-control dynamic_pricing" data-product-pk="{{product_data.product.pk}}" name="product_labor" value="{{product_data.product.labor_time}}">
                                         <label class="mt-3" for="stock">Miscellaneous Margin</label>
-                                        <input type="number" class="product_misc form-control" name="product_misc" value="{{product_data.product.misc_margin}}">
+                                        <input type="number" class="product_misc form-control dynamic_pricing" data-product-pk="{{product_data.product.pk}}" name="product_misc" value="{{product_data.product.misc_margin}}">
                                         <label class="mt-2" for="product_misc">Last Update Date</label>
                                         <input type="date" class="last_update form-control" value="{{product_data.product.last_update|date:'Y-m-d'}}">
                                     </div>
@@ -427,7 +427,7 @@
                         <div class="productTextileContainer pl-3 pr-3" id="productTextileContainer" style="height:135px; overflow-x:visible; overflow-y:scroll;">
                             <div class="productTextile_row row align-items-center mt-2" id="productTextile_row1">
                                 <div class="col-4">
-                                    <select class="product_textile input-select" name="product_textile">
+                                    <select class="product_textile input-select dynamic_pricing" data-product-pk="" name="product_textile">
                                         <option value="delete">None</option>
                                         {% for z in textiles %}
                                         <option value="{{z.material_key.material_key}}">{{z.name}}</option>
@@ -461,7 +461,7 @@
                         <div class="productAccessoryContainer pr-3 pl-3" id="productAccessoryContainer" style="height:135px; overflow-x:visible; overflow-y:scroll;">
                             <div class="productAccessory_row row align-items-center mt-2" id="productAccessory_row1">
                                 <div class="col-4">
-                                    <select class="product_accessory input-select" name="product_accessory">
+                                    <select class="product_accessory input-select dynamic_pricing" data-product-pk="" name="product_accessory">
                                         <option value="delete">None</option>
                                         {% for z in accessories %}
                                         <option value="{{z.material_key.material_key}}">{{z.name}}</option>
@@ -472,7 +472,7 @@
                                     <input type="text" class="unit form-control" name="accessory_unit" placeholder="Unit" readonly>
                                 </div>
                                 <div class="col-3">
-                                    <input type="number" class="quantity form-control"  name="accessory_quantity" placeholder="Quantity">
+                                    <input type="number" class="quantity form-control dynamic_pricing" data-product-pk="" name="accessory_quantity" placeholder="Quantity">
                                 </div>
                                 <div class="col-1">
                                     <button type="button" class="btn dark-button delete-productMaterial" data-row-id="productAccessory_row1"> &times
@@ -485,11 +485,11 @@
                 </div>
                 <div class="col-4 mt-4" style="margin-top: 30px;">
                     <label for="product_margin">Product Margin</label>
-                    <input type="number" class="product_margin form-control" name="product_margin" placeholder="Product Margin">
+                    <input type="number" class="product_margin form-control dynamic_pricing" data-product-pk="" name="product_margin" placeholder="Product Margin">
                     <label class="mt-2" for="product_labor">Labor Time</label>
-                    <input type="number" class="product_labor form-control" name="product_labor" placeholder="Labor Time">
+                    <input type="number" class="product_labor form-control dynamic_pricing" data-product-pk="" name="product_labor" placeholder="Labor Time">
                     <label class="mt-2" for="product_misc">Miscellaneous Margin</label>
-                    <input type="number" class="product_misc form-control" name="product_misc" value="50">
+                    <input type="number" class="product_misc form-control dynamic_pricing" data-product-pk=""  name="product_misc" value="50">
                     <label class="mt-2" for="last_update">Last Update Date</label>
                     <input type="date" class="last_update form-control" name="last_update">
                 </div>
@@ -514,7 +514,7 @@
                                     <label for="component_buffer">Buffer</label>
                                 </div>
                                 <div class="col-4">
-                                    <input type="number" class="component_buffer form-control" placeholder="Component Buffer">
+                                    <input type="number" class="component_buffer form-control dynamic_pricing" data-product-pk="" placeholder="Component Buffer">
                                 </div>
                             </div>
                             <div class="row ml-2 mt-4">
@@ -599,13 +599,13 @@
         <input type="text" class="component_name form-control" name="">
     </div>
     <div class="col-2">
-        <input type="number" class="height form-control" name="">
+        <input type="number" class="height form-control dynamic_pricing" data-product-pk=""  name="">
     </div>
     <div class="col-2">
-        <input type="number" class="width form-control" name="">
+        <input type="number" class="width form-control dynamic_pricing" data-product-pk="" name="">
     </div>
     <div class="col-2">
-        <input type="number" class="quantity form-control" name="">
+        <input type="number" class="quantity form-control dynamic_pricing" data-product-pk="" name="">
     </div>
     <div class="col-1">
         <button type="button" class="btn dark-button delete-component" data-row-id=""> &times </button>
@@ -614,7 +614,7 @@
 
 <div class="productTextile_row row align-items-center mt-2" id="productTextile_row_temp" style="display:none;">
     <div class="col-4">
-        <select class="product_textile input-select" name="product_textile">
+        <select class="product_textile input-select dynamic_pricing" data-product-pk=""  name="product_textile">
             <option value="delete">None</option>
             {% for z in textiles %}
             <option value="{{z.material_key.material_key}}">{{z.name}}</option>
@@ -637,7 +637,7 @@
 
 <div class="productAccessory_row row align-items-center mt-2" id="productAccessory_row_temp" style="display:none;">
     <div class="col-4">
-        <select class="product_accessory input-select" name="product_accessory">
+        <select class="product_accessory input-select dynamic_pricing" data-product-pk="" name="product_accessory">
             <option value="delete">None</option>
             {% for z in accessories %}
             <option value="{{z.material_key.material_key}}">{{z.name}}</option>
@@ -648,7 +648,7 @@
         <input type="text" class="unit form-control" name="accessory_unit" placeholder="Unit" readonly>
     </div>
     <div class="col-3">
-        <input type="number" class="quantity form-control"  name="accessory_quantity"
+        <input type="number" class="quantity form-control dynamic_pricing" data-product-pk="" name="accessory_quantity"
             placeholder="Quantity">
     </div>
     <div class="col-1">
@@ -746,7 +746,7 @@
 
             let newRow = textile_template.clone();
             newRow.attr('id', product_id + 'productTextile_row' + counter);
-            newRow.find('.product_textile').val('delete');
+            newRow.find('.product_textile').val('delete').attr('data-product-pk', product_id);
             newRow.find('.unit').val('');
             newRow.find('.editTextile_btn').attr('data-modal', product_id + 'editTextile' + counter)
 
@@ -786,9 +786,9 @@
             newRow = component_template.clone()
             newRow.attr('id', product_id + 'productComponent_row' + textile_id + '_' + counter);
             newRow.find('.component_name').val('');
-            newRow.find('.height').val('');
-            newRow.find('.width').val('');
-            newRow.find('.quantity').val('');
+            newRow.find('.height').val('').attr('data-product-pk', product_id);
+            newRow.find('.width').val('').attr('data-product-pk', product_id);
+            newRow.find('.quantity').val('').attr('data-product-pk', product_id);
 
             newRow.find('.delete-component').attr('data-row-id', product_id + 'productComponent_row' + textile_id + '_' + counter);
 
@@ -806,9 +806,9 @@
 
             let newRow = accessory_template.clone();
             newRow.attr('id', product_id + 'productAccessory_row' + counter);
-            newRow.find('.product_accessory').val('delete');
+            newRow.find('.product_accessory').val('delete').attr('data-product-pk', product_id);
             newRow.find('.unit').val('');
-            newRow.find('.quantity').val('');
+            newRow.find('.quantity').val('').attr('data-product-pk', product_id);
 
             newRow.find('.delete-productMaterial').attr('data-row-id', product_id + 'productAccessory_row' + counter)
 
@@ -838,7 +838,7 @@
 
             let selectElement = row.find('select');
 
-            selectElement.val('delete');
+            selectElement.val('delete').change();
             row.hide();
 
         });
@@ -846,11 +846,13 @@
         $(document).on('click', '.delete-component', function () {
             let rowId = $(this).data('row-id');
             let row = $('#' + rowId);
-            console.log(rowId)
+            console.log(rowId);
 
-            let nameElement = row.find('.component_name')
+            let nameElement = row.find('.component_name');
+            let heightElement = row.find('.height');
             
-            nameElement.val('delete');
+            heightElement.val('').change();
+            nameElement.val('delete').change();
             row.hide();
         });
 
@@ -995,6 +997,101 @@
                         // controlled error, display message
                         alert(data["error"]);
                     }
+                },
+                error: function(xhr, textStatus, errorThrown){
+                    // Basic `xhr.status` Key
+                    // 0    = Server didn't Reply (Server Down)
+                    // 400  = Bad Request         (Syntax Error)
+                    // 403  = Forbidden           (Login Token Expired)
+                    // 403  = Not Found           (Invalid Url)
+                    // 500  = Server Error        (Django Crash)
+                    alert("something broke")  // uncontrolled error
+                }
+            });
+
+        });
+        $(document).on('change', '.dynamic_pricing', function() {
+            console.log('pass')
+            let product_id = $(this).data('product-pk')
+
+            let textile_container = $(document).find('#' + product_id + 'productTextileContainer');
+            let accessory_container = $(document).find('#' + product_id + 'productAccessoryContainer');
+            let product_container;
+            let component_modal;
+            let buffer;
+
+            if (product_id === '') {
+                product_container = $(document).find('#addProduct')
+            } else {
+                product_container = $(document).find('#editProduct' + product_id)
+            }
+            let textile_data = [];
+            let accessory_data = [];
+
+            $.each(textile_container.find('.productTextile_row'), function(counter, row){
+                let rowId = $(row).attr('id');
+                let rowNumber = rowId.match(/\d+$/)[0];
+                let componentsData = [];
+
+                let selectElement = $(row).find('.product_textile');
+
+
+                if (selectElement.val() !== "delete") {
+                    component_modal = $('#' + product_id + 'editTextile' + rowNumber);
+                    buffer = $(component_modal).find('.component_buffer').val();
+
+                    $('#' + product_id + 'productComponentContainer' + rowNumber).find('.productComponent_row').each(function () {
+                        let component = {
+                            'component_name': $(this).find('.component_name').val(),
+                            'height': $(this).find('.height').val(),
+                            'width': $(this).find('.width').val(),
+                            'quantity': $(this).find('.quantity').val(),
+                            'buffer': buffer,
+                        };
+                        componentsData.push(component);
+                    });
+                }
+                
+                temp = {
+                    'textile_id': $(row).find(".product_textile").val(),
+                    'components': componentsData
+                }
+                textile_data.push(temp);
+            });
+
+            $.each(accessory_container.find('.productAccessory_row'), function(counter, row){
+                let rowId = $(row).attr('id');
+                let rowNumber = rowId.match(/\d+$/)[0];
+
+                temp = {
+                    'accessory_id': $(row).find(".product_accessory").val(),
+                    'quantity': $(row).find(".quantity").val(),
+                }
+                accessory_data.push(temp);
+            });
+
+            submit_data = {
+                'pk': product_container.find('.product_pk').val(),
+                'margin': product_container.find('.product_margin').val(),
+                'labor': product_container.find('.product_labor').val(),
+                'misc': product_container.find('.product_misc').val(),
+                'textile_data': JSON.stringify(textile_data),
+                'accessory_data': JSON.stringify(accessory_data),
+                "csrfmiddlewaretoken": $("[name=csrfmiddlewaretoken]").val(),
+            }
+            console.log(submit_data)
+
+            let calcPrice_field = product_container.find('.calc_price')
+
+            $.ajax({
+                url: '/dynamic_pricing/',
+                data: submit_data,
+                dataType: 'json',
+                success: function(data) {
+                    console.log(data.calc_price)
+                    let calc_price = data.calc_price;
+                    console.log(calcPrice_field)
+                    $(calcPrice_field).val(calc_price);
                 },
                 error: function(xhr, textStatus, errorThrown){
                     // Basic `xhr.status` Key

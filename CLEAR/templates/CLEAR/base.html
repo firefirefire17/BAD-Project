@@ -94,7 +94,7 @@
                             </a> 
                         </li> 
                         <li class="nav-item pb-3"> 
-                            <a id="navbars" href="{% url 'reports' %}" 
+                            <a id="navbars" href="" data-toggle="modal" data-target="#generateReportModal" 
                                 class="nav-link text-white {% if 'reports' in request.path %} active {% endif %}"> 
                                 Reports 
                             </a> 
@@ -105,6 +105,35 @@
             <div class="col-10" style="background-color:#EBEBEB;">
                 {% block content %}
                 {% endblock %}
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="generateReportModal" tabindex="-1" role="dialog" aria-labelledby="generateReportModalLabel">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content"  style="width: 350px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="generateReportModalLabel">Generate Report</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" action="{% url 'reports' %}"> {% csrf_token %}
+                    <div class="modal-body ml-4">
+                        <div class="row" style="display: flexbox; align-items: baseline;">
+                            <label for="reptype">Report type</label>
+                            <select class="reptype input-select" name="reptype" style="width: 150px; border-radius: 100px; margin-left: 20px;">
+                                <option value="materials">Materials</option>
+                                <option value="production">Production</option>
+                                <option value="pricing">Pricing</option>
+                                <option value="shopping_list">Shopping List</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display: flexbox; justify-content: space-between;">
+                        <button type="button" class="btn dark-button" style="border-radius: 100px;" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn dark-button" >Generate</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

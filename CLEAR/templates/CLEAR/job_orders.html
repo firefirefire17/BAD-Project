@@ -32,7 +32,7 @@
                             <td> {{ order_data.order.customer}}, {{order_data.order.outlet.outlet_name}}</td>
                             <td> {{ order_data.file_date|date:'Y-m-d' }} </td>
                             <td> {{ order_data.status|title }} </td>
-                            <td> {{ order_data.completion_date }}</td>
+                            <td> {{ order_data.completion_date|date:'Y-m-d' }}</td>
                             <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
                                 data-target="#editord-modal{{order_data.order.pk}}" 
                                 style="border-radius: 30px;">Edit</button> </td>
@@ -798,7 +798,7 @@ $(document).ready(function() {
             'outlet': modal.find('.outlet').val(),
             'file_date': modal.find('.file_date').val(),
             'start_date': modal.find('.start_date').val(),
-            'completion_date': modal.find('.completion-date').val(),
+            'completion_date': modal.find('.completion_date').val(),
             'status': modal.find('.status').val(),
             'items': JSON.stringify(item_data),
             "csrfmiddlewaretoken": $("[name=csrfmiddlewaretoken]").val(),
