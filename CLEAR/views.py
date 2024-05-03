@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.db import transaction
 
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -106,89 +107,89 @@ def products(request):
         print(request.POST)
         action = request.POST.get("action")
         if action == "add_form": # adding products
-
-            name = request.POST.get("name")
-            prod_margin = request.POST.get("margin")
-            labor_time = request.POST.get("labor")
-            misc_margin = request.POST.get("misc")
-            retail_price = request.POST.get("retail")
-            last_update = request.POST.get("last_update")
-
-            new_product = Product.objects.create(name=name, 
-                                               prod_margin=prod_margin, 
-                                               labor_time=labor_time, 
-                                             misc_margin=misc_margin)
-
-            textile_data = json.loads(request.POST.get("textile_data"))
-            for textile in textile_data:
-                textile_id = textile['textile_id']
-
-                if textile_id == "delete":
-                    pass
-                else:
-                    textile_object = Textile.objects.get(material_key__material_key = textile_id)
-                    
-                    for component in textile['components']:
-                        component_name = component['component_name'].lower()
-
-                        if component_name == 'delete':
-                            pass
-                        elif not component_name:
-                            error_message = "Please input component name"
-                            return render(request, 'CLEAR/products.html', {'products':product_objects, 
-                                                   'product_material_list':product_material_list,
-                                                   'accessories':accessory_objects,
-                                                   'textiles':textile_objects,
-                                                   'VAT':vat,
-                                                   'wage': wage,
-                                                   })
-                        else: 
-                            height = component['height']
-                            width = component['width']
-                            component_quantity = component['quantity']
-                            buffer = component['buffer'] or 0
-
-                            existing_component = Component.objects.filter(component_name=component_name).first()
-
-                            if existing_component:
-                                product_component = Product_Component.objects.create(product=new_product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
-                            else:
-                                new_component = Component.objects.create(component_name=component_name)
-                                product_component = Product_Component.objects.create(product=new_product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
-
-            
-            accessory_data = json.loads(request.POST.get("accessory_data"))
-            for accessory in accessory_data:
-                accessory_id = accessory['accessory_id']
-                quantity = accessory['quantity']
-
-                if accessory_id == "delete":
-                    pass
-                else:
-                    accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
-                    Product_Accessory.objects.create(product=new_product, accessory=accessory_object, accessory_quantity=quantity)
-            
-            if retail_price:
-                new_product.updateCost()
-                new_product.retail_price = retail_price
-            else:
-                print("no retail")
-                new_product.retail_price = new_product.updateCost()
-
-            if last_update:
-                new_product.last_update = last_update
-            else:
-                new_product.last_update = timezone.now().date()
-            print(new_product.last_update)
-
-            new_product.save()
-
             response = {}
             response['status'] = True
-            response['msg'] = "Form submitted."
-            response['url'] = reverse('products')  # URL to direct is str
+            try:
+                with transaction.atomic():
+                    name = request.POST.get("name").lower()
+                    prod_margin = request.POST.get("margin")
+                    labor_time = request.POST.get("labor")
+                    misc_margin = request.POST.get("misc")
+                    retail_price = request.POST.get("retail")
+                    last_update = request.POST.get("last_update")
 
+
+                    new_product = Product.objects.create(name=name, 
+                                                    prod_margin=prod_margin, 
+                                                    labor_time=labor_time, 
+                                                    misc_margin=misc_margin)
+
+                    textile_data = json.loads(request.POST.get("textile_data"))
+                    for textile in textile_data:
+                        textile_id = textile['textile_id']
+
+                        if textile_id == "delete":
+                            pass
+                        else:
+                            textile_object = Textile.objects.get(material_key__material_key = textile_id)
+                            
+                            for component in textile['components']:
+                                component_name = component['component_name'].lower()
+
+                                if component_name == 'delete':
+                                    pass
+                                elif not component_name:
+                                    response['error'] = "Please input a valid component name"
+                                    response['status'] = False
+                                else: 
+                                    height = component['height']
+                                    width = component['width']
+                                    component_quantity = component['quantity']
+                                    buffer = component['buffer'] or 0
+
+                                    existing_component = Component.objects.filter(component_name=component_name).first()
+
+                                    if existing_component:
+                                        product_component = Product_Component.objects.create(product=new_product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
+                                    else:
+                                        new_component = Component.objects.create(component_name=component_name)
+                                        product_component = Product_Component.objects.create(product=new_product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
+
+                    
+                    accessory_data = json.loads(request.POST.get("accessory_data"))
+                    for accessory in accessory_data:
+                        accessory_id = accessory['accessory_id']
+                        quantity = accessory['quantity']
+
+                        if accessory_id == "delete":
+                            pass
+                        else:
+                            accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
+                            Product_Accessory.objects.create(product=new_product, accessory=accessory_object, accessory_quantity=quantity)
+                    
+                    if retail_price:
+                        print('pass')
+                        print('retail')
+                        new_product.updateCost()
+                        new_product.retail_price = retail_price
+                    else:
+                        print("no retail")
+                        new_product.retail_price = new_product.updateCost()
+
+                    if last_update:
+                        new_product.last_update = last_update
+                    else:
+                        new_product.last_update = timezone.now().date()
+                    print(new_product.last_update)
+
+                    new_product.save()
+
+                    if response['status'] == False:
+                        raise Exception("An error has occured during the transaction")
+            except:
+                pass
             # return dict to ajax
+            response['url'] = reverse('products')  # URL to direct is str
             return JsonResponse(response)
 
         elif action == "edit_form": # updating products
@@ -431,6 +432,14 @@ def materials(request):
             stock = request.POST.get("stock")
             cost = float(request.POST.get("cost"))
 
+            if not stock:
+                error_message = "Please input a valid stock number"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+            
+            if not cost:
+                error_message = "Please input a valid cost"
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
@@ -535,57 +544,59 @@ def job_orders(request):
         print(file_date)
 
         if action == 'add_form':
-            outlet_object = Outlet.objects.get(pk=outlet)
-            new_order = Job_Order.objects.create(file_date=file_date, order_status=status, customer=customer, outlet=outlet_object)
-            if start_date:
-                new_order.start_date = start_date
-                new_order.save()
-            if completion_date:
-                new_order.completion_date = completion_date
-                new_order.save()
-
-            item_data = json.loads(request.POST.get("items"))
-            for item in item_data:
-                product_id = item['order_item']
-                if product_id == 'delete':
-                    pass
-                else:
-                    product = Product.objects.get(pk = item['order_item'])
-                    quantity = item['quantity']
-                    if item['materials']:
-                        type = "bespoke"
-                    else:
-                        type = "regular"
-
-                    new_item = Item.objects.create(product=product, type=type)
-
-                    for material in item['materials']:
-                        material_type = material['material_type']
-                        item_material = material['item_material']
-                        bespoke_rate = material['bespoke_rate']
-                        quantity = material['quantity']
-                        print(quantity)
-                        if item_material == "delete":
-                            pass
-                        else:
-                            if material_type == 'textile':
-                                textile_object = Textile.objects.get(material_key__material_key = item_material)
-                                Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
-                            else:
-                                accessory_object = Accessory.objects.get(material_key__material_key = item_material)
-                                Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
-                    
-                    existing_item = new_item.is_duplicate()
-                    print(existing_item)
-                    if not existing_item:
-                        print('pass')
-                        Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
-                    else:
-                        new_item.delete()
-                        Order_Item.objects.create(order=new_order, item=existing_item, quantity=quantity)
-        
             response = {}
             response['status'] = True
+
+            with transaction.atomic():
+                outlet_object = Outlet.objects.get(pk=outlet)
+                new_order = Job_Order.objects.create(file_date=file_date, order_status=status, customer=customer, outlet=outlet_object)
+                if start_date:
+                    new_order.start_date = start_date
+                    new_order.save()
+                if completion_date:
+                    new_order.completion_date = completion_date
+                    new_order.save()
+
+                item_data = json.loads(request.POST.get("items"))
+                for item in item_data:
+                    product_id = item['order_item']
+                    if product_id == 'delete':
+                        pass
+                    else:
+                        product = Product.objects.get(pk = item['order_item'])
+                        quantity = item['quantity']
+                        if item['materials']:
+                            type = "bespoke"
+                        else:
+                            type = "regular"
+
+                        new_item = Item.objects.create(product=product, type=type)
+
+                        for material in item['materials']:
+                            material_type = material['material_type']
+                            item_material = material['item_material']
+                            bespoke_rate = material['bespoke_rate']
+                            quantity = material['quantity']
+                            print(quantity)
+                            if item_material == "delete":
+                                pass
+                            else:
+                                if material_type == 'textile':
+                                    textile_object = Textile.objects.get(material_key__material_key = item_material)
+                                    Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                                else:
+                                    accessory_object = Accessory.objects.get(material_key__material_key = item_material)
+                                    Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                        
+                        existing_item = new_item.is_duplicate()
+                        print(existing_item)
+                        if not existing_item:
+                            print('pass')
+                            Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
+                        else:
+                            new_item.delete()
+                            Order_Item.objects.create(order=new_order, item=existing_item, quantity=quantity)
+        
             response['msg'] = "Form submitted."
             response['url'] = reverse('orders')
 
@@ -733,7 +744,7 @@ def material_report(request):
         unit = textile.get_unit_display()
         unit = unit.removeprefix("per ")
 
-        material_data.append({'type': 'textile', 'pk': textile, 'unit': unit})
+        material_data.append({'type': 'textile', 'pk': textile.pk, 'unit': unit, })
 
     for accessory in accessory_objects:
         unit = accessory.get_unit_display()
@@ -745,7 +756,9 @@ def material_report(request):
             else:
                 unit = unit + "s"
 
-        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+        material_data.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+
+    print(material_data)
 
     # Create a dictionary to hold the data for each column
     data_dict = {

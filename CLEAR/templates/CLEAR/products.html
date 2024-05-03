@@ -10,6 +10,9 @@
 {% block content %}
 <div class="row pl-3 pt-3 pr-3" style="height:700px;">
     <div class="card main-card">
+        {% if error_message %}
+            <h5 style="color: #FF0000;"> {{error_message}}</h5>
+        {%endif%}
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
             <table class="table table-hover table-striped" style="border-radius: 40px;">
@@ -984,12 +987,13 @@
                 data: submit_data,
                 success: function(data){
                     console.log(data["status"])
+                    console.log(data)
                     if (data["status"]){
                         // redirect to returned url
                         window.location = data["url"];
                     } else{
                         // controlled error, display message
-                        alert(data["msg"]);
+                        alert(data["error"]);
                     }
                 },
                 error: function(xhr, textStatus, errorThrown){

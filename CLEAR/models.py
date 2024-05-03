@@ -37,9 +37,9 @@ class Accessory(models.Model):
     
 class Product(models.Model):
     name = models.CharField(max_length=50)
-    prod_margin = models.FloatField(null=True) # renamed from 'margin'
-    labor_time = models.IntegerField(null=True) 
-    misc_margin = models.IntegerField(null=True)
+    prod_margin = models.FloatField() # renamed from 'margin'
+    labor_time = models.IntegerField() 
+    misc_margin = models.IntegerField()
     calc_price = models.FloatField(null=True) # renamed from 'total_cost'
     retail_price = models.FloatField(null=True)
     last_update = models.DateField(null=True) # remove null once views has been finalized
@@ -51,15 +51,12 @@ class Product(models.Model):
         return str(self.name)
     
     def updateCost(self):
-        print("pass")
         wage_object = Financial_Value.objects.get(name="labor_wage")
         wage = wage_object.value
         
         vat_object = Financial_Value.objects.get(name="vat")
         vat = vat_object.value
 
-        print(wage)
-        print(vat)
 
         labor_time = self.labor_time
         prod_margin = self.prod_margin
@@ -72,29 +69,22 @@ class Product(models.Model):
             quantity = product_component.quantity
             textile_cost = product_component.textile.cost
             textile_unit = product_component.textile.unit
-            print(product_component.buffer)
             buffer = product_component.buffer
 
             productComponent_cost = get_prodComponentCost(height, width, quantity, textile_unit, textile_cost, buffer)
             raw_material_cost += productComponent_cost
-            print(f"product component: {productComponent_cost}")
         
         for product_accessory in self.product_accessory_set.all():
             quantity = product_accessory.accessory_quantity
             accessory_cost = product_accessory.accessory.cost
             productAccessory_cost = quantity*accessory_cost
             raw_material_cost += productAccessory_cost
-            print(f"product accessory: {productAccessory_cost}")
 
         labor_cost = wage*(int(labor_time)/60)
         total_cost = raw_material_cost + labor_cost + labor_cost*(float(misc_margin)/100)
         margin = total_cost*(float(prod_margin)/100)
         calc_price = (total_cost + margin)*(1 + (vat/100))
-        self.calc_price = calc_price
-
-        print(f"labor: {labor_cost}")
-        print(f"total cost: {total_cost}")
-        print(f"margin: {margin}")
+        self.calc_price = float(calc_price)
 
         print(calc_price)
         return self.calc_price
@@ -208,7 +198,7 @@ class Job_Order(models.Model):
                 if material_data['type'] == "textile":
                     textile = Textile.objects.get(material_key__material_key = material_data['id'])
                     if material_data['qty'] <= textile.stock:
-                        print(f'{material_data['qty']}')
+                        print(f'{material_data["qty"]}')
                         textile.stock -= material_data['qty']
                         textile.save()
                     else:
