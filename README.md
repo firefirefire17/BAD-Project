@@ -9,7 +9,8 @@ This is a management system for NiQUA Bag Manufacturing Company (An Open-Source 
 - Manage Transactions
 - Manage Job Orders
 - Manage Shopping List
-- Create Production Reports
+- Create Reports
+- Save/Download Reports as PDF
 
 ## Requirements
 - Latest version of [Python](https://www.python.org/downloads/)
