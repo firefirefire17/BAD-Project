@@ -1,3 +1,70 @@
-## This will serve as our system documentation for CLEAR
 
-# As for now empty, but will fill this up soon
+
+  ____ _     _____    _    ____       ____            _                 
+ / ___| |   | ____|  / \  |  _ \     / ___| _   _ ___| |_ ___ _ __ ___  
+| |   | |   |  _|   / _ \ | |_) |    \___ \| | | / __| __/ _ \ '_ ` _ \ 
+| |___| |___| |___ / ___ \|  _ <      ___) | |_| \__ \ ||  __/ | | | | |
+ \____|_____|_____/_/   \_\_| \_\    |____/ \__, |___/\__\___|_| |_| |_|®
+                                            |___/                       
+
+Developed by The Baddies Team®
+
+## Overview
+This system documentation provides an overview of the features, functionality, and architecture of the application developed using the Django web framework.
+Features
+
+1. Material Management
+
+    Viewing Materials: Users can view a list of textiles and accessories stored in the system, along with their details such as name, type, unit, stock quantity, and cost per unit.
+    Adding, Editing, and Deleting Materials: Authorized users can add new textiles and accessories, edit existing ones, and delete materials as needed.
+    Material Report: Generates a comprehensive report listing all materials, including sorting by total cost and providing totals for stock quantity and total cost.
+
+2. Job Orders
+
+    Viewing Job Orders: Displays a list of job orders, including file date, completion date, order status, customer, outlet, and items associated with each order.
+    Adding, Editing, and Deleting Job Orders: Authorized users can add new job orders, edit existing ones, and delete orders as needed.
+
+3. Reports
+
+    Material Report: Generates a report listing all materials, including sorting by total cost and providing totals for stock quantity and total cost.
+    Production Report: Placeholder for a production report feature.
+    Pricing Report: Placeholder for a pricing report feature.
+    Shopping List: Placeholder for a shopping list feature.
+
+4. Stock Management
+
+    Stock In: Allows users to record the addition of new stock items, including textiles and accessories, along with quantity and cost details.
+
+5. User Authentication
+
+    User Registration: Allows new users to register for an account.
+    User Login/Logout: Provides authentication functionality for users to log in to and log out of the system.
+
+## Architecture
+
+Backend
+
+    Django Framework: The backend is developed using the Django web framework, providing a robust architecture for building web applications.
+    Database: Utilizes a relational database (such as SQLite, MySQL, or PostgreSQL) for storing data, managed through Django's ORM.
+    Views and Models: Implements views and models to handle business logic and interact with the database.
+    Authentication: Integrates Django's built-in authentication system for user registration, login, and logout.
+
+Frontend
+
+    HTML Templates: Utilizes HTML templates rendered by Django views to generate dynamic web pages.
+    CSS and JavaScript: Enhances user interface and interactivity using custom CSS styles and JavaScript code.
+    AJAX: Implements asynchronous requests for dynamic content loading and interaction without full page reloads.
+
+Usage
+
+    Accessing Features: Users can access various features through the navigation menu or dedicated URLs provided by the application.
+    Authentication: Users need to register and log in to access certain features requiring authentication.
+    Data Management: Authorized users can add, edit, or delete data as necessary, ensuring accurate and up-to-date information.
+    Report Generation: Reports can be generated to analyze data and make informed decisions.
+
+## Future Enhancements
+
+    Implement additional features such as production reports, pricing reports, and shopping lists.
+    Enhance user interface and experience with more interactive elements and responsive design.
+    Improve security measures, including role-based access control and data encryption.
+    Optimize performance by implementing caching, lazy loading, and database indexing.
