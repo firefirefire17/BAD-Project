@@ -50,7 +50,7 @@ def products(request):
 
     #create a list of dicts
     for product in product_objects:
-        product.updateCost()
+        product.updateCost('update')
         product_data = {
             'product':product,
             'textile_buffers': [],
@@ -172,11 +172,11 @@ def products(request):
                     if retail_price:
                         print('pass')
                         print('retail')
-                        new_product.updateCost()
+                        new_product.updateCost('update')
                         new_product.retail_price = retail_price
                     else:
                         print("no retail")
-                        new_product.retail_price = new_product.updateCost()
+                        new_product.retail_price = new_product.updateCost('update')
 
                     if last_update:
                         new_product.last_update = last_update
@@ -273,7 +273,7 @@ def products(request):
                     accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
                     Product_Accessory.objects.create(product=product, accessory=accessory_object, accessory_quantity=quantity)
 
-            product.updateCost()
+            product.updateCost('update')
             product.save()
 
             response = {}
@@ -591,8 +591,6 @@ def job_orders(request):
         outlet = request.POST.get("outlet")
         customer = request.POST.get("customer")
 
-        print(file_date)
-
         if action == 'add_form':
             response = {}
             response['status'] = True
@@ -606,6 +604,8 @@ def job_orders(request):
                 if completion_date:
                     new_order.completion_date = completion_date
                     new_order.save()
+                    print('completion-date')
+                    print(new_order.completion_date)
 
                 item_data = json.loads(request.POST.get("items"))
                 for item in item_data:
@@ -794,7 +794,7 @@ def material_report(request):
         unit = textile.get_unit_display()
         unit = unit.removeprefix("per ")
 
-        material_data.append({'type': 'textile', 'pk': textile.pk, 'unit': unit, })
+        material_data.append({'type': 'textile', 'pk': textile.material_key.material_key, 'name': textile.name, 'unit': unit, 'stock': textile.stock, 'cost': textile.cost})
 
     for accessory in accessory_objects:
         unit = accessory.get_unit_display()
@@ -806,23 +806,24 @@ def material_report(request):
             else:
                 unit = unit + "s"
 
-        material_data.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+        material_data.append({'type': 'accessory', 'pk': accessory.material_key.material_key, 'name': accessory.name, 'unit': unit, 'stock': accessory.stock, 'cost': accessory.cost})
 
     print(material_data)
 
     # Create a dictionary to hold the data for each column
     data_dict = {
-        "Material Key": [item["pk"] for item in material_data],
-        "Name": [item["name"] for item in material_data],
-        "Type": [item["type"].title() for item in material_data],  # Title-case the type
-        "Stock": [f"{item['stock']:.2f} {item['unit']}" for item in material_data],  # Format stock and unit
-        "Cost": [item["cost"] for item in material_data]
+        "pk": [item["pk"] for item in material_data],
+        "name": [item["name"] for item in material_data],
+        "type": [item["type"].title() for item in material_data],  # Title-case the type
+        "stock": [f"{item['stock']:.2f} {item['unit']}" for item in material_data],  # Format stock and unit
+        "cost": [item["cost"] for item in material_data]
     }
 
-    material_objects = sorted(material_objects, key=lambda x: x['material'].stock)
+    material_data = sorted(material_data, key=lambda x: x['stock'])
+    inStock_count = sum(1 for item in material_data if item['stock'] > 0)
     datenow = timezone.now().date()
 
-    return render(request, 'CLEAR/material_report.html', {'materials':material_objects, 'today': datenow,})
+    return render(request, 'CLEAR/material_report.html', {'materials':material_data, 'today': datenow, 'stocked': inStock_count})
 
 @login_required(login_url="/login")
 def production_report(request):
@@ -1020,6 +1021,89 @@ def get_material_options(request): # function used to change materials in stock-
         options[pk] = name 
  
     return JsonResponse({'options': options}) 
+
+def dynamic_pricing(request):
+    print('back end entered')
+    print(request.GET)
+    response = {}
+    response['status'] = True
+    try:
+        with transaction.atomic():
+            prod_margin = request.GET.get("margin")
+            labor_time = request.GET.get("labor")
+            misc_margin = request.GET.get("misc")
+
+            print(prod_margin, labor_time, misc_margin)
+
+            if Product.objects.filter(name="test_product_test_product_test").exists():
+                test_product = Product.objects.get(name="test_product_test_product_test")
+
+                test_product.prod_margin = prod_margin
+                test_product.labor_time = labor_time
+                test_product.misc_margin = misc_margin
+            else:
+                test_product = Product.objects.create(name="test_product_test_product_test", 
+                                            prod_margin=prod_margin, 
+                                            labor_time=labor_time, 
+                                            misc_margin=misc_margin)
+                
+            Product_Component.objects.filter(product=test_product).delete()
+
+            textile_data = json.loads(request.GET.get("textile_data"))
+            for textile in textile_data:
+                textile_id = textile['textile_id']
+
+                if textile_id == "delete":
+                    pass
+                else:
+                    textile_object = Textile.objects.get(material_key__material_key = textile_id)
+                    
+                    for component in textile['components']:
+                        component_name = component['component_name'].lower()
+
+                        if component_name == 'delete':
+                            pass
+                        elif not component_name:
+                            pass
+                        else: 
+                            height = component['height']
+                            width = component['width']
+                            component_quantity = component['quantity']
+                            buffer = component['buffer'] or 0
+
+                            existing_component = Component.objects.filter(component_name=component_name).first()
+
+                            if height and width and component_quantity:
+                                if existing_component:
+                                    product_component = Product_Component.objects.create(product=test_product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
+                                else:
+                                    new_component = Component.objects.create(component_name=component_name)
+                                    product_component = Product_Component.objects.create(product=test_product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
+
+            Product_Accessory.objects.filter(product=test_product).delete()
+            accessory_data = json.loads(request.GET.get("accessory_data"))
+            for accessory in accessory_data:
+                accessory_id = accessory['accessory_id']
+                quantity = accessory['quantity']
+
+                if accessory_id == "delete":
+                    pass
+                else:
+                    if quantity:
+                        accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
+                        Product_Accessory.objects.create(product=test_product, accessory=accessory_object, accessory_quantity=quantity)
+            
+            calc_price = "{:.2f}".format(test_product.updateCost('update'))
+            test_product.save()
+
+            print(calc_price)
+
+        if response['status'] == False:
+            raise Exception("An error has occured during the transaction")
+    except:
+        print('failed')
+        calc_price = ""
+    return JsonResponse({'calc_price':calc_price})
 
 def generate_material_pd(request):
     textile_objects = Textile.objects.all()

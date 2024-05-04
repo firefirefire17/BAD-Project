@@ -34,5 +34,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name="logout"),
     path('stock_in/', views.stock_in, name="stock_in"),
     path('get_material_options/', views.get_material_options, name='get_material_options'),
+    path('dynamic_pricing/', views.dynamic_pricing, name='dynamic_pricing'),
     path('filter_materials/', views.filter_materials, name="filter_materials"),
 ]
