@@ -8,9 +8,25 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
 </head>
+{% block search %}
+<form id="search-form" method="GET" action="{% url 'filter_materials' %}">
+    {% csrf_token %}
+    <input id="search-input" class="search" name="q" type="search" placeholder="Search..."
+        style="background-color: transparent; border:none; height: 40px; margin-top: 8px; width: max-content; color: white;">
+</form>
+{% endblock %}
 
+{% block filter %} 
+    <button class="button btn btn-secondary filterbutton" data-toggle="modal" data-target="#filtermodal" 
+    style="height: fit-content; display: flexbox; align-items: center; opacity: 60%; border-radius: 35px; margin-right: 5px;">
+    Filter
+    </button>
+
+{% endblock %}
 
 {% block content %}
+
+
 
 <div class="row pl-3 pt-3 pr-3" style="height:700px;">
     <div class="card main-card">
@@ -19,7 +35,7 @@
         {%endif%}
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
-            <table class="table table-hover table-striped" style="border-radius: 40px;">
+            <table id="materialTable" class="table table-hover table-striped" style="border-radius: 40px;">
                 <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Material # </th>
                     <th scope="col"> Name</th>
@@ -270,28 +286,125 @@
         </div>
     </div>
 </form>
-
+<div class="modal" id="filtermodal" style="max-width: 700px; position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 60%;">
+    <div class="modal-content">
+        <div class="modal-body">
+            <div class="container">
+                <button type="button" class="close btn-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <input id="outofstock" name="filterstock" type="radio" class="placeholder_class" value="out_of_stock">
+                <label class="form-check-label" for="credit">Out of Stock </label>
+                <br>
+                <input id="instock" name="filterstock" type="radio" class="placeholder_class" value="in_stock">
+                <label class="form-check-label" for="debit">In Stock</label>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     $(document).ready(function() {
+        
         const unit_select = $('#unit');
 
-      $('#type').change(function() {
-        let type = $(this).val();
-        
-        // Clear existing options
-        unit_select.empty();
-        
-        // Populate options based on the selected option of the first select element
-        if (type === "textile") {
-            unit_select.append($('<option>', { value: 'FT', text: 'per sq/ft' }));
-            unit_select.append($('<option>', { value: 'IN', text: 'per sq/in' }));
-            unit_select.append($('<option>', { value: 'M', text: 'per sq/m' }));
-        } else if (type === "accessory") {
-            unit_select.append($('<option>', { value: 'IN', text: 'per inch' }));
-            unit_select.append($('<option>', { value: 'PC', text: 'per piece' }));
-        }
-      });
+        $('#type').change(function() {
+            let type = $(this).val();
+            
+            // Clear existing options
+            unit_select.empty();
+            
+            // Populate options based on the selected option of the first select element
+            if (type === "textile") {
+                unit_select.append($('<option>', { value: 'FT', text: 'per sq/ft' }));
+                unit_select.append($('<option>', { value: 'IN', text: 'per sq/in' }));
+                unit_select.append($('<option>', { value: 'M', text: 'per sq/m' }));
+            } else if (type === "accessory") {
+                unit_select.append($('<option>', { value: 'IN', text: 'per inch' }));
+                unit_select.append($('<option>', { value: 'PC', text: 'per piece' }));
+            }
+        });
+
+        // filter stock ajax request
+        $('input[name="filterstock"]').change(function() {
+            let filterStock = $('input[name="filterstock"]:checked').val();
+            let searchQuery = $('#search-input').val();
+            $.ajax({
+                type: 'GET',
+                url: '{% url "filter_materials" %}',
+                data: {
+                    'q': searchQuery,
+                    'filterstock': filterStock
+                },
+                success: function(response) {
+                    console.log("AJAX request successful.");
+                    $('#materialTable tbody').empty();
+                    updateTable(response.table_data);
+                },
+
+                error: function(xhr, status, error) {
+                    console.error("AJAX request failed:", error);
+                }
+            });
+        });
+
+        // search ajax request
+        $('#search-input').on('input', function() {
+            let searchQuery = $('#search-input').val();
+            let filterStock = $('input[name="filterstock"]:checked').val();
+            $.ajax({
+                type: 'GET',
+                url: '{% url "filter_materials" %}',
+                data: {
+                    'q': searchQuery,
+                    'filterstock': filterStock
+                },
+                success: function(response) {
+                    console.log("AJAX request successful.");
+                    $('#materialTable tbody').empty();
+                    updateTable(response.table_data);
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX request failed:", error);
+                }
+            });
+        });
+
+
     });
-    </script>
+
+// function for updating the table with the passed table data with the formating of the
+function updateTable(data) {
+    $('#materialTable tbody').empty();
+
+    $.each(data, function(index, item) {
+        var row = $('<tr>');
+        row.append($('<td>').text(item.material_id));
+        row.append($('<td>').text(item.material_name));
+        row.append($('<td>').text(item.type));
+        row.append($('<td>').text(item.stock));
+        row.append($('<td>').text(item.cost));
+
+        var actions = $('<td>');
+        var editButton = $('<button>').addClass('btn btn-outline-secondary')
+            .attr('data-toggle', 'modal')
+            .attr('data-target', '#editmat-modal' + item.material_id)
+            .text('Edit')
+            .css('border-radius', '30px'); // Set border-radius inline
+        actions.append(editButton);
+        row.append(actions);
+
+        $('#materialTable tbody').append(row);
+    });
+    $('#materialTable th').css('width', '120px'); // Adjust the width as needed
+    $('#materialTable td').css('width', '120px'); // Adjust the width as needed
+}
+
+</script>
+
 
 {% endblock %}

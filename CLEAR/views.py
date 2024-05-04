@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Financial_Value, MaterialKey, Outlet
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.db import transaction
+from django.db.models import Q
 
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -21,7 +23,7 @@ import json
 @login_required(login_url="/login") # this is to restrict access if not logged in
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
-
+    
 
 @login_required(login_url="/login")
 def products(request):
@@ -328,14 +330,64 @@ def products(request):
                                                    'wage': wage,
                                                    })
 
-# orders used to be here
+# search and filter functionality
+@login_required(login_url="/login")
+def filter_materials(request):
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_objects = []
+
+    for textile in textile_objects:
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        material_objects.append({'type': 'textile', 'material': textile, 'unit': unit})
+
+    for accessory in accessory_objects:
+        unit = accessory.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        if accessory.stock > 1:
+            if unit == 'inch':
+                unit = unit + "es"
+            else:
+                unit = unit + "s"
+
+        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+    
+    if request.method == "GET":
+        search_query = request.GET.get('q')
+        print(search_query)
+        filterstock = request.GET.get('filterstock')
+        print(filterstock)
+
+        if search_query:
+            material_objects = [material for material in material_objects if search_query.lower() in material['material'].name.lower()]
+        if filterstock == 'out_of_stock':
+            material_objects = [material for material in material_objects if int(material['material'].stock) == 0]
+        elif filterstock == 'in_stock':
+            material_objects = [material for material in material_objects if int(material['material'].stock) > 0]
+        
+
+    # json constructor
+    table_data = []
+    for material in material_objects:
+        table_data.append({
+            'type': material['type'],
+            'material_id': material['material'].material_key.material_key,
+            'material_name': material['material'].name,
+            'stock': material['material'].stock,
+            'cost': material['material'].cost,
+        })
+
+    return JsonResponse({'table_data': table_data})
+
 
 @login_required(login_url="/login")
 def materials(request):
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
     material_objects = []
-
     
     for textile in textile_objects:
         unit = textile.get_unit_display()
@@ -354,6 +406,9 @@ def materials(request):
                 unit = unit + "s"
 
         material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+
+        
+        
 
     if(request.method=="POST"):
         material_key = request.POST.get("material_key")
@@ -472,11 +527,6 @@ def materials(request):
             if type == "accessory":
                 Accessory.objects.filter(material_key=material_key_obj).delete()
             return redirect('materials')
-        
-        #if searchitem in request.GET:
-           # searchitem = request.GET['searchitem']
-           # data = Textile.objects.filter(name__unaccent__icontains=searchitem)
-
 
     return render(request, 'CLEAR/materials.html', {'materials':material_objects})
 

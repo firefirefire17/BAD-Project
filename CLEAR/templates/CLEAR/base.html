@@ -27,14 +27,19 @@
         <div class="row">
                 <img class="logo" src="https://i.imgur.com/RK7hDVV.png">
                 <img class="searchnav" src="https://i.imgur.com/04qNE39.png">
+                {% block search %}
                 <form method="POST" action=""> {% csrf_token %}
                     <input class="search" name="searchitem" type="search" placeholder="Search..."
                         style="background-color: transparent; border:none; height: 40px; margin-top: 8px; width: max-content; color: white;">
                 </form>
+                {% endblock %}
         </div>
+        {% block filter %}
         <button class="button btn btn-secondary filterbutton" data-toggle="modal" data-target="#filtermodal"
             style="height: fit-content; display: flexbox; align-items: center; opacity: 60%; border-radius: 35px; margin-right: 5px;">
-            Filter</button>
+            Filter
+        </button>
+        {% endblock %}
     </nav>
     <div class="container-fluid">
         <div class="row h-100">
