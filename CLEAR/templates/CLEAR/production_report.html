@@ -1,0 +1,127 @@
+{% extends "CLEAR/base.html" %}
+{% load static %}
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet4.css' %}">
+    <script src="{% static 'js/styling.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+</head>
+
+{% block content %}
+<div class="row pb-2 pt-4">
+    <div class="col" style="margin: 0px 30px 0px 30px">
+        <div class="card" style="height:150px;">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
+                <div class="m-0">     
+                    <p class="m-0" style="font-size: 80px;"> {{material_count}} </p>
+                </div>
+                <div class="m-0">
+                    <p class="m-0" style="font-size: 20px;">Total Materials</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col" style="margin: 0px 30px 0px 30px">
+        <div class="card" style="height:150px;">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
+                <div class="m-0">     
+                    <p class="m-0" style="font-size: 80px;"> {{stocked}} </p>
+                </div>
+                <div class="m-0">
+                    <p class="m-0" style="font-size: 20px;">Materials In-stock</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col" style="margin: 0px 30px 0px 30px">
+        <div class="card" style="height:150px;">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
+                <div class="m-0">     
+                    <p class="m-0" style="font-size: 80px;"> {{unstocked}} </p>
+                </div>
+                <div class="m-0">
+                    <p class="m-0" style="font-size: 20px;">Materials Out-of-stock</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row pl-3 pt-3 pr-3" style="height:700px;">
+    <div class="card main-card">
+        <div class="table-responsive card"
+            style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
+            <table class="table table-hover table-striped" style="border-radius: 40px;">
+                <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
+                    <th scope="col"> Material # </th>
+                    <th scope="col"> Name</th>
+                    <th scope="col"> Material Type </th>
+                    <th scope="col"> Stock</th>
+                    <th scope="col"> Cost </th>
+                </thead>
+                <tbody>
+                    {% for material_data in materials %}
+                        <tr style="height:70px;">
+                            <td> {{ material_data.pk }} </td>
+                            <td> {{ material_data.name }} </td>
+                            <td> {{ material_data.type|title }} </td>
+                            <td> {{ material_data.stock|floatformat:2 }} {{material_data.unit}}</td>
+                            <td> {{ material_data.cost }} </td>
+                        </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+        </div>
+        <div class="row" style="margin-right: 15px;">
+            <div class="col-2 ml-auto">
+                <button type="button" class="btn light-button download_button">
+                    Download
+                </button>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+        const editContainer = $('.editContainer');
+        $(document).on('change', '.reptype', function() {
+            console.log('pass');
+            let reptype = $(this).val();
+    
+            if (reptype == "production") {
+                editContainer.empty(); 
+                editContainer.append('<div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">' +
+                    '<label for="reportDate">Date</label>' +
+                    '<input type="date" class="last_update form-control"' +
+                    'style="width: 150px; border-radius: 100px; margin-left: 70px;">' +
+                    '</div>');
+            } else if (reptype == "shopping_list") {
+                editContainer.empty();
+                editContainer.append('<div>Shopping list here</div>');
+            } else {
+                editContainer.empty();
+            }
+        });
+        $(".download_button").click(function() {
+            let link = $('<a href="/download_matrep/" style="display: none;"></a>');
+    
+            // Append the link to the body
+            $('body').append(link);
+            
+            // Trigger a click event on the link
+            link[0].click();
+            
+            // Remove the link from the DOM
+            link.remove();
+        });
+    });
+</script>
+
+{% endblock %}

@@ -38,4 +38,5 @@ urlpatterns = [
     path('filter_materials/', views.filter_materials, name="filter_materials"),
     path('search_products/', views.search_products, name="search_products"),
     path('download_matrep/', views.download_matrep, name="download_matrep"),
+    path('download_prodrep/', views.download_matrep, name="download_matrep"),
 ]

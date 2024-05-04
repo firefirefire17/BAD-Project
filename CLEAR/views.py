@@ -1168,6 +1168,42 @@ def download_matrep(request):
     # Set response headers
     response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
     return response
+
+def download_prodrep(request):
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_data = []
+
+    for textile in textile_objects:
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        material_data.append({'type': 'textile', 'pk': textile.material_key.material_key, 'name': textile.name, 'cost': textile.cost, 'stock': textile.stock, 'unit': unit})
+
+    for accessory in accessory_objects:
+        unit = accessory.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        if accessory.stock > 1:
+            if unit == 'inch':
+                unit = unit + "es"
+            else:
+                unit = unit + "s"
+
+        material_data.append({'type': 'accessory', 'pk': accessory.material_key.material_key, 'name': accessory.name, 'cost': accessory.cost, 'stock': accessory.stock, 'unit': unit})
+
+    df = pd.DataFrame(material_data)
+    df.set_index('pk', inplace=True)
+
+    excel_filename = 'material_data.xlsx'
+
+    excel_buffer = io.BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
+
+    # Set response headers
+    response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
+    return response
  
 # this is a function used in products to get the cost of each product component 
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost): 
