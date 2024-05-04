@@ -11,40 +11,40 @@
 
 {% block content %}
 <div class="row pb-2 pt-4">
-    <div class="col">
-        <div class="card">
-            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+    <div class="col" style="margin: 0px 30px 0px 30px">
+        <div class="card" style="height:150px;">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
                 <div class="m-0">     
-                    <p class="m-0" style="font-size: 80px;"> 5 </p>
+                    <p class="m-0" style="font-size: 80px;"> {{material_count}} </p>
                 </div>
                 <div class="m-0">
-                    <p class="m-0" style="font-size: 20px;">Materials in-stock</p>
+                    <p class="m-0" style="font-size: 20px;">Total Materials</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col">
-        <div class="card">
-            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+    <div class="col" style="margin: 0px 30px 0px 30px">
+        <div class="card" style="height:150px;">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
                 <div class="m-0">     
-                    <p class="m-0" style="font-size: 80px;"> 5 </p>
+                    <p class="m-0" style="font-size: 80px;"> {{stocked}} </p>
                 </div>
                 <div class="m-0">
-                    <p class="m-0" style="font-size: 20px;">Materials in-stock</p>
+                    <p class="m-0" style="font-size: 20px;">Materials In-stock</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col">
-        <div class="card">
-            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+    <div class="col" style="margin: 0px 30px 0px 30px">
+        <div class="card" style="height:150px;">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
                 <div class="m-0">     
-                    <p class="m-0" style="font-size: 80px;"> 5 </p>
+                    <p class="m-0" style="font-size: 80px;"> {{unstocked}} </p>
                 </div>
                 <div class="m-0">
-                    <p class="m-0" style="font-size: 20px;">Materials in-stock</p>
+                    <p class="m-0" style="font-size: 20px;">Materials Out-of-stock</p>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@
         </div>
         <div class="row" style="margin-right: 15px;">
             <div class="col-2 ml-auto">
-                <button type="button" class="btn light-button download-button">
+                <button type="button" class="btn light-button download_button">
                     Download
                 </button>
             </div>
@@ -109,19 +109,17 @@
                 editContainer.empty();
             }
         });
-        $("#downloadButton").click(function() {
-            $.ajax({
-                url: '/generate_material_pdf/',
-                type: 'GET',
-                success: function(data) {
-                    // Handle success (optional)
-                    console.log('PDF generated successfully');
-                },
-                error: function(xhr, status, error) {
-                    // Handle error (optional)
-                    console.error('Error generating PDF:', error);
-                }
-            });
+        $(".download_button").click(function() {
+            let link = $('<a href="/download_matrep/" style="display: none;"></a>');
+    
+            // Append the link to the body
+            $('body').append(link);
+            
+            // Trigger a click event on the link
+            link[0].click();
+            
+            // Remove the link from the DOM
+            link.remove();
         });
     });
 </script>
