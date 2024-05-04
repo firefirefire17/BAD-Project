@@ -4,7 +4,7 @@
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'stylesheet4.css' %}">
     <script src="{% static 'js/styling.js' %}"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
 </head>
@@ -388,24 +388,33 @@ function updateTable(data) {
 
     $.each(data, function(index, item) {
         var row = $('<tr>');
-        row.append($('<td>').text(item.material_id));
-        row.append($('<td>').text(item.material_name));
-        row.append($('<td>').text(item.type));
-        row.append($('<td>').text(item.stock + ' ' + item.unit));
-        row.append($('<td>').text(item.cost));
 
-        var actions = $('<td>');
+        var materialIdCell = $('<td>').text(item.material_id);
+        var materialNameCell = $('<td>').text(item.material_name);
+        var typeCell = $('<td>').text(item.type);
+        var stockCell = $('<td>').text(item.stock);
+        var costCell = $('<td>').text(item.cost); // Add class to right-align
+        var actionsCell = $('<td>');
+
         var editButton = $('<button>').addClass('btn btn-outline-secondary')
             .attr('data-toggle', 'modal')
             .attr('data-target', '#editmat-modal' + item.material_id)
             .text('Edit')
             .css('border-radius', '30px'); // Set border-radius inline
-        actions.append(editButton);
-        row.append(actions);
+        actionsCell.append(editButton);
+
+        // appending it to the roowwws
+        row.append(materialIdCell);
+        row.append(materialNameCell);
+        row.append(typeCell);
+        row.append(stockCell);
+        row.append(costCell);
+        row.append(actionsCell);
 
         $('#materialTable tbody').append(row);
     });
-    $('#materialTable th').attr('scope', 'col'); // Adjust the width as needed
+
+    $('#materialTable th').attr('scope', 'col');
 }
 
 </script>
