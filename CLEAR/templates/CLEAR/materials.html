@@ -45,6 +45,7 @@
                     <th scope="col"></th>
                 </thead>
                 <tbody>
+                    <div class="delete_rows">
                     {% for material_data in materials %}
                         <tr style="height:70px;">
                             <td> {{ material_data.material.material_key.material_key }} </td>
@@ -56,141 +57,145 @@
                                     data-target="#editmat-modal{{material_data.material.material_key.material_key}}" style="border-radius: 30px;">Edit</button>
                             </td>
                         </tr>
+                    {%endfor%}
+                    </div>
 
 
                         <!-- modal to edit materials -->
-                    <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-                        <div class="modal" id="editmat-modal{{material_data.material.material_key.material_key}}" tabindex="-1" role="dialog">
-                            <div class="modal-content">
-                                <div class="modal-body">
+                
+                </tbody>
+            </table>
+            {% for material_data in materials %}
+            <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+                <div class="modal" id="editmat-modal{{material_data.material.material_key.material_key}}" tabindex="-1" role="dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-11">
+                                        <h3 style="margin-bottom: 20px;">Edit Material</h3>
+                                    </div>
+                                    <div class="col-1"><button type="button" class="close btn-close"
+                                            data-dismiss="modal" aria-label="Close"><span
+                                                aria-hidden="true">&times;</span></button></div>
+                                </div>
+                                
+                                <input type="hidden" name="edit_form" value="1"></input>
+                                <input type="hidden" name="type" value="{{material_data.type}}"></input>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="pk">Material ID</label>
+                                        <input type="text" class="form-control" name="material_key" value="{{material_data.material.material_key.material_key}}" readonly>
+                                    </div>
+                                    <div class="col">
+                                        <label for="name">Material Name</label>
+                                        <input type="text" class="form-control" id="name" name="name"
+                                            value="{{material_data.material.name|title}}">
+                                    </div>
+                                    <div class="col">
+                                        <label for="type">Material Type</label>
+                                        <select class="input-select" disabled>
+                                            <option value="textile" {% if 'textile' in material_data.type %}selected{% endif %}>Textile</option>
+                                            <option value="accessory" {% if 'accessory' in material_data.type %}selected{% endif %}>Accessory</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row pt-3">
+                                    <div class="col">
+                                        <label for="stock">Stock</label>
+                                        <input type="number" class="form-control" id="stock" name="stock"
+                                            value="{{material_data.material.stock}}" readonly>
+                                    </div>
+                                    <div class="col">
+                                        <label for="cost">Cost</label>
+                                        <input type="number" class="form-control" id="cost" name="cost"
+                                            value="{{material_data.material.cost}}" step="0.01">
+                                    </div>
+                                    <div class="col">
+                                        <label for="unit">Unit</label>
+                                        <input type="text" class="form-control" 
+                                            value=
+                                            "{% if material_data.material.unit == 'M' %} per sq/m
+                                            {% elif material_data.material.unit == 'IN' and material_data.type == 'textile' %} per sq/in
+                                            {% elif material_data.material.unit == 'IN' %} per inch 
+                                            {% elif material_data.material.unit == 'PC' %} per piece 
+                                            {% elif material_data.material.unit == 'FT' %} per sq/ft {% endif %}" readonly>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin: 30px 0px 10px 0px;">
+                                    <div class="col" style="margin-left: -16px;">
+                                        <button type="button" class="btn dark-button delete-button" data-toggle="modal"
+                                            data-target="#delconf-modal{{material_data.material.material_key.material_key}}"> Delete
+                                            Material </button>
+                                    </div>
+                                    <div class="col-4 order-2 text-right">
+                                        <button type="button" class="btn dark-button" data-toggle="modal"
+                                            data-target="#editconf-modal{{material_data.material.material_key.material_key}}" style="margin-left: 65px;">
+                                            Save Edits </button>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONFIRM EDIT MATERIALS MODAL-->
+
+                <div class="modal" id="editconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
+                    style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="col-12">
+                                <h4 style="text-align: center;"> Confirm edits? </h4>
+                            </div>
+                            <div class="row text-center" style="margin-top: 15px;">
+                                <div class="col">
+                                    <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
+                                        Editing </button>
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn dark-button confirm-button">
+                                        Confirm </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+                
+                <!-- CONFIRM DELETE MATERIALS MODAL-->
+
+                <div class="modal" id="delconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
+                    style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="col-12">
+                                <h4 style="text-align: center;"> Delete Material? </h4>
+                            </div>
+                            <div id="confirmDeleteMaterial{{material_data.material.material_key.material_key}}">
+                                <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
+                                    <input type="hidden" name="delete_form" value="1">
+                                    <input type="hidden" name="material_key" value="{{material_data.material.material_key.material_key}}">
+                                    <input type="hidden" name="type" value="{{material_data.type}}"></input>
                                     <div class="container-fluid">
-                                        <div class="row">
-                                            <div class="col-11">
-                                                <h3 style="margin-bottom: 20px;">Edit Material</h3>
-                                            </div>
-                                            <div class="col-1"><button type="button" class="close btn-close"
-                                                    data-dismiss="modal" aria-label="Close"><span
-                                                        aria-hidden="true">&times;</span></button></div>
-                                        </div>
-                                        
-                                        <input type="hidden" name="edit_form" value="1"></input>
-                                        <input type="hidden" name="type" value="{{material_data.type}}"></input>
-                                        <div class="row">
+                                        <div class="row text-center" style="margin-top: 15px;">
                                             <div class="col">
-                                                <label for="pk">Material ID</label>
-                                                <input type="text" class="form-control" name="material_key" value="{{material_data.material.material_key.material_key}}" readonly>
+                                                <button type="button" class="btn dark-button" data-dismiss="modal">
+                                                    Continue Editing
+                                                </button>
                                             </div>
                                             <div class="col">
-                                                <label for="name">Material Name</label>
-                                                <input type="text" class="form-control" id="name" name="name"
-                                                    value="{{material_data.material.name|title}}">
-                                            </div>
-                                            <div class="col">
-                                                <label for="type">Material Type</label>
-                                                <select class="input-select" disabled>
-                                                    <option value="textile" {% if 'textile' in material_data.type %}selected{% endif %}>Textile</option>
-                                                    <option value="accessory" {% if 'accessory' in material_data.type %}selected{% endif %}>Accessory</option>
-                                                </select>
+                                                <button type="submit" class="btn dark-button delete-button"> Confirm </button>
                                             </div>
                                         </div>
-                                        <div class="row pt-3">
-                                            <div class="col">
-                                                <label for="stock">Stock</label>
-                                                <input type="number" class="form-control" id="stock" name="stock"
-                                                    value="{{material_data.material.stock}}" readonly>
-                                            </div>
-                                            <div class="col">
-                                                <label for="cost">Cost</label>
-                                                <input type="number" class="form-control" id="cost" name="cost"
-                                                    value="{{material_data.material.cost}}" step="0.01">
-                                            </div>
-                                            <div class="col">
-                                                <label for="unit">Unit</label>
-                                                <input type="text" class="form-control" 
-                                                    value=
-                                                    "{% if material_data.material.unit == 'M' %} per sq/m
-                                                    {% elif material_data.material.unit == 'IN' and material_data.type == 'textile' %} per sq/in
-                                                    {% elif material_data.material.unit == 'IN' %} per inch 
-                                                    {% elif material_data.material.unit == 'PC' %} per piece 
-                                                    {% elif material_data.material.unit == 'FT' %} per sq/ft {% endif %}" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="row" style="margin: 30px 0px 10px 0px;">
-                                            <div class="col" style="margin-left: -16px;">
-                                                <button type="button" class="btn dark-button delete-button" data-toggle="modal"
-                                                    data-target="#delconf-modal{{material_data.material.material_key.material_key}}"> Delete
-                                                    Material </button>
-                                            </div>
-                                            <div class="col-4 order-2 text-right">
-                                                <button type="button" class="btn dark-button" data-toggle="modal"
-                                                    data-target="#editconf-modal{{material_data.material.material_key.material_key}}" style="margin-left: 65px;">
-                                                    Save Edits </button>
-                                            </div>
-                                        </div>
-                                        
                                     </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
-
-                        <!-- CONFIRM EDIT MATERIALS MODAL-->
-
-                        <div class="modal" id="editconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
-                            style=" margin-left: 15%; margin-top: 10%; width: 70%;">
-                            <div class="modal-content">
-                                <div class="modal-body">
-                                    <div class="col-12">
-                                        <h4 style="text-align: center;"> Confirm edits? </h4>
-                                    </div>
-                                    <div class="row text-center" style="margin-top: 15px;">
-                                        <div class="col">
-                                            <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
-                                                Editing </button>
-                                        </div>
-                                        <div class="col">
-                                            <button type="submit" class="btn dark-button confirm-button">
-                                                Confirm </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                        
-                        <!-- CONFIRM DELETE MATERIALS MODAL-->
-
-                        <div class="modal" id="delconf-modal{{material_data.material.material_key.material_key}}" tabindex="-1"
-                            style=" margin-left: 15%; margin-top: 10%; width: 70%;">
-                            <div class="modal-content">
-                                <div class="modal-body">
-                                    <div class="col-12">
-                                        <h4 style="text-align: center;"> Delete Material? </h4>
-                                    </div>
-                                    <div id="confirmDeleteMaterial{{material_data.material.material_key.material_key}}">
-                                        <form method="POST" action="{% url 'materials' %}"> {% csrf_token %}
-                                            <input type="hidden" name="delete_form" value="1">
-                                            <input type="hidden" name="material_key" value="{{material_data.material.material_key.material_key}}">
-                                            <input type="hidden" name="type" value="{{material_data.type}}"></input>
-                                            <div class="container-fluid">
-                                                <div class="row text-center" style="margin-top: 15px;">
-                                                    <div class="col">
-                                                        <button type="button" class="btn dark-button" data-dismiss="modal">
-                                                            Continue Editing
-                                                        </button>
-                                                    </div>
-                                                    <div class="col">
-                                                        <button type="submit" class="btn dark-button delete-button"> Confirm </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-        </tbody>
-        </table>
+                    </div>
+                </div>
+            {% endfor %}
     </div>
     <div class="row ml-auto pr-3">
         <button type="button" class="btn light-button" data-toggle="modal" data-target="#orange-modal"> Add Material
@@ -379,14 +384,14 @@
 
 // function for updating the table with the passed table data with the formating of the
 function updateTable(data) {
-    $('#materialTable tbody').empty();
+    $('.delete_rows').empty();
 
     $.each(data, function(index, item) {
         var row = $('<tr>');
         row.append($('<td>').text(item.material_id));
         row.append($('<td>').text(item.material_name));
         row.append($('<td>').text(item.type));
-        row.append($('<td>').text(item.stock));
+        row.append($('<td>').text(item.stock + ' ' + item.unit));
         row.append($('<td>').text(item.cost));
 
         var actions = $('<td>');
@@ -400,8 +405,7 @@ function updateTable(data) {
 
         $('#materialTable tbody').append(row);
     });
-    $('#materialTable th').css('width', '120px'); // Adjust the width as needed
-    $('#materialTable td').css('width', '120px'); // Adjust the width as needed
+    $('#materialTable th').attr('scope', 'col'); // Adjust the width as needed
 }
 
 </script>

@@ -51,6 +51,8 @@ def products(request):
 
     #create a list of dicts
     for product in product_objects:
+        if product.name == "test_product_test_product_test":
+            continue
         product.updateCost('update')
         product_data = {
             'product':product,
@@ -374,11 +376,12 @@ def filter_materials(request):
     table_data = []
     for material in material_objects:
         table_data.append({
-            'type': material['type'],
+            'type': material['type'].title(),
             'material_id': material['material'].material_key.material_key,
             'material_name': material['material'].name,
             'stock': material['material'].stock,
             'cost': material['material'].cost,
+            'unit': material['unit'],
         })
 
     return JsonResponse({'table_data': table_data})
@@ -785,37 +788,6 @@ def reports(request):
     return render(request, 'CLEAR/reports.html')
 
 
-#-------ATTEMPT ON MATERIAL REPORTS (NEEDS WORK BUT DISPLAYS)--------#
-'''
-@login_required(login_url="/login")
-def material_report(request):
-    textile_objects = Textile.objects.annotate(total_cost=ExpressionWrapper(F('stock') * F('cost'), output_field=FloatField()))
-    accessory_objects = Accessory.objects.annotate(total_cost=ExpressionWrapper(F('stock') * F('cost'), output_field=FloatField()))
-
-    material_data = []
-
-    for textile in textile_objects:
-        unit = textile.get_unit_display().removeprefix("per ")
-        material_data.append({'type': 'textile', 'pk': textile.pk, 'name': textile.name, 'unit': unit, 'stock': textile.stock, 'cost': textile.cost, 'total_cost': textile.total_cost})
-
-    for accessory in accessory_objects:
-        unit = accessory.get_unit_display().removeprefix("per ")
-        material_data.append({'type': 'accessory', 'pk': accessory.pk, 'name': accessory.name, 'unit': unit, 'stock': accessory.stock, 'cost': accessory.cost, 'total_cost': accessory.total_cost})
-
-    material_data = sorted(material_data, key=lambda x: x['total_cost'], reverse=True)
-    
-    total_stock = sum(item['stock'] for item in material_data)
-    total_cost = sum(item['total_cost'] for item in material_data)
-
-    context = {
-        'materials': material_data,
-        'total_stock': total_stock,
-        'total_cost': total_cost,
-    }
-
-    datenow = timezone.now().date()
-    return render(request, 'CLEAR/material_report.html', {'materials':material_data, 'today': datenow,})
-'''
 
 @login_required(login_url="/login")
 def material_report(request):

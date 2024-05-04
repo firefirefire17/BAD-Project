@@ -27,224 +27,225 @@
                         <tr style="height:70px;">
                             <td> {{ order_data.order.pk }} </td>
                             <td> {{ order_data.order.customer}}, {{order_data.order.outlet.outlet_name}}</td>
-                            <td> {{ order_data.file_date|date:'Y-m-d' }} </td>
+                            <td> {{ order_data.file_date }} </td>
                             <td> {{ order_data.status|title }} </td>
-                            <td> {{ order_data.completion_date|date:'Y-m-d' }}</td>
+                            <td> {{ order_data.completion_date}}</td>
                             <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
                                 data-target="#editord-modal{{order_data.order.pk}}" 
                                 style="border-radius: 30px;">Edit</button> </td>
                         </tr>
+                    {% endfor %}
 
-
-                        <!-- modal to edit materials -->
-                        <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
-                            <div class="modal edit_modal" id="editord-modal{{order_data.order.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
-                                <div class="modal-content" style="width:60%;">
-                                    <div class="modal-body">
-                                        <div class="container-fluid">
-                                            <div class="row">
-                                                <div class="col-11">
-                                                    <h3 style="margin-bottom: 30px;">Edit Job Order</h3>
-                                                </div>
-                                                <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
-                                                        aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+                        
+                </tbody>
+            </table>
+{% for order_data in orders %}
+    <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
+        <div class="modal edit_modal" id="editord-modal{{order_data.order.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
+            <div class="modal-content" style="width:60%;">
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-11">
+                                <h3 style="margin-bottom: 30px;">Edit Job Order</h3>
+                            </div>
+                            <div class="col-1"><button type="button" class="close btn-close" data-dismiss="modal"
+                                    aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+                        </div>
+                        <div class="row justify-content-between">
+                            <div class="col-4">
+                                <label for="name">Job Order #</label>
+                                <input type="number" class="pk form-control" value="{{ order_data.order.pk }}" style="border-radius: 100px; width: 170px;" readonly>
+                            </div>
+                            <div class="col-4">
+                                <label for="name">Customer</label>
+                                <input type="text" class="customer form-control" value="{{order_data.order.customer}}">
+                            </div>
+                            <div class="col-4">
+                                <label for="outlet">Outlet</label>
+                                <select class="outlet input-select" id="order_item1">
+                                    <option value="delete">None</option>
+                                    {% for z in outlets %}
+                                    <option value="{{z.pk}}" {% if order_data.order.outlet.pk == z.pk %} selected {% endif %}>{{z.outlet_name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-5" style="display: flex; justify-content: center;">
+                                <div class="orderItemContainer" id="orderItemContainer{{order_data.order.pk}}" style="height:250px; overflow-y:scroll;">
+                                {% for item_data in order_data.items %}
+                                    <div class="orderItem_instance" id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}">
+                                        <div class="row pt-3">
+                                            <div class="col-4">
+                                                <label for="product">Product</label>
+                                                <select class="order_item input-select" id="order_item1">
+                                                    <option value="delete">None</option>
+                                                    {% for z in products %}
+                                                    <option value="{{z.pk}}"{% if item_data.item.product.pk == z.pk %} selected {% endif %}>{{z.name}}</option>
+                                                    {% endfor %}
+                                                </select>
                                             </div>
-                                            <div class="row justify-content-between">
-                                                <div class="col-4">
-                                                    <label for="name">Job Order #</label>
-                                                    <input type="number" class="pk form-control" value="{{ order_data.order.pk }}" style="border-radius: 100px; width: 170px;" readonly>
-                                                </div>
-                                                <div class="col-4">
-                                                    <label for="name">Customer</label>
-                                                    <input type="text" class="customer form-control" value="{{order_data.order.customer}}">
-                                                </div>
-                                                <div class="col-4">
-                                                    <label for="outlet">Outlet</label>
-                                                    <select class="outlet input-select" id="order_item1">
-                                                        <option value="delete">None</option>
-                                                        {% for z in outlets %}
-                                                        <option value="{{z.pk}}" {% if order_data.order.outlet.pk == z.pk %} selected {% endif %}>{{z.outlet_name}}</option>
-                                                        {% endfor %}
+                                            <div class="col-4">
+                                                <label for="quantity">Quantity</label>
+                                                <input type="number" class="quantity form-control" value="{{item_data.quantity}}">
+                                            </div>
+                                            <div class="col">
+                                                <label for "bespoke"> Bespoke? </label>
+                                                <input type="checkbox" class="bespoke form-control" role="switch" value="yes" 
+                                                        style="height: 20px; margin-top: 8px;"
+                                                        data-item-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}" {% if item_data.bespoke == 'yes' %}checked{% endif %}>                                                          
+                                            </div>
+
+                                            <div class="col p-4">
+                                                <button type="button" class="btn dark-button delete-item"
+                                                data-row-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}"> &times
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="itemMaterialContainer" id="{{order_data.order.pk}}itemMaterialContainer{{forloop.counter}}"{% if item_data.bespoke == 'no' %}style="display:none;"{% endif %}>
+                                            <div class="row ml-1 pb-0"> Add-Ons </div>
+                                            {% for material_data in item_data.materials %}
+                                            <div class="materialRow row mt-1 pr-2" id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}">
+                                                <div class="col-3">
+                                                    <select class="material_type input-select">
+                                                        <option value="textile"> Textile</option>
+                                                        <option value="accessory" {% if material_data.type == 'accessory' %}selected{% endif %}> Accessory</option>
                                                     </select>
                                                 </div>
-                                            </div>
-                                            <div class="row mt-5" style="display: flex; justify-content: center;">
-                                                    <div class="orderItemContainer" id="orderItemContainer{{order_data.order.pk}}" style="height:250px; overflow-y:scroll;">
-                                                    {% for item_data in order_data.items %}
-                                                        <div class="orderItem_instance" id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}">
-                                                            <div class="row pt-3">
-                                                                <div class="col-4">
-                                                                    <label for="product">Product</label>
-                                                                    <select class="order_item input-select" id="order_item1">
-                                                                        <option value="delete">None</option>
-                                                                        {% for z in products %}
-                                                                        <option value="{{z.pk}}"{% if item_data.item.product.pk == z.pk %} selected {% endif %}>{{z.name}}</option>
-                                                                        {% endfor %}
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-4">
-                                                                    <label for="quantity">Quantity</label>
-                                                                    <input type="number" class="quantity form-control" value="{{item_data.quantity}}">
-                                                                </div>
-                                                                <div class="col">
-                                                                    <label for "bespoke"> Bespoke? </label>
-                                                                    <input type="checkbox" class="bespoke form-control" role="switch" value="yes" 
-                                                                            style="height: 20px; margin-top: 8px;"
-                                                                            data-item-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}" {% if item_data.bespoke == 'yes' %}checked{% endif %}>                                                          
-                                                                </div>
+                                                <div class="col-3">
+                                                    <select class="item_material input-select" id="item_material">
+                                                        <option value="delete"> {{material_data.type}} </option>
+                                                        {% if material_data.type == 'textile' %}
+                                                            {% for z in textiles %}
+                                                            <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            {% endfor %}
 
-                                                                <div class="col p-4">
-                                                                    <button type="button" class="btn dark-button delete-item"
-                                                                    data-row-id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}"> &times
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                            <div class="itemMaterialContainer" id="{{order_data.order.pk}}itemMaterialContainer{{forloop.counter}}"{% if item_data.bespoke == 'no' %}style="display:none;"{% endif %}>
-                                                                <div class="row ml-1 pb-0"> Add-Ons </div>
-                                                                {% for material_data in item_data.materials %}
-                                                                <div class="materialRow row mt-1 pr-2" id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}">
-                                                                    <div class="col-3">
-                                                                        <select class="material_type input-select">
-                                                                            <option value="textile"> Textile</option>
-                                                                            <option value="accessory" {% if material_data.type == 'accessory' %}selected{% endif %}> Accessory</option>
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-3">
-                                                                        <select class="item_material input-select" id="item_material">
-                                                                            <option value="delete"> {{material_data.type}} </option>
-                                                                            {% if material_data.type == 'textile' %}
-                                                                                {% for z in textiles %}
-                                                                                <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
-                                                                                {% endfor %}
-                
-                                                                            {% elif material_data.type == 'accessory' %}
-                                                                                {% for z in accessories %}
-                                                                                <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
-                                                                                {% endfor %}
-                                                                            {% endif %}
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-3">
-                                                                        <input type="number" class="bespoke_rate form-control" value="{{material_data.bespoke_rate}}" step="0.01">
-                                                                    </div>
-                                                                    <div class="col-2">
-                                                                        <input type="number" class="quantity form-control" value="{{material_data.quantity}}">
-                                                                    </div>
-                                                                    <div class="col-1">
-                                                                        <button type="button" class="btn dark-button delete-material" data-row-id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}"> &times
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <div class="button_row row justify-content-center">
-                                                                <button type="button" class="addMaterial addMaterial_edit btn dark-button x-button mt-3 ml-1" id="{{order_data.order.pk}}editMaterial{{forloop.counter}}"
-                                                                data-order-id="{{order_data.order.pk}}" data-item-id="{{forloop.counter}}" data-counter="{{item_data.material_count}}" {% if item_data.bespoke == 'no' %}style="display:none;"{% endif %}>Add Material</button>
-                                                            </div>
-                                                            <hr style="margin: 20px 0; border-top:1px solid #767B85;">
-                                                        </div>
-                                                    {% endfor %}
-                                                    </div>
+                                                        {% elif material_data.type == 'accessory' %}
+                                                            {% for z in accessories %}
+                                                            <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </select>
                                                 </div>
-                                                <div class="row" style="display: flexbox; justify-content: center;">
-                                                    <button type="button" class="addItem_edit btn dark-button x-button mt-1 ml-1 mb-5" data-order-id="{{order_data.order.pk}}"
-                                                        data-counter="{{order_data.item_count}}">Add Item</button>
+                                                <div class="col-3">
+                                                    <input type="number" class="bespoke_rate form-control" value="{{material_data.bespoke_rate}}" step="0.01">
                                                 </div>
-                                                <div class="row" style="display: flex; justify-content: center;">
-                                                    <div class="col-5">
-                                                        <label for="status">Job Order Status</label>
-                                                        <select class="status input-select mb-3" value="{{order_data.status}}" style="border-radius: 100px;">
-                                                            <option value="in-queue">In-queue</option>
-                                                            <option value="completed"{% if order_data.status == 'completed' %} selected{% endif %}> Completed</option>
-                                                            <option value="cancelled"{% if order_data.status == 'cancelled' %} selected{% endif %}>Cancelled</option>
-                                                            <option value="in-progress"{% if order_data.status == 'in-progress' %} selected{% endif %}>In-progress</option>
-                                                        </select>
-
-                                                        <label for="File Date" class="mt-2">File Date</label>
-                                                        <input type="date" class="file_date form-control" value="{{ order_data.file_date|date:'Y-m-d' }}" style="border-radius: 100px;">
-                                                    </div>
-                                                    <div class="col-5" style="margin-top: -9px;">
-                                                        <label for="Start Date" class="mt-2">Start Date</label>
-                                                        <input type="date" class="start_date form-control mb-4" value="{{ order_data.order.start_date|date:'Y-m-d' }}" style="border-radius: 100px;">
-                                                        
-                                                        <label for="Completion Date">Completion Date</label>
-                                                        <input type="date" class="completion_date form-control" value="{{ order_data.order.completion_date|date:'Y-m-d' }}" style="border-radius: 100px;">
-                                                    </div>
+                                                <div class="col-2">
+                                                    <input type="number" class="quantity form-control" value="{{material_data.quantity}}">
                                                 </div>
-                                            </div>
-                                            <div class="row mt-3">
-                                                <div class="col-3 mr-auto">
-                                                    <button type="button" class="btn dark-button delete-button m-2" data-toggle="modal"
-                                                    data-target="#delconf-modal{{order_data.order.pk}}"> Delete Job Order </button>
-                                                </div>
-                                                <div class="col-3 ml-auto">
-                                                    <button type="button" class="btn dark-button m-2" data-toggle="modal"
-                                                    data-target="#editconf-modal{{order_data.order.pk}}"> Save Edits
+                                                <div class="col-1">
+                                                    <button type="button" class="btn dark-button delete-material" data-row-id="{{order_data.order.pk}}materialRow{{forloop.parentloop.counter}}_{{forloop.counter}}"> &times
                                                     </button>
                                                 </div>
                                             </div>
+                                            {% endfor %}
                                         </div>
+                                        <div class="button_row row justify-content-center">
+                                            <button type="button" class="addMaterial addMaterial_edit btn dark-button x-button mt-3 ml-1" id="{{order_data.order.pk}}editMaterial{{forloop.counter}}"
+                                            data-order-id="{{order_data.order.pk}}" data-item-id="{{forloop.counter}}" data-counter="{{item_data.material_count}}" {% if item_data.bespoke == 'no' %}style="display:none;"{% endif %}>Add Material</button>
+                                        </div>
+                                        <hr style="margin: 20px 0; border-top:1px solid #767B85;">
                                     </div>
+                                {% endfor %}
                                 </div>
                             </div>
+                            <div class="row" style="display: flexbox; justify-content: center;">
+                                <button type="button" class="addItem_edit btn dark-button x-button mt-1 ml-1 mb-5" data-order-id="{{order_data.order.pk}}"
+                                    data-counter="{{order_data.item_count}}">Add Item</button>
+                            </div>
+                            <div class="row" style="display: flex; justify-content: center;">
+                                <div class="col-5">
+                                    <label for="status">Job Order Status</label>
+                                    <select class="status input-select mb-3" value="{{order_data.status}}" style="border-radius: 100px;">
+                                        <option value="in-queue">In-queue</option>
+                                        <option value="completed"{% if order_data.status == 'completed' %} selected{% endif %}> Completed</option>
+                                        <option value="cancelled"{% if order_data.status == 'cancelled' %} selected{% endif %}>Cancelled</option>
+                                        <option value="in-progress"{% if order_data.status == 'in-progress' %} selected{% endif %}>In-progress</option>
+                                    </select>
 
-                        <!-- CONFIRM EDIT MATERIALS MODAL-->
+                                    <label for="File Date" class="mt-2">File Date</label>
+                                    <input type="date" class="file_date form-control" value="{{ order_data.file_date|date:'Y-m-d' }}" style="border-radius: 100px;">
+                                </div>
+                                <div class="col-5" style="margin-top: -9px;">
+                                    <label for="Start Date" class="mt-2">Start Date</label>
+                                    <input type="date" class="start_date form-control mb-4" value="{{ order_data.order.start_date|date:'Y-m-d' }}" style="border-radius: 100px;">
+                                    
+                                    <label for="Completion Date">Completion Date</label>
+                                    <input type="date" class="completion_date form-control" value="{{ order_data.order.completion_date|date:'Y-m-d' }}" style="border-radius: 100px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-3 mr-auto">
+                                <button type="button" class="btn dark-button delete-button m-2" data-toggle="modal"
+                                data-target="#delconf-modal{{order_data.order.pk}}"> Delete Job Order </button>
+                            </div>
+                            <div class="col-3 ml-auto">
+                                <button type="button" class="btn dark-button m-2" data-toggle="modal"
+                                data-target="#editconf-modal{{order_data.order.pk}}"> Save Edits
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="modal" id="editconf-modal{{order_data.order.pk}}" tabindex="-1"
-                            style=" margin-left: 15%; margin-top: 10%; width: 70%;">
-                            <div class="modal-content">
-                                <div class="modal-body">
-                                    <div class="col-12">
-                                        <h4 style="text-align: center;"> Confirm edits? </h4>
-                                    </div>
-                                    <div class="row text-center" style="margin-top: 15px;">
-                                        <div class="col">
-                                            <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
-                                                Editing </button>
-                                        </div>
-                                        <div class="col">
-                                            <button type="button" class="btn dark-button confirm-button submit-btn" data-modal-id="editord-modal{{order_data.order.pk}}" data-action="edit_form">
-                                                Confirm </button>
-                                        </div>
-                                    </div>
+    <!-- CONFIRM EDIT MATERIALS MODAL-->
+
+    <div class="modal" id="editconf-modal{{order_data.order.pk}}" tabindex="-1"
+        style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="col-12">
+                    <h4 style="text-align: center;"> Confirm edits? </h4>
+                </div>
+                <div class="row text-center" style="margin-top: 15px;">
+                    <div class="col">
+                        <button type="button" class="btn dark-button" data-dismiss="modal"> Continue
+                            Editing </button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn dark-button confirm-button submit-btn" data-modal-id="editord-modal{{order_data.order.pk}}" data-action="edit_form">
+                            Confirm </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+    
+    <!-- CONFIRM DELETE MATERIALS MODAL-->
+
+    <div class="modal" id="delconf-modal{{order_data.order.pk}}" tabindex="-1"
+        style=" margin-left: 15%; margin-top: 10%; width: 70%;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="col-12">
+                    <h4 style="text-align: center;"> Delete Job Order? </h4>
+                </div>
+                <div id="confirmDeleteMaterial{{material_data.material.material_key.material_key}}">
+                    <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
+                        <input type="hidden" name="delete_form" value="1">
+                        <input type="hidden" name="pk" value="{{order_data.order.pk}}">
+                        <div class="container-fluid">
+                            <div class="row text-center" style="margin-top: 15px;">
+                                <div class="col">
+                                    <button type="button" class="btn dark-button" data-dismiss="modal">
+                                        Continue Editing
+                                    </button>
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn dark-button delete-button"> Confirm </button>
                                 </div>
                             </div>
                         </div>
                     </form>
-                        
-                        <!-- CONFIRM DELETE MATERIALS MODAL-->
-
-                        <div class="modal" id="delconf-modal{{order_data.order.pk}}" tabindex="-1"
-                            style=" margin-left: 15%; margin-top: 10%; width: 70%;">
-                            <div class="modal-content">
-                                <div class="modal-body">
-                                    <div class="col-12">
-                                        <h4 style="text-align: center;"> Delete Job Order? </h4>
-                                    </div>
-                                    <div id="confirmDeleteMaterial{{material_data.material.material_key.material_key}}">
-                                        <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
-                                            <input type="hidden" name="delete_form" value="1">
-                                            <input type="hidden" name="pk" value="{{order_data.order.pk}}">
-                                            <div class="container-fluid">
-                                                <div class="row text-center" style="margin-top: 15px;">
-                                                    <div class="col">
-                                                        <button type="button" class="btn dark-button" data-dismiss="modal">
-                                                            Continue Editing
-                                                        </button>
-                                                    </div>
-                                                    <div class="col">
-                                                        <button type="submit" class="btn dark-button delete-button"> Confirm </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-        </tbody>
-        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
     </div>
     <div class="row ml-auto pr-3">
         <div class="col">
