@@ -4,12 +4,15 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Q
 
+import pandas as pd
+import io
+import openpyxl
 from django.db.models import F, ExpressionWrapper, FloatField, Sum  #used expwrapper for reports - dane
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -39,6 +42,8 @@ def search_products(request):
             product_objects = [product for product in product_objects if search_query.lower() in product.name.lower()]
         table_data = []
         for product in product_objects:
+            if product.name == "test_product_test_product_test":
+                continue
             table_data.append({
               'product_pk' : product.pk,
               'product_name' : product.name.title(),
@@ -869,14 +874,6 @@ def material_report(request):
 
     print(material_data)
 
-    # Create a dictionary to hold the data for each column
-    data_dict = {
-        "pk": [item["pk"] for item in material_data],
-        "name": [item["name"] for item in material_data],
-        "type": [item["type"].title() for item in material_data],  # Title-case the type
-        "stock": [f"{item['stock']:.2f} {item['unit']}" for item in material_data],  # Format stock and unit
-        "cost": [item["cost"] for item in material_data]
-    }
 
     material_data = sorted(material_data, key=lambda x: x['stock'])
     inStock_count = sum(1 for item in material_data if item['stock'] > 0)
@@ -1166,17 +1163,16 @@ def dynamic_pricing(request):
         calc_price = ""
     return JsonResponse({'calc_price':calc_price})
 
-def generate_material_pd(request):
+def download_matrep(request):
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
-    material_objects = []
+    material_data = []
 
-    
     for textile in textile_objects:
         unit = textile.get_unit_display()
         unit = unit.removeprefix("per ")
 
-        material_objects.append({'type': 'textile', 'material': textile, 'unit': unit})
+        material_data.append({'type': 'textile', 'pk': textile.material_key.material_key, 'name': textile.name, 'cost': textile.cost, 'stock': textile.stock, 'unit': unit})
 
     for accessory in accessory_objects:
         unit = accessory.get_unit_display()
@@ -1188,12 +1184,55 @@ def generate_material_pd(request):
             else:
                 unit = unit + "s"
 
-        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
-    pdf_bytes = pandas_df_to_table(dataframe)
+        material_data.append({'type': 'accessory', 'pk': accessory.material_key.material_key, 'name': accessory.name, 'cost': accessory.cost, 'stock': accessory.stock, 'unit': unit})
 
-    # Serve PDF file as response
-    response = HttpResponse(pdf_bytes, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="output.pdf"'
+    df = pd.DataFrame(material_data)
+    df.set_index('pk', inplace=True)
+
+    excel_filename = 'material_data.xlsx'
+
+    excel_buffer = io.BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
+
+    # Set response headers
+    response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
+    return response
+
+def download_prodrep(request):
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_data = []
+
+    for textile in textile_objects:
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        material_data.append({'type': 'textile', 'pk': textile.material_key.material_key, 'name': textile.name, 'cost': textile.cost, 'stock': textile.stock, 'unit': unit})
+
+    for accessory in accessory_objects:
+        unit = accessory.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        if accessory.stock > 1:
+            if unit == 'inch':
+                unit = unit + "es"
+            else:
+                unit = unit + "s"
+
+        material_data.append({'type': 'accessory', 'pk': accessory.material_key.material_key, 'name': accessory.name, 'cost': accessory.cost, 'stock': accessory.stock, 'unit': unit})
+
+    df = pd.DataFrame(material_data)
+    df.set_index('pk', inplace=True)
+
+    excel_filename = 'material_data.xlsx'
+
+    excel_buffer = io.BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
+
+    # Set response headers
+    response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
     return response
  
 # this is a function used in products to get the cost of each product component 
