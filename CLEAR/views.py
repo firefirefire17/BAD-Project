@@ -28,7 +28,7 @@ def dashboard(request):
 
 # search and filter product
 @login_required(login_url="/login")
-def filter_products(request):
+def search_products(request):
     product_objects = Product.objects.all()
 
     if request.method == "GET":

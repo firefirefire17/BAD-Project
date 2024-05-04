@@ -8,7 +8,7 @@
 </head>
 
 {% block search %}
-<form id="search-form" method="GET" action="{% url 'filter_products' %}">
+<form id="search-form" method="GET" action="{% url 'search_products' %}">
     {% csrf_token %}
     <input id="search-input" class="search" name="q" type="search" placeholder="Search..."
         style="background-color: transparent; border:none; height: 40px; margin-top: 8px; width: max-content; color: white;">
@@ -1126,7 +1126,7 @@
 
             $.ajax({
                 type: 'GET',
-                url: '/filter_products/',
+                url: '/search_products/',
                 data: {
                     'q': searchQuery,
                 },
