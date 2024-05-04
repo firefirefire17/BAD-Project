@@ -291,6 +291,8 @@
         </div>
     </div>
 </form>
+
+<!--FILTER MODAL-->
 <div class="modal" id="filtermodal" style="max-width: 700px; position: absolute;
     top: 0;
     right: 0;
@@ -312,6 +314,7 @@
         </div>
     </div>
 </div>
+
 <script>
     $(document).ready(function() {
         
@@ -358,7 +361,8 @@
         });
 
         // search ajax request
-        $('#search-input').on('input', function() {
+        $('#search-form').on('input submit', function(event) {
+            event.preventDefault();
             let searchQuery = $('#search-input').val();
             let filterStock = $('input[name="filterstock"]:checked').val();
             $.ajax({
@@ -378,6 +382,7 @@
                 }
             });
         });
+
 
 
     });

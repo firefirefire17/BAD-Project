@@ -1121,25 +1121,26 @@
 
         });
             // search ajax request
-            $('#search-input').on('input', function() {
-            let searchQuery = $('#search-input').val();
-
-            $.ajax({
-                type: 'GET',
-                url: '/search_products/',
-                data: {
-                    'q': searchQuery,
-                },
-                success: function(response) {
-                    console.log("AJAX request successful.");
-                    $('#product_table tbody').empty();
-                    updateTable(response.table_data);
-                },
-                error: function(xhr, status, error) {
-                    console.error("AJAX request failed:", error);
-                }
+            $('#search-form').on('input submit', function(event) {
+                event.preventDefault();
+                let searchQuery = $('#search-input').val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/search_products/',
+                    data: {
+                        'q': searchQuery,
+                    },
+                    success: function(response) {
+                        console.log("AJAX request successful.");
+                        $('#product_table tbody').empty();
+                        updateTable(response.table_data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX request failed:", error);
+                    }
+                });
             });
-        });
+
     });
     function updateTable(data) {
     $('#product_table tbody').empty();

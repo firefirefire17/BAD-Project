@@ -17,6 +17,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 import matplotlib.backends.backend_pdf
+from django.template.defaultfilters import date as django_date
 
 import json
 
@@ -556,6 +557,35 @@ def materials(request):
             return redirect('materials')
 
     return render(request, 'CLEAR/materials.html', {'materials':material_objects})
+
+@login_required(login_url="/login")
+def search_joborders(request):
+    joborder_objects = Job_Order.objects.all()
+
+    if request.method == "GET":
+        search_query = request.GET.get('q')
+        selected_statuses = request.GET.getlist('status[]')  # Get list of selected statuses
+        if search_query:
+            joborder_objects = [joborder for joborder in joborder_objects if
+                                 search_query.lower() in joborder.customer.lower() or
+                                 search_query.lower() in joborder.outlet.outlet_name.lower()]
+        if selected_statuses:
+            joborder_objects = [joborder for joborder in joborder_objects if joborder.order_status in selected_statuses]
+            
+        table_data = []
+        for joborder in joborder_objects:
+            table_data.append({
+                'joborder_pk': joborder.pk,
+                'joborder_customername': joborder.customer,
+                'joborder_outletname': joborder.outlet.outlet_name,
+                'joborder_filedate': django_date(joborder.file_date, "F j, Y"),
+                'joborder_status': joborder.order_status.title(),
+                'joborder_completiondate': django_date(joborder.completion_date, "F j, Y"),
+            })
+
+    return JsonResponse({'table_data': table_data})
+
+    
 
 @login_required(login_url="/login")
 def job_orders(request):

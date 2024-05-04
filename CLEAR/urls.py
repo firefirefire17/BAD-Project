@@ -37,4 +37,5 @@ urlpatterns = [
     path('dynamic_pricing/', views.dynamic_pricing, name='dynamic_pricing'),
     path('filter_materials/', views.filter_materials, name="filter_materials"),
     path('search_products/', views.search_products, name="search_products"),
+    path('search_joborders', views.search_joborders, name="search_joborders"),
 ]

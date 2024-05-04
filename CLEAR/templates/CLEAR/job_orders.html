@@ -4,8 +4,19 @@
 <head>
     <link rel="stylesheet" href="{% static '/stylesheet3.css' %}">
 </head>
-
-
+{% block search %}
+<form id="search-form" method="GET" action="{% url 'search_joborders' %}">
+    {% csrf_token %}
+    <input id="search-input" class="search" name="q" type="search" placeholder="Search..."
+        style="background-color: transparent; border:none; height: 40px; margin-top: 8px; width: max-content; color: white;">
+</form>
+{% endblock %}
+{% block filter %} 
+<button class="button btn btn-secondary filterbutton" data-toggle="modal" data-target="#filtermodal" 
+style="height: fit-content; display: flexbox; align-items: center; opacity: 60%; border-radius: 35px; margin-right: 5px;">
+Filter
+</button>
+{% endblock %}
 {% block content %}
 
 <div class="row pl-3 pt-3 pr-3" style="height:700px;">
@@ -13,10 +24,11 @@
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
 
-            <table class="table table-hover table-striped" style="border-radius: 40px;">
+            <table id="joborder_table" class="table table-hover table-striped" style="border-radius: 40px;">
                 <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Job Order # </th>
-                    <th scope="col"> </th>
+                    <th scope="col"> Customer Name </th>
+                    <th scope="col"> Outlet</th>
                     <th scope="col"> File Date</th>
                     <th scope="col"> Status </th>
                     <th scope="col"> Completion Date</th>
@@ -26,10 +38,11 @@
                     {% for order_data in orders %}
                         <tr style="height:70px;">
                             <td> {{ order_data.order.pk }} </td>
-                            <td> {{ order_data.order.customer}}, {{order_data.order.outlet.outlet_name}}</td>
+                            <td> {{ order_data.order.customer}} </td>
+                            <td> {{ order_data.order.outlet.outlet_name }}</td>
                             <td> {{ order_data.file_date }} </td>
                             <td> {{ order_data.status|title }} </td>
-                            <td> {{ order_data.completion_date}}</td>
+                            <td> {{ order_data.completion_date }}</td>
                             <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
                                 data-target="#editord-modal{{order_data.order.pk}}" 
                                 style="border-radius: 30px;">Edit</button> </td>
@@ -550,6 +563,44 @@
     </div>
 </div>
 
+
+<!--FILTER MODAL-->
+<div class="modal" id="filtermodal" style="max-width: 700px; position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 60%;">
+    <div class="modal-content">
+        <div class="modal-body">
+            <div class="container">
+                <button type="button" class="close btn-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div>
+                    <input id="inqueue" name="filterstatus" type="checkbox" class="status-checkbox" value="in-queue">
+                    <label class="form-check-label" for="inqueue">In Queue</label>
+                </div>
+                <div>
+                    <input id="inprocess" name="filterstatus" type="checkbox" class="status-checkbox" value="in-process">
+                    <label class="form-check-label" for="inprocess">In Process</label>
+                </div>
+                <div>
+                    <input id="completed" name="filterstatus" type="checkbox" class="status-checkbox" value="completed">
+                    <label class="form-check-label" for="completed">Completed</label>
+                </div>
+                <div>
+                    <input id="cancelled" name="filterstatus" type="checkbox" class="status-checkbox" value="cancelled">
+                    <label class="form-check-label" for="cancelled">Cancelled</label>
+                </div>                            
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 <script>
 
 $(function () {
@@ -880,7 +931,88 @@ $(document).ready(function() {
             }
         });
     })
+    $('.status-checkbox').change(function() {
+        let selectedStatuses = $('.status-checkbox:checked').map(function() {
+            return this.value;
+        }).get();
+        let searchQuery = $('#search-input').val();
+        $.ajax({
+            type: 'GET',
+            url: '{% url "search_joborders" %}',
+            data: {
+                'q': searchQuery,
+                'status[]': selectedStatuses
+            },
+            success: function(response) {
+                console.log("AJAX request successful.");
+                updateTable(response.table_data);
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX request failed:", error);
+            }
+        });
+    });
+            // search ajax request
+            $('#search-form').on('input submit', function(event) {
+                event.preventDefault(); // Prevent form submission
+                let searchQuery = $('#search-input').val();
+                let selectedStatuses = $('.status-checkbox:checked').map(function() {
+                    return this.value;
+                }).get();
+                $.ajax({
+                    type: 'GET',
+                    url: '{% url "search_joborders" %}',
+                    data: {
+                        'q': searchQuery,
+                        'status[]': selectedStatuses
+                    },
+                    success: function(response) {
+                        console.log("AJAX request successful.");
+                        updateTable(response.table_data); // Update table with new data
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX request failed:", error);
+                    }
+                });
+            });
+
+        function updateTable(data) {
+            $('#joborder_table tbody').empty(); // Clear existing table rows
+
+            $.each(data, function(index, item) {
+                var row = $('<tr>');
+
+                var joborderIdCell = $('<td>').text(item.joborder_pk);
+                var joborderCustomerNameCell = $('<td>').text(item.joborder_customername);
+                var joborderOutletNameCell = $('<td>').text(item.joborder_outletname);
+                var joborderFileDateCell = $('<td>').text(item.joborder_filedate);
+                var joborderStatusCell = $('<td>').text(item.joborder_status);
+                var joborderCompletionDateCell = $('<td>').text(item.joborder_completiondate);
+                var actionsCell = $('<td>');
+
+                var editButton = $('<button>').addClass('btn btn-outline-secondary')
+                    .attr('type', 'button')
+                    .attr('data-toggle', 'modal')
+                    .attr('data-target', '#editord-modal' + item.joborder_pk)
+                    .text('Edit')
+                    .css('border-radius', '30px');
+                actionsCell.append(editButton);
+
+                // Append cells to the row
+                row.append(joborderIdCell);
+                row.append(joborderCustomerNameCell);
+                row.append(joborderOutletNameCell);
+                row.append(joborderFileDateCell);
+                row.append(joborderStatusCell);
+                row.append(joborderCompletionDateCell);
+                row.append(actionsCell);
+
+                $('#joborder_table tbody').append(row);
+            });
+        }
 });
+
+
 </script>
 
 
