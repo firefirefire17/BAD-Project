@@ -26,6 +26,28 @@ def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
     
 
+# search and filter product
+@login_required(login_url="/login")
+def filter_products(request):
+    product_objects = Product.objects.all()
+
+    if request.method == "GET":
+        search_query = request.GET.get('q')
+
+        if search_query:
+            product_objects = [product for product in product_objects if search_query.lower() in product.name.lower()]
+        table_data = []
+        for product in product_objects:
+            table_data.append({
+              'product_pk' : product.pk,
+              'product_name' : product.name.title(),
+              'product_retailprice' : product.retail_price,
+              'product_lastupdate' : product.last_update
+            })
+
+    return JsonResponse({'table_data' : table_data})
+
+
 @login_required(login_url="/login")
 def products(request):
     product_objects = Product.objects.all()
@@ -360,9 +382,7 @@ def filter_materials(request):
     
     if request.method == "GET":
         search_query = request.GET.get('q')
-        print(search_query)
         filterstock = request.GET.get('filterstock')
-        print(filterstock)
 
         if search_query:
             material_objects = [material for material in material_objects if search_query.lower() in material['material'].name.lower()]
@@ -378,7 +398,7 @@ def filter_materials(request):
             stock = f"{material['material'].stock} {material['unit']}"
             cost = f"PHP {material['material'].cost:.2f}"
             table_data.append({
-                'type': material['type'].title(),
+                'type': material['type'],
                 'material_id': material['material'].material_key.material_key,
                 'material_name': material['material'].name.title(),
                 'stock': stock,

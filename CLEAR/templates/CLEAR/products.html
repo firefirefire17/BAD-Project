@@ -7,6 +7,14 @@
 
 </head>
 
+{% block search %}
+<form id="search-form" method="GET" action="{% url 'filter_products' %}">
+    {% csrf_token %}
+    <input id="search-input" class="search" name="q" type="search" placeholder="Search..."
+        style="background-color: transparent; border:none; height: 40px; margin-top: 8px; width: max-content; color: white;">
+</form>
+{% endblock %}
+
 {% block content %}
 <div class="row pl-3 pt-3 pr-3" style="height:700px;">
     <div class="card main-card">
@@ -15,7 +23,7 @@
         {%endif%}
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
-            <table class="table table-hover table-striped" style="border-radius: 40px;">
+            <table id="product_table" class="table table-hover table-striped" style="border-radius: 40px;">
                 <thead style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Product # </th>
                     <th scope="col"> Name</th>
@@ -1112,9 +1120,58 @@
             });
 
         });
-        
+            // search ajax request
+            $('#search-input').on('input', function() {
+            let searchQuery = $('#search-input').val();
 
+            $.ajax({
+                type: 'GET',
+                url: '/filter_products/',
+                data: {
+                    'q': searchQuery,
+                },
+                success: function(response) {
+                    console.log("AJAX request successful.");
+                    $('#product_table tbody').empty();
+                    updateTable(response.table_data);
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX request failed:", error);
+                }
+            });
+        });
     });
+    function updateTable(data) {
+    $('#product_table tbody').empty();
+
+    $.each(data, function(index, item) {
+        var row = $('<tr>');
+
+        var productIdCell = $('<td>').text(item.product_pk);
+        var productNameCell = $('<td>').text(item.product_name);
+        var productRetailCell = $('<td>').text(item.product_retailprice);
+        var productLastUpdateCell = $('<td>').text(item.product_lastupdate);
+        var actionsCell = $('<td>');
+
+        var editButton = $('<button>').addClass('btn btn-outline-secondary')
+            .attr('type', 'button')
+            .attr('data-toggle', 'modal')
+            .attr('data-target', '#editProduct-modal-' + item.product_pk)
+            .attr('onclick', "toggleModal('editProduct" + item.product_pk + "', 'open')")
+            .text('Edit')
+            .css('border-radius', '30px');
+        actionsCell.append(editButton);
+
+        // Append cells to the row
+        row.append(productIdCell);
+        row.append(productNameCell);
+        row.append(productRetailCell);
+        row.append(productLastUpdateCell);
+        row.append(actionsCell);
+
+        $('#product_table tbody').append(row);
+    });
+}
 
 
 </script>
