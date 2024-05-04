@@ -39,6 +39,17 @@
                         
                 </tbody>
             </table>
+        </div>
+        <div class="row ml-auto pr-3">
+            <div class="col">
+                <button type="button" class="btn light-button" data-toggle="modal" data-target="#outlets"> Outlets
+                </button>
+            </div>
+            <div class="col">
+                <button type="button" class="btn light-button" data-toggle="modal" data-target="#addord"> Create Job Order
+                </button>
+            </div>
+        </div>
 {% for order_data in orders %}
     <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
         <div class="modal edit_modal" id="editord-modal{{order_data.order.pk}}" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
@@ -72,7 +83,7 @@
                             </div>
                         </div>
                         <div class="row mt-5" style="display: flex; justify-content: center;">
-                                <div class="orderItemContainer" id="orderItemContainer{{order_data.order.pk}}" style="height:250px; overflow-y:scroll;">
+                                <div class="orderItemContainer pl-3 pr-3" id="orderItemContainer{{order_data.order.pk}}" style="height:250px; overflow-y:scroll;">
                                 {% for item_data in order_data.items %}
                                     <div class="orderItem_instance" id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}">
                                         <div class="row pt-3">
@@ -246,20 +257,6 @@
         </div>
     </div>
 {% endfor %}
-    </div>
-    <div class="row ml-auto pr-3">
-        <div class="col">
-            <button type="button" class="btn light-button" data-toggle="modal" data-target="#outlets"> Outlets
-            </button>
-        </div>
-        <div class="col">
-            <button type="button" class="btn light-button" data-toggle="modal" data-target="#addord"> Create Job Order
-            </button>
-        </div>
-    </div>
-</div>
-</tbody>
-</table>
 
 <!-- ADD MATERIAL MODAL -->
 <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
@@ -295,8 +292,8 @@
                     </div>
 
                     <div class="row mt-5" style="display: flex; justify-content: center;">
-                        <div class="col-9">
-                            <div class="orderItemContainer" id="orderItemContainer" style="height:250px; overflow-y:scroll;">
+                        <div class="col">
+                            <div class="orderItemContainer pr-3 pl-3" id="orderItemContainer" style="height:250px; overflow-y:scroll;">
                                 <div class="orderItem_instance" id="orderItem_instance1">
                                     <div class="row pt-3">
                                         <div class="col-4">
@@ -397,7 +394,7 @@
 
 <form method="POST" action="{% url 'orders' %}"> {% csrf_token %}
     <div class="modal" id="outlets" tabindex="-1" role="dialog" aria-labelledby="orange-modal-label">
-        <div class="modal-content"  style="height:54%; width:40%;">
+        <div class="modal-content"  style="height:60%; width:40%;">
             <div class="modal-body">
                 <div class="container-fluid">    
                     <input type="hidden" name="add_form" value="1"></input>
@@ -418,7 +415,7 @@
                         <div class="col-2">
                         </div>
                     </div>
-                    <div class="outletContainer" style="height: 180px; overflow-y: scroll;">
+                    <div class="outletContainer pr-3 pl-3" style="height: 180px; overflow-y: scroll;">
                     {% for outlet in outlets %}
                     <div class="outletRow row mt-2" id="outletRow{{forloop.counter}}">
                         <div class="col">
@@ -451,6 +448,7 @@
                             </button>
                         </div>
                     </div>
+                </div>
             </div>
         </div>
     </div>

@@ -850,9 +850,11 @@ def material_report(request):
 
     material_data = sorted(material_data, key=lambda x: x['stock'])
     inStock_count = sum(1 for item in material_data if item['stock'] > 0)
+    material_count = len(material_data)
+    outStock_count = material_count - inStock_count
     datenow = timezone.now().date()
 
-    return render(request, 'CLEAR/material_report.html', {'materials':material_data, 'today': datenow, 'stocked': inStock_count})
+    return render(request, 'CLEAR/material_report.html', {'materials':material_data, 'today': datenow, 'stocked': inStock_count, 'unstocked': outStock_count, 'material_count': material_count})
 
 @login_required(login_url="/login")
 def production_report(request):
