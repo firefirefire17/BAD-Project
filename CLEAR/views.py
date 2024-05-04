@@ -373,16 +373,19 @@ def filter_materials(request):
         
 
     # json constructor
-    table_data = []
-    for material in material_objects:
-        table_data.append({
-            'type': material['type'].title(),
-            'material_id': material['material'].material_key.material_key,
-            'material_name': material['material'].name,
-            'stock': material['material'].stock,
-            'cost': material['material'].cost,
-            'unit': material['unit'],
-        })
+        table_data = []
+        for material in material_objects:
+            stock = f"{material['material'].stock} {material['unit']}"
+            cost = f"PHP {material['material'].cost:.2f}"
+            table_data.append({
+                'type': material['type'].title(),
+                'material_id': material['material'].material_key.material_key,
+                'material_name': material['material'].name.title(),
+                'stock': stock,
+                'cost': cost,
+                'unit': material['unit'],
+            })
+
 
     return JsonResponse({'table_data': table_data})
 
