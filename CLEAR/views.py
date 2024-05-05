@@ -521,11 +521,11 @@ def materials(request):
 
             if not stock:
                 error_message = "Please input a valid stock number"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
             
             if not cost:
                 error_message = "Please input a valid cost"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
 
             try:
                 stock = int(stock)
@@ -534,26 +534,26 @@ def materials(request):
 
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
             
             if stock < 0 or stock > 999:
                 #backend message
                 error_message = "Input cannot be negative or more than 999"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
             
             if type == "accessory":
                 if isinstance(stock, float):
                     error_message = "Stock input cannot be a decimal number"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
                     
             if cost < 0:
                 #backend message
                 error_message = "Input cannot be negative"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
             
             if not name:
                 error_message = "Please input a material name"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
             
 
             
@@ -565,7 +565,7 @@ def materials(request):
                 existing_material = Textile.objects.filter(name=name)
                 if existing_material:
                     error_message = "Material already exists"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
                 else:
                     print("pass")
                     Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key, unit=unit)
@@ -573,7 +573,7 @@ def materials(request):
                 existing_material = Accessory.objects.filter(name=name)                
                 if existing_material:
                     error_message = "Material already exists"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
                 else:
                     print("pass")
                     Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key, unit=unit)
@@ -586,25 +586,25 @@ def materials(request):
 
             if not stock:
                 error_message = "Please input a valid stock number"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
             
             if not cost:
                 error_message = "Please input a valid cost"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
 
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
         
             if type == "accessory":
                 if isinstance(stock, float):
                     error_message = "Stock input cannot be a decimal number"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
             
             if cost < 0:
                 #backend message
                 error_message = "Input cannot be negative"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
 
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
 
@@ -1095,6 +1095,48 @@ def filter_stock_in(request):
                 })
         return JsonResponse({'table_data' : stockin_data})
 
+                    if material_id in shoplist_data:
+                        shoplist_data[material_id]['total_need'] += qty_val
+                    else:
+                        shoplist_data[material_id] = {'total_need': qty_val, 'type': qty['type']}
+                
+                for material_id in shoplist_data:
+                    if shoplist_data[material_id]['type'] == 'textile':
+                        material_object = Textile.objects.get(material_key__material_key = material_id)
+                        shoplist_data[material_id]['name'] = material_object.name
+                    else:
+                        material_object = Accessory.objects.get(material_key__material_key = material_id)
+                        shoplist_data[material_id]['name'] = material_object.name
+                    
+                    if material_object.stock >= shoplist_data[material_id]['total_need']:
+                        shoplist_data[material_id]['in_stock'] = shoplist_data[material_id]['total_need']
+                        shoplist_data[material_id]['to_purchase'] = 0
+                    else:
+                        shoplist_data[material_id]['in_stock'] = material_object.stock
+                        shoplist_data[material_id]['to_purchase'] = shoplist_data[material_id]['total_need'] - material_object.stock
+                    
+                    shoplist_data[material_id]['total_cost'] = shoplist_data[material_id]['to_purchase']*material_object.cost
+                
+                material_list = []
+                for material_id, material_data in shoplist_data.items():
+                    info = {
+                        'pk': material_id,
+                        'type': material_data['type'],
+                        'name': material_data['name'],
+                        'total_need': material_data['total_need'],
+                        'in_stock': material_data['in_stock'],
+                        'to_purchase': material_data['to_purchase'],
+                        'total_cost': material_data['total_cost'],
+                    }
+                    material_list.append(info)
+                
+                print(material_list)
+                material_list = sorted(material_list, key=lambda x: x['to_purchase'])
+                response['data'] = material_list
+                response['pks'] = pks_list
+                return JsonResponse(response)
+        
+            return render(request, 'CLEAR/shopping_list.html', {'orders': in_queue}) 
 
 @login_required(login_url="/login")
 def stock_in(request):
@@ -1520,7 +1562,7 @@ def download_pricerep(request):
 
     df = pd.DataFrame(table_data_sorted)
 
-    excel_filename = 'production_report.xlsx'
+    excel_filename = 'pricing_report.xlsx'
 
     excel_buffer = io.BytesIO()
     df.to_excel(excel_buffer, index=False)
@@ -1529,6 +1571,78 @@ def download_pricerep(request):
     print(df)
 
     response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
+    return response
+
+def download_shoplist(request):
+    pks_str = request.GET.get("pks", "")
+
+    pks_list = pks_str.split(",")
+    pks_list = [int(pk) for pk in pks_list if pk]
+    
+    total_qty_list = []
+    shoplist_data = {}
+
+
+    if pks_list:
+        filter_ordlist = [Job_Order.objects.get(pk=pk) for pk in pks_list]
+
+        for ord in filter_ordlist:
+            qty_list = ord.get_stocks()
+            total_qty_list.extend(qty_list)
+
+        for qty in total_qty_list:
+            material_id = qty['id']
+            qty_val = qty['qty']
+
+            if material_id in shoplist_data:
+                shoplist_data[material_id]['total_need'] += qty_val
+            else:
+                shoplist_data[material_id] = {'total_need': qty_val, 'type': qty['type']}
+        
+        for material_id in shoplist_data:
+            if shoplist_data[material_id]['type'] == 'textile':
+                material_object = Textile.objects.get(material_key__material_key = material_id)
+                shoplist_data[material_id]['name'] = material_object.name
+            else:
+                material_object = Accessory.objects.get(material_key__material_key = material_id)
+                shoplist_data[material_id]['name'] = material_object.name
+
+            
+            if material_object.stock >= shoplist_data[material_id]['total_need']:
+                shoplist_data[material_id]['in_stock'] = shoplist_data[material_id]['total_need']
+                shoplist_data[material_id]['to_purchase'] = 0
+            else:
+                shoplist_data[material_id]['in_stock'] = material_object.stock
+                shoplist_data[material_id]['to_purchase'] = shoplist_data[material_id]['total_need'] - material_object.stock
+            
+            shoplist_data[material_id]['total_cost'] = shoplist_data[material_id]['to_purchase']*material_object.cost
+        
+        material_list = []
+        for material_id, material_data in shoplist_data.items():
+            info = {
+                'pk': material_id,
+                'type': material_data['type'],
+                'name': material_data['name'],
+                'total_need': material_data['total_need'],
+                'in_stock': material_data['in_stock'],
+                'to_purchase': material_data['to_purchase'],
+                'total_cost': material_data['total_cost'],
+            }
+            material_list.append(info)
+        
+        print(material_list)
+        material_list = sorted(material_list, key=lambda x: x['to_purchase'])
+
+    df = pd.DataFrame(material_list)
+
+    excel_filename = 'shopping_list.xlsx'
+
+    excel_buffer = io.BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
+
+    response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
+    print(response)
     return response
 
  

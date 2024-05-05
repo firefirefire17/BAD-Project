@@ -1,0 +1,192 @@
+{% extends "CLEAR/base.html" %}
+{% load static %}
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'stylesheet3.css' %}">
+    <script src="{% static 'js/styling.js' %}"></script>
+
+</head>
+
+{% block content %}
+<div class="row pl-3 pt-3 pr-3" style="height:700px;">
+    <div class="card main-card">
+        {% if error_message %}
+            <h5 style="color: #FF0000;">{{ error_message }}</h5>
+        {% endif %}
+        <div class="table-responsive card" style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
+            <table id="shoplist_table" class="table table-hover table-striped" style="border-radius: 40px;">
+                <thead style="background-color: #3f3e3e; color: #ffffff;">
+                    <th scope="col">Material #</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Total Need</th>
+                    <th scope="col">In-Stock</th>
+                    <th scope="col">For Purchase</th>
+                    <th scope="col">Total Est. Cost</th>
+                </thead>
+                <tbody>                
+                </tbody>
+            </table>
+        </div>
+        <div class="row" style="display: flex; justify-content: right; margin-bottom: 15px;">
+            <div class="col-2">
+                <button type="button"  data-toggle="modal" data-target="#selectJobOrders" class="btn light-button">
+                    Select Job Orders
+                </button>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn light-button download_button">
+                    Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" class="justify-content-center" id="selectJobOrders" tabindex="-1" role="dialog" aria-labelledby="generateReportModalLabel">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="width:600px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateReportModalLabel">Select Job Orders</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action-"{% url 'reports' %}"> {% csrf_token %} 
+                <div class="modal-body ml-4">
+                    <div class="orderFilterContainer pr-3" style="height:300px; width:500px; overflow-y: scroll;">
+                        <input type="hidden" id="filtered_pks" class="form-control" value="">
+                        <div class="row justify-content-start align-items-center">
+                            <div class="col-3 mr-0 align-items-center">
+                                Select All <input type="checkbox" class="allSelected">
+                            </div>
+                        </div>
+                        <div class="row mt-2 align-items-center order_row">
+                            <div class="col-1">
+                                
+                            </div>
+                            <div class="col-4">
+                                File Date
+                            </div>
+                            <div class="col-4">
+                                Customer
+                            </div>
+                            <div class="col-3">
+                                Outlet
+                            </div>
+                        </div>
+                    {% for order in orders %}
+                        <div class="row mt-2 align-items-center order_row">
+                            <div class="col-1">
+                                <input type="checkbox" class="check_prod" data-order-id="{{order.pk}}">
+                            </div>
+                            <div class="col-4">
+                                <input type="text" class="order_store form-control" value="{{order.file_date}}" readonly>
+                            </div>
+                            <div class="col-4">
+                                <input type="text" class="order_customer form-control" value="{{order.customer}}" readonly>
+                            </div>
+                            <div class="col-3">
+                                <input type="text" class="order_store form-control" value="{{order.outlet.outlet_name}}" readonly>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer" style="display: flexbox; justify-content: space-between;">
+                    <button type="button" class="btn dark-button closeSelect" style="border-radius: 100px;" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn dark-button filter_button">  Generate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        const orderFilterContainer = $('.orderFilterContainer')
+        const allSelected = $('.allSelected')
+        const material_table = $('#shoplist_table tbody');
+        const filtered_pks = $('#filtered_pks');
+        const modal_button = $('.closeSelect');
+        $(".download_button").click(function() {
+            let pks_list = filtered_pks.val()
+    
+            $.ajax({
+                url: "/download_shoplist/",
+                type: "GET", 
+                data: {
+                  pks: pks_list,
+                  csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val(),
+                },
+                xhrFields:{
+                    responseType: 'blob'
+                },
+                success: function(data) {
+                    console.log(data)
+                    var blob = data;
+                    var downloadUrl = URL.createObjectURL(blob);
+                    var a = document.createElement("a");
+                    a.href = downloadUrl;
+                    a.download = "shopping_list.xlsx";
+                    document.body.appendChild(a);
+                    a.click();
+                },
+                error: function(error) {
+                  console.error("Error downloading file:", error);
+                  // Handle potential errors gracefully, e.g., display an error message to the user
+                }
+            });
+        });
+
+        $('#selectJobOrders').on('click', '.filter_button', function() {
+            let orderPK_list = [];
+            $.each(orderFilterContainer.find('.check_prod'), function(counter, checkbox){
+                let isChecked = $(checkbox).is(':checked');
+                let orderId = $(checkbox).data('order-id');
+                
+                if (allSelected.is(':checked')) {
+                    orderPK_list.push(orderId);
+                } else if (isChecked) {
+                    orderPK_list.push(orderId);
+                }
+            });
+            console.log(orderPK_list)
+            submit_data = {
+                'pks': orderPK_list.join(','),
+                'reptype': 'shopping_list',
+                "csrfmiddlewaretoken": $("[name=csrfmiddlewaretoken]").val(),
+            }
+            $.ajax({
+                method: "post",
+                data: submit_data,
+                success: function(response) {
+                    material_table.empty();
+                    
+                    let shoplist_data = response['data']
+                    // Iterate over each dict in the list
+                    shoplist_data.forEach(function(material) {
+                        // Create a new row for each material
+                        let row = $('<tr>');
+    
+                        // Populate row with data from the material dict
+                        $('<td>').text(material.pk).appendTo(row);
+                        $('<td>').text(material.type).appendTo(row);
+                        $('<td>').text(material.name).appendTo(row);
+                        $('<td>').text(material.total_need.toFixed(2)).appendTo(row);
+                        $('<td>').text(material.in_stock.toFixed(2)).appendTo(row);
+                        $('<td>').text(material.to_purchase.toFixed(2)).appendTo(row);
+                        $('<td>').text(material.total_cost.toFixed(2)).appendTo(row);
+    
+                        // Append the row to the table body
+                        row.appendTo(material_table);
+                    });
+                    let pks_list = response['pks']
+                    filtered_pks.val(pks_list)
+                    modal_button.click()
+                    console.log(modal_button)
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
