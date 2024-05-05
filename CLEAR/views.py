@@ -14,7 +14,6 @@ from django.db.models.functions import Cast
 from datetime import datetime, timedelta
 import pandas as pd
 import io
-import openpyxl
 from django.db.models import F, ExpressionWrapper, FloatField, Sum  #used expwrapper for reports - dane
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -23,17 +22,32 @@ from django.template.defaultfilters import date as django_date
 
 import json
 
+def chart_data(request):
+
+    current_date = timezone.now().date()
+    start_date = current_date - timedelta(days=30)
+    end_date = current_date + timedelta(days=30)
+
+    outlet_objects = Outlet.objects.all()
+    outlet_data = []
+    for outlet in outlet_objects:
+        job_order_count = outlet.job_order_set.filter(file_date__range=[start_date, end_date]).count()
+        outlet_data.append({"y": job_order_count, "label": outlet.outlet_name})
+
+    return JsonResponse(outlet_data, safe=False)
+
 # Create your views here.
 @login_required(login_url="/login") # this is to restrict access if not logged in
 def dashboard(request): 
 
     product_objects = Product.objects.all().exclude(name="test_product_test_product_test")
+    # Get the current date
     order_objects = Job_Order.objects.all()
+
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
     outlet_objects = Outlet.objects.all()
     outlet_count = len(outlet_objects)
-    order_list = []
 
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
@@ -70,16 +84,9 @@ def dashboard(request):
         vat = vat_object.value
     except:
         vat_object = False
-
-    #per branch
-    outlet_objects = Outlet.objects.all()
-    outlet_data = []
-    for outlet in outlet_objects:
-        job_order_count = outlet.job_order_set.count()
-        outlet_data.append({"y": job_order_count, "label": outlet.outlet_name})
     
 
-    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, "outlet_data": outlet_data, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
+    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, 'orders':order_objects, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
     
 
 # search and filter product
@@ -497,9 +504,6 @@ def materials(request):
                 unit = unit + "s"
 
         material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
-
-        
-        
 
     if(request.method=="POST"):
         material_key = request.POST.get("material_key")
@@ -1233,8 +1237,7 @@ def login_view(request):
     return render(request, 'registration/login.html', {'form': form})
 
 def logout_view(request):
-    logout(request)
-    return redirect('login')
+    return render(request, 'registration/login.html')
 
 def get_material_options(request): # function used to change materials in stock-in upon material type change 
     material_type = request.GET.get('material_type') 

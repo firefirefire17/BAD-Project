@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
 </head>
 {% block search %}
+<img class="searchnav" src="https://i.imgur.com/04qNE39.png">
 <form id="search-form" method="GET" action="{% url 'filter_materials' %}">
     {% csrf_token %}
     <input id="search-input" class="search" name="q" type="search" placeholder="Search..."
@@ -293,8 +294,8 @@
 </form>
 
 <!--FILTER MODAL-->
-<div class="modal" id="filtermodal" style="max-width: 700px; position: absolute;
-    top: 0;
+<div class="modal" id="filtermodal" style="width: 600px; position: absolute;
+    top: -90px;
     right: 0;
     bottom: 0;
     left: 60%;">

@@ -10,50 +10,84 @@
 </head>
 
 {% block content %}
-<div class="row pb-2 pt-4">
-    <div class="col-7" style="margin: 0px 30px 0px 30px">
+<div class="row pt-4">
+    <div class="col-6">
         <div class="card" style="height:190px; border-radius: 10px;">
-            <div class="card-body" style="height:190px;">
+            <div class="card-body">
                 <div class="card-title">
-                    <h4>Order Summary</h4>
+                    <h4>Job Order Summary</h4>
                 </div>
                 <div class="card-text">
-                    <div class="row">
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> {{file_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
+                    <div class="row d-flex justify-content-around ml-3">
+                        <div class="col" style="display: flex; flex-direction: column;">
+                            {% if file_count == 0 %}
+                            <p class="m-0" style="font-size: 40px; color: gray;"> {{file_count}} </p>
+                            {% endif %}
+                            {% if file_count > 0 %}
+                            <p class="m-0" style="font-size: 40px;"> {{file_count}} </p>
+                            {% endif %}
+                            <p style="font-size: 15px;"> Filed </p>
                         </div>
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> {{start_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Started</p>
+                        <div class="col" style="display: flex; flex-direction: column;">
+                            {% if complete_count == 0 %}
+                            <p class="m-0" style="font-size: 40px; color: gray;"> {{complete_count}} </p>
+                            {% endif %}
+                            {% if complete_count > 0 %}
+                            <p class="m-0" style="font-size: 40px;"> {{complete_count}} </p>
+                            {% endif %}
+                            <p style="font-size: 15px;"> Completed </p>
                         </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> {{complete_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Completed </p>
+                        <div class="col" style="display: flex; flex-direction: column;">
+                            {% if start_count == 0 %}
+                            <p class="m-0" style="font-size: 40px; color: gray;"> {{start_count}} </p>
+                            {% endif %}
+                            {% if start_count > 0 %}
+                            <p class="m-0" style="font-size: 40px;"> {{start_count}} </p>
+                            {% endif %}
+                            <p style="font-size: 15px;"> Started </p>
                         </div>
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> {{average_duration|floatformat:0}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Average Duration </p>
+                        <div class="col" style="display: flex; flex-direction: column;">
+                            {% if average_duration|floatformat:0 == '0' %}
+                            <p class="m-0" style="font-size: 40px; color: gray;"> {{average_duration|floatformat:0}}
+                            </p>
+                            {% endif %}
+                            {% if average_duration|floatformat:0 > 0 %}
+                            <p class="m-0" style="font-size: 40px;"> {{average_duration|floatformat:0}} </p>
+                            {% endif %}
+                            <p style="font-size: 15px;"> Average Duration </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="col" style="margin: 0px 30px 0px 30px">
+    <div class="col-6">
         <div class="card" style="height:190px; border-radius: 10px;">
-            <div class="card-body" style="height:190px;">
+            <div class="card-body">
                 <div class="card-title">
                     <h4>Item Distribution</h4>
                 </div>
                 <div class="card-text">
-                    <div class="row mt-3">
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> {{bespoke_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Bespoke Items </p>
+                    <div class="row d-flex justify-content-around">
+                        <div class="col">
+                            {% if bespoke_count == 0 %}
+                                <p class="m-0" style="font-size: 40px; color: gray;"> {{bespoke_count}}
+                            </p>
+                            {% endif %}
+                            {% if bespoke_count > 0 %}
+                                <p class="m-0" style="font-size: 40px;">{{bespoke_count}} </p>
+                            {% endif %}
+                            <p class="m-0" style="font-size: 15px;"> Bespoke Items </p>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> {{regular_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Regular Items </p>
+                        <div class="col">
+                            {% if regular_count == 0 %}
+                                <p class="m-0" style="font-size: 40px; color: gray;"> {{regular_count}}
+                            </p>
+                            {% endif %}
+                            {% if regular_count > 0 %}
+                                <p class="m-0" style="font-size: 40px;">{{regular_count}} </p>
+                            {% endif %}
+                            <p class="m-0" style="font-size: 15px;"> Regular Items </p>
                         </div>
                     </div>
                 </div>
@@ -61,6 +95,7 @@
         </div>
     </div>
 </div>
+
 <div class="row pl-3 pt-3 pr-3" style="height:68%">
     <div class="card main-card">
         <div class="table-responsive card"
