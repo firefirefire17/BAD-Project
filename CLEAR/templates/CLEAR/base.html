@@ -28,10 +28,18 @@
                 <img class="logo" src="https://i.imgur.com/RK7hDVV.png">
                 <img class="searchnav" src="https://i.imgur.com/04qNE39.png">
                 {% block search %}
-                <form method="POST" action=""> {% csrf_token %}
-                    <input class="search" name="searchitem" type="search" placeholder="Search..."
-                        style="background-color: transparent; border:none; height: 40px; margin-top: 8px; width: max-content; color: white;">
-                </form>
+                {% if '' in request.path %}
+                    <form method="POST" action=""> {% csrf_token %}
+                        <input class="search" name="searchitem" type="search" placeholder="Search..."
+                            style="display:none;">
+                    </form>
+                {%endif%}
+                {% if 'dashbord' not in request.path %}
+                    <form method="POST" action=""> {% csrf_token %}
+                        <input class="search" name="searchitem" type="search" placeholder="Search..."
+                            style="background-color: transparent; border:none; height: 40px; margin-top: 8px; width: max-content; color: white;">
+                    </form>
+                {% endif %}
                 {% endblock %}
         </div>
         {% block filter %}
