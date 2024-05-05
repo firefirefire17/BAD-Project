@@ -23,24 +23,31 @@ from django.template.defaultfilters import date as django_date
 import json
 
 def chart_data(request):
+
+    current_date = timezone.now().date()
+    start_date = current_date - timedelta(days=30)
+    end_date = current_date + timedelta(days=30)
+
     outlet_objects = Outlet.objects.all()
     outlet_data = []
     for outlet in outlet_objects:
-        job_order_count = outlet.job_order_set.count()
+        job_order_count = outlet.job_order_set.filter(file_date__range=[start_date, end_date]).count()
         outlet_data.append({"y": job_order_count, "label": outlet.outlet_name})
 
     return JsonResponse(outlet_data, safe=False)
+
 # Create your views here.
 @login_required(login_url="/login") # this is to restrict access if not logged in
 def dashboard(request): 
 
     product_objects = Product.objects.all().exclude(name="test_product_test_product_test")
+    # Get the current date
     order_objects = Job_Order.objects.all()
+
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
     outlet_objects = Outlet.objects.all()
     outlet_count = len(outlet_objects)
-    order_list = []
 
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
