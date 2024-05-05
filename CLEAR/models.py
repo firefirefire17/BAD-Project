@@ -331,7 +331,13 @@ class Financial_Value(models.Model):
 class Account(models.Model):
     username = models.CharField(max_length=50)
     password = models.IntegerField()
-    role = models.CharField(max_length=50)
+    ROLE_OWNER = 'Owner'
+    ROLE_PRODUCT_MANAGER = 'Product Manager'
+    ROLE_CHOICES = [
+        (ROLE_OWNER, 'Owner'),
+        (ROLE_PRODUCT_MANAGER, 'Product Manager'),
+    ]
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES)
 
 # function used in products to get cost of a product component
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost, buffer):
