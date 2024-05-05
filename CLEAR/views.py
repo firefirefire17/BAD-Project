@@ -10,6 +10,7 @@ from django.db import transaction
 from django.db.models import Q
 from .decorators import owner_required, product_manager_required
 
+from datetime import datetime
 import pandas as pd
 import io
 import openpyxl
@@ -872,6 +873,63 @@ def reports(request):
             datenow = timezone.now().date()
             return render(request, 'CLEAR/material_report.html', {'materials':material_data, 'today': datenow, 'stocked': inStock_count, 'unstocked': outStock_count, 'material_count': material_count})
         elif reptype == 'production':
+            start_date = request.POST.get("start_date") 
+            end_date = request.POST.get("end_date") 
+ 
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date() 
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date() 
+ 
+            # get all objects where either file_date, start_date, or completion_date fall under the range of input dates 
+            order_objects = Job_Order.objects.filter( 
+                Q(file_date__range=(start_date, end_date)) | 
+                Q(start_date__range=(start_date, end_date)) | 
+                Q(completion_date__range=(start_date, end_date)) 
+                ) 
+ 
+            order_list = [] 
+ 
+ 
+            for order in Job_Order.objects.all(): 
+                order_data = { 
+                    'order': order, 
+                    'file_date': order.file_date, 
+                    'completion_date': order.completion_date, 
+                    'status': order.order_status, 
+                    'customer': order.customer, 
+                    'outlet': order.outlet, 
+                    'items': [], 
+                } 
+                for order_item in order.order_item_set.all(): 
+                    item_data = { 
+                        'item': order_item.item, 
+                        'quantity': order_item.quantity, 
+                        'materials': [], 
+                    } 
+                    for item_textile in order_item.item.item_textile_set.all(): 
+                        material_data = { 
+                            'type': 'textile', 
+                            'material': item_textile.textile, 
+                            'bespoke_rate': item_textile.bespoke_rate, 
+                            'quantity': item_textile.quantity, 
+                        } 
+                        item_data['materials'].append(material_data) 
+                    for item_accessory in order_item.item.item_accessory_set.all(): 
+                        material_data = { 
+                            'type': 'accessory', 
+                            'material': item_accessory.accessory, 
+                            'bespoke_rate': item_accessory.bespoke_rate, 
+                            'quantity': item_accessory.quantity, 
+                        } 
+                        item_data['materials'].append(material_data) 
+                    if item_data['materials']: 
+                        item_data['bespoke'] = 'yes' 
+                    else: 
+                        item_data['bespoke'] = 'no' 
+                    item_data['item_count'] = len(item_data['materials']) 
+                    order_data['items'].append(item_data) 
+                order_data['item_count'] = len(order_data['items']) 
+                order_list.append(order_data) 
+         
             return render(request, 'CLEAR/production_report.html')  
         elif reptype == 'pricing':
             return redirect('pricing_reports')
