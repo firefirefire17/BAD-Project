@@ -28,6 +28,7 @@ import json
 def dashboard(request): 
 
     product_objects = Product.objects.all().exclude(name="test_product_test_product_test")
+    order_objects = Job_Order.objects.all()
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
     outlet_objects = Outlet.objects.all()
@@ -56,6 +57,8 @@ def dashboard(request):
 
         material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
 
+    material_objects = [material for material in material_objects if int(material['material'].stock) == 0]
+
     try:
         wage_object = Financial_Value.objects.get(name="labor_wage")
         wage = wage_object.value
@@ -70,236 +73,11 @@ def dashboard(request):
 
     #per branch
     outlet_objects = Outlet.objects.all()
-    joborder_objects = Job_Order.objects.all()
     outlet_data = []
     for outlet in outlet_objects:
         job_order_count = outlet.job_order_set.count()
         outlet_data.append({"y": job_order_count, "label": outlet.outlet_name})
     
-    for order in Job_Order.objects.all():
-        order_data = {
-            'order': order,
-            'file_date': order.file_date,
-            'completion_date': order.completion_date,
-            'status': order.order_status,
-            'customer': order.customer,
-            'outlet': order.outlet,
-            'items': [],
-        }
-        for order_item in order.order_item_set.all():
-            item_data = {
-                'item': order_item.item,
-                'quantity': order_item.quantity,
-                'materials': [],
-            }
-            for item_textile in order_item.item.item_textile_set.all():
-                material_data = {
-                    'type': 'textile',
-                    'material': item_textile.textile,
-                    'bespoke_rate': item_textile.bespoke_rate,
-                    'quantity': item_textile.quantity,
-                }
-                item_data['materials'].append(material_data)
-            for item_accessory in order_item.item.item_accessory_set.all():
-                material_data = {
-                    'type': 'accessory',
-                    'material': item_accessory.accessory,
-                    'bespoke_rate': item_accessory.bespoke_rate,
-                    'quantity': item_accessory.quantity,
-                }
-                item_data['materials'].append(material_data)
-            if item_data['materials']:
-                item_data['bespoke'] = 'yes'
-            else:
-                item_data['bespoke'] = 'no'
-            item_data['item_count'] = len(item_data['materials'])
-            order_data['items'].append(item_data)
-        order_data['item_count'] = len(order_data['items'])
-        order_list.append(order_data)
-    
-    if (request.method == "POST"):
-        action = request.POST.get("action")
-        print(request.POST)
-
-        file_date = request.POST.get("file_date") 
-        status = request.POST.get("status")
-        completion_date = request.POST.get("completion_date")
-        start_date = request.POST.get("start_date")
-        outlet = request.POST.get("outlet")
-        customer = request.POST.get("customer")
-
-        if action == 'add_form':
-            response = {}
-            response['status'] = True
-
-            with transaction.atomic():
-                outlet_object = Outlet.objects.get(pk=outlet)
-                new_order = Job_Order.objects.create(file_date=file_date, order_status=status, customer=customer, outlet=outlet_object)
-                if start_date:
-                    new_order.start_date = start_date
-                    new_order.save()
-                if completion_date:
-                    new_order.completion_date = completion_date
-                    new_order.save()
-                    print('completion-date')
-                    print(new_order.completion_date)
-
-                item_data = json.loads(request.POST.get("items"))
-                for item in item_data:
-                    product_id = item['order_item']
-                    if product_id == 'delete':
-                        pass
-                    else:
-                        product = Product.objects.get(pk = item['order_item'])
-                        quantity = item['quantity']
-                        if item['materials']:
-                            type = "bespoke"
-                        else:
-                            type = "regular"
-
-                        new_item = Item.objects.create(product=product, type=type)
-
-                        for material in item['materials']:
-                            material_type = material['material_type']
-                            item_material = material['item_material']
-                            bespoke_rate = material['bespoke_rate']
-                            quantity = material['quantity']
-                            print(quantity)
-                            if item_material == "delete":
-                                pass
-                            else:
-                                if material_type == 'textile':
-                                    textile_object = Textile.objects.get(material_key__material_key = item_material)
-                                    Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
-                                else:
-                                    accessory_object = Accessory.objects.get(material_key__material_key = item_material)
-                                    Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
-                        
-                        existing_item = new_item.is_duplicate()
-                        print(existing_item)
-                        if not existing_item:
-                            print('pass')
-                            Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
-                        else:
-                            new_item.delete()
-                            Order_Item.objects.create(order=new_order, item=existing_item, quantity=quantity)
-        
-            response['msg'] = "Form submitted."
-            response['url'] = reverse('orders')
-
-            # return dict to ajax
-            return JsonResponse(response)
-        elif action == "edit_form":
-            outlet_object = Outlet.objects.get(pk=outlet)
-
-            pk = request.POST.get("pk")
-            order = Job_Order.objects.get(pk=pk)
-
-            if start_date:
-                order.start_date = start_date
-            if completion_date:
-                order.completion_date = completion_date
-
-            original_status = order.order_status
-            if original_status == "completed":
-                if status != "completed":
-                    order.rollback_stocks(order.get_stocks())
-            else:
-                if status == "completed":
-                    order.deduct_stocks(order.get_stocks())
-            
-            order.file_date=file_date
-            order.order_status=status
-            order.customer=customer
-            order.outlet=outlet_object
-
-            order.save()
-
-            Order_Item.objects.filter(order=order).delete()
-            
-            item_data = json.loads(request.POST.get("items"))
-            for item in item_data:
-                product_id = item['order_item']
-                if product_id == 'delete':
-                    pass
-                else:
-                    product = Product.objects.get(pk = item['order_item'])
-                    quantity = item['quantity']
-                    if item['materials']:
-                        type = "bespoke"
-                    else:
-                        type = "regular"
-
-                    new_item = Item.objects.create(product=product, type=type)
-
-                    for material in item['materials']:
-                        material_type = material['material_type']
-                        item_material = material['item_material']
-                        bespoke_rate = material['bespoke_rate']
-                        quantity = material['quantity']
-                        print(material_type)
-                        print(item_material)
-                        print(quantity)
-                        if item_material == "delete":
-                            pass
-                        else:
-                            if material_type == 'textile':
-                                print('textile')
-                                textile_object = Textile.objects.get(material_key__material_key = item_material)
-                                Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
-                            else:
-                                print('accessory')
-                                accessory_object = Accessory.objects.get(material_key__material_key = item_material)
-                                Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
-                    
-                    existing_item = new_item.is_duplicate()
-                    print(existing_item)
-                    if not existing_item:
-                        print('pass')
-                        Order_Item.objects.create(order=order, item=new_item, quantity=quantity)
-                    else:
-                        new_item.delete()
-                        Order_Item.objects.create(order=order, item=existing_item, quantity=quantity)
-            order.save() 
-            response = {}
-            response['status'] = True
-            response['msg'] = "Form submitted."
-            response['url'] = reverse('orders')
-
-            # return dict to ajax
-            return JsonResponse(response)
-        elif 'delete_form' in request.POST:
-            pk = request.POST.get("pk")
-            Job_Order.objects.filter(pk=pk).delete()
-            return redirect('orders')
-        elif action == 'outlets':
-            print(request.POST)
-            outlet_data = json.loads(request.POST.get("outlets"))
-            print(outlet_data)
-
-            for outlet in outlet_data:
-                outlet_id = outlet['outlet_id']
-                outlet_name = outlet['outlet_name']
-                print(outlet_id)
-                if outlet_id:
-                    outlet_object = Outlet.objects.get(pk=outlet_id)
-                    print(outlet_id)
-                    if outlet_name == 'delete':
-                        outlet_object.delete()
-                        outlet_object.save()
-                    else:
-                        outlet_object.outlet_name = outlet_name
-                        outlet_object.save()
-                else:
-                    print('pass')
-                    Outlet.objects.create(outlet_name=outlet_name)
-            response = {}
-            response['status'] = True
-            response['msg'] = "Form submitted."
-            response['url'] = reverse('orders')
-
-            # return dict to ajax
-            return JsonResponse(response)  
 
     return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, "outlet_data": outlet_data, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
     
@@ -333,6 +111,8 @@ def products(request):
     product_objects = Product.objects.all()
     accessory_objects = Accessory.objects.all()
     textile_objects = Textile.objects.all()
+    order_objects = Job_Order.objects.all()
+
 
 
     product_material_list = []
@@ -625,6 +405,7 @@ def products(request):
                                                    'product_material_list':product_material_list,
                                                    'accessories':accessory_objects,
                                                    'textiles':textile_objects,
+                                                   'job_orders': order_objects
                                                    })
     else:
         return render(request, 'CLEAR/products.html', {'products':product_objects, 
@@ -633,6 +414,7 @@ def products(request):
                                                    'textiles':textile_objects,
                                                    'VAT':vat,
                                                    'wage': wage,
+                                                   'job_orders': order_objects
                                                    })
 
 # search and filter functionality
@@ -692,6 +474,8 @@ def filter_materials(request):
 
 @login_required(login_url="/login")
 def materials(request):
+    order_objects = Job_Order.objects.all()
+
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
     material_objects = []
@@ -731,11 +515,11 @@ def materials(request):
 
             if not stock:
                 error_message = "Please input a valid stock number"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
             
             if not cost:
                 error_message = "Please input a valid cost"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
 
             try:
                 stock = int(stock)
@@ -744,26 +528,26 @@ def materials(request):
 
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
             
             if stock < 0 or stock > 999:
                 #backend message
                 error_message = "Input cannot be negative or more than 999"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
             
             if type == "accessory":
                 if isinstance(stock, float):
                     error_message = "Stock input cannot be a decimal number"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
                     
             if cost < 0:
                 #backend message
                 error_message = "Input cannot be negative"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
             
             if not name:
                 error_message = "Please input a material name"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
             
 
             
@@ -775,7 +559,7 @@ def materials(request):
                 existing_material = Textile.objects.filter(name=name)
                 if existing_material:
                     error_message = "Material already exists"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
                 else:
                     print("pass")
                     Textile.objects.create(name=name, stock=stock, cost=cost, material_key=material_key, unit=unit)
@@ -783,7 +567,7 @@ def materials(request):
                 existing_material = Accessory.objects.filter(name=name)                
                 if existing_material:
                     error_message = "Material already exists"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
                 else:
                     print("pass")
                     Accessory.objects.create(name=name, stock=stock, cost=cost, material_key=material_key, unit=unit)
@@ -796,25 +580,25 @@ def materials(request):
 
             if not stock:
                 error_message = "Please input a valid stock number"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
             
             if not cost:
                 error_message = "Please input a valid cost"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
 
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
         
             if type == "accessory":
                 if isinstance(stock, float):
                     error_message = "Stock input cannot be a decimal number"
-                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                    return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
             
             if cost < 0:
                 #backend message
                 error_message = "Input cannot be negative"
-                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message})
+                return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message, 'job_orders': order_objects})
 
             material_key_obj = get_object_or_404(MaterialKey, material_key=material_key)
 
@@ -835,7 +619,7 @@ def materials(request):
                 Accessory.objects.filter(material_key=material_key_obj).delete()
             return redirect('materials')
 
-    return render(request, 'CLEAR/materials.html', {'materials':material_objects})
+    return render(request, 'CLEAR/materials.html', {'materials':material_objects, 'job_orders': order_objects})
 
 @login_required(login_url="/login")
 def search_joborders(request):
@@ -868,6 +652,8 @@ def search_joborders(request):
 
 @login_required(login_url="/login")
 def job_orders(request):
+    order_objects = Job_Order.objects.all()
+
     product_objects = Product.objects.all().exclude(name="test_product_test_product_test")
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
@@ -990,6 +776,9 @@ def job_orders(request):
                         else:
                             new_item.delete()
                             Order_Item.objects.create(order=new_order, item=existing_item, quantity=quantity)
+
+            if status == "completed":
+                new_order.deduct_stocks(new_order.get_stocks())
         
             response['msg'] = "Form submitted."
             response['url'] = reverse('orders')
@@ -1008,12 +797,6 @@ def job_orders(request):
                 order.completion_date = completion_date
 
             original_status = order.order_status
-            if original_status == "completed":
-                if status != "completed":
-                    order.rollback_stocks(order.get_stocks())
-            else:
-                if status == "completed":
-                    order.deduct_stocks(order.get_stocks())
             
             order.file_date=file_date
             order.order_status=status
@@ -1072,6 +855,12 @@ def job_orders(request):
                         new_item.delete()
                         Order_Item.objects.create(order=order, item=existing_item, quantity=quantity)
             order.save() 
+            if original_status == "completed":
+                if status != "completed":
+                    order.rollback_stocks(order.get_stocks())
+            else:
+                if status == "completed":
+                    order.deduct_stocks(order.get_stocks())
             response = {}
             response['status'] = True
             response['msg'] = "Form submitted."
@@ -1112,14 +901,14 @@ def job_orders(request):
             # return dict to ajax
             return JsonResponse(response)
 
-
-
-    return render(request, 'CLEAR/job_orders.html', {'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count})
+    return render(request, 'CLEAR/job_orders.html', {'job_orders': order_objects, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count})
 
 
 @login_required(login_url="/login")
 def reports(request):
     print(request.POST)
+    order_objects = Job_Order.objects.all()
+
     if request.method == "POST":
         reptype = request.POST.get("reptype")
         if reptype == 'materials':
@@ -1154,7 +943,7 @@ def reports(request):
             material_count = len(material_data)
             outStock_count = material_count - inStock_count
             datenow = timezone.now().date()
-            return render(request, 'CLEAR/material_report.html', {'materials':material_data, 'today': datenow, 'stocked': inStock_count, 'unstocked': outStock_count, 'material_count': material_count})
+            return render(request, 'CLEAR/material_report.html', {'materials':material_data, 'today': datenow, 'stocked': inStock_count, 'unstocked': outStock_count, 'material_count': material_count, 'job_orders': order_objects})
         elif reptype == 'production':
             start_date = request.POST.get("start_date") 
             end_date = request.POST.get("end_date") 
@@ -1253,13 +1042,13 @@ def reports(request):
                     if start_date <= order['completion_date'] <= end_date:
                         complete_count += 1
 
-            return render(request, 'CLEAR/production_report.html', {'orders': order_list, 'bespoke_count': bespoke_count, 'regular_count': regular_count, 'average_duration': average_duration, 'file_count': file_count, 'start_count': start_count, 'complete_count': complete_count, 'start_date': start_date, 'end_date': end_date})  
+            return render(request, 'CLEAR/production_report.html', {'orders': order_list, 'bespoke_count': bespoke_count, 'regular_count': regular_count, 'average_duration': average_duration, 'file_count': file_count, 'start_count': start_count, 'complete_count': complete_count, 'start_date': start_date, 'end_date': end_date, 'job_orders': order_objects})  
         elif reptype == 'pricing':
             products = Product.objects.exclude(name="test_product_test_product_test")
             table_data = []
             for product in products:
                 difference = product.retail_price - product.calc_price
-                days_since_last_update = (timezone.now().date() - product.last_update).days
+                days_since_last_update = (product.last_update - timezone.now().date()).days
                 table_data.append({
                     'product_pk': product.pk,
                     'product_name': product.name.title(),
@@ -1272,7 +1061,7 @@ def reports(request):
             # Sort table_data by product_difference
             table_data_sorted = sorted(table_data, key=lambda x: x['product_difference'])
             
-            return render(request, 'CLEAR/pricing_report.html', {'table_data': table_data_sorted})
+            return render(request, 'CLEAR/pricing_report.html', {'table_data': table_data_sorted, 'job_orders': order_objects})
         elif reptype == 'shopping_list':
             return redirect('shopping_list_reports')  
     return render(request, 'CLEAR/reports.html')
@@ -1280,6 +1069,8 @@ def reports(request):
 
 @login_required(login_url="/login")
 def stock_in(request):
+    order_objects = Job_Order.objects.all()
+
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
     stockIn_objects = StockIn.objects.all()
@@ -1412,7 +1203,7 @@ def stock_in(request):
 
 
 
-    return render(request, 'CLEAR/stock_in.html', {'textiles':textile_objects, 'accessories': accessory_objects, 'stock_ins':stockIn_material_list})
+    return render(request, 'CLEAR/stock_in.html', {'textiles':textile_objects, 'accessories': accessory_objects, 'stock_ins':stockIn_material_list, 'job_orders': order_objects})
 
 def sign_up(request):
     if request.method == 'POST':
@@ -1554,7 +1345,7 @@ def download_matrep(request):
         unit = textile.get_unit_display()
         unit = unit.removeprefix("per ")
 
-        material_data.append({'type': 'textile', 'pk': textile.material_key.material_key, 'name': textile.name, 'cost': textile.cost, 'stock': textile.stock, 'unit': unit})
+        material_data.append({'pk': textile.material_key.material_key, 'type': 'textile', 'name': textile.name, 'cost': textile.cost, 'stock': textile.stock, 'unit': unit})
 
     for accessory in accessory_objects:
         unit = accessory.get_unit_display()
@@ -1566,10 +1357,9 @@ def download_matrep(request):
             else:
                 unit = unit + "s"
 
-        material_data.append({'type': 'accessory', 'pk': accessory.material_key.material_key, 'name': accessory.name, 'cost': accessory.cost, 'stock': accessory.stock, 'unit': unit})
+        material_data.append({'pk': accessory.material_key.material_key, 'type': 'accessory', 'name': accessory.name, 'cost': accessory.cost, 'stock': accessory.stock, 'unit': unit})
 
     df = pd.DataFrame(material_data)
-    df.set_index('pk', inplace=True)
 
     excel_filename = 'material_data.xlsx'
 
@@ -1634,6 +1424,38 @@ def download_prodrep(request):
     response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
     print(response)
     return response
+
+def download_pricerep(request):
+    products = Product.objects.exclude(name="test_product_test_product_test")
+    table_data = []
+    for product in products:
+        difference = product.retail_price - product.calc_price
+        days_since_last_update = (product.last_update - timezone.now().date()).days
+        table_data.append({
+            'pk': product.pk,
+            'name': product.name.title(),
+            'retailprice': product.retail_price,
+            'calcprice': product.calc_price,
+            'difference': difference,
+            'dayslastupdate': days_since_last_update,
+        })
+    
+    # Sort table_data by product_difference
+    table_data_sorted = sorted(table_data, key=lambda x: x['difference'])
+
+    df = pd.DataFrame(table_data_sorted)
+
+    excel_filename = 'production_report.xlsx'
+
+    excel_buffer = io.BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
+
+    print(df)
+
+    response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
+    return response
+
  
 # this is a function used in products to get the cost of each product component 
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost): 

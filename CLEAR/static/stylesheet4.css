@@ -33,7 +33,6 @@ a:active {
     border-radius: 10px;
     color: black !important;
     box-shadow: inset;
-    pointer-events: none;
 }
 
 .profile {

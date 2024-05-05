@@ -95,25 +95,7 @@
 
 <script>
     $(document).ready(function() {
-        const editContainer = $('.editContainer');
-        $(document).on('change', '.reptype', function() {
-            console.log('pass');
-            let reptype = $(this).val();
-    
-            if (reptype == "production") {
-                editContainer.empty(); 
-                editContainer.append('<div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">' +
-                    '<label for="reportDate">Date</label>' +
-                    '<input type="date" class="last_update form-control"' +
-                    'style="width: 150px; border-radius: 100px; margin-left: 70px;">' +
-                    '</div>');
-            } else if (reptype == "shopping_list") {
-                editContainer.empty();
-                editContainer.append('<div>Shopping list here</div>');
-            } else {
-                editContainer.empty();
-            }
-        });
+        
         $(".download_button").click(function() {
             let link = $('<a href="/download_matrep/" style="display: none;"></a>');
     
