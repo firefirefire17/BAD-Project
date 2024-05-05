@@ -25,8 +25,261 @@ import json
 
 # Create your views here.
 @login_required(login_url="/login") # this is to restrict access if not logged in
-def dashboard(request):
-    return render(request, 'CLEAR/dashboard.html')
+def dashboard(request): 
+
+    product_objects = Product.objects.all().exclude(name="test_product_test_product_test")
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    outlet_objects = Outlet.objects.all()
+    outlet_count = len(outlet_objects)
+    order_list = []
+
+    try:
+        wage_object = Financial_Value.objects.get(name="labor_wage")
+        wage = wage_object.value
+    except: # if the global value doesn't exist, assign it to false to flag it for creation later
+        wage_object = False
+
+    try:
+        vat_object = Financial_Value.objects.get(name="vat")
+        vat = vat_object.value
+    except:
+        vat_object = False
+
+    #per branch
+    outlet_objects = Outlet.objects.all()
+    joborder_objects = Job_Order.objects.all()
+    outlet_data = []
+    for outlet in outlet_objects:
+        job_order_count = outlet.job_order_set.count()
+        outlet_data.append({"y": job_order_count, "label": outlet.outlet_name})
+    
+    for order in Job_Order.objects.all():
+        order_data = {
+            'order': order,
+            'file_date': order.file_date,
+            'completion_date': order.completion_date,
+            'status': order.order_status,
+            'customer': order.customer,
+            'outlet': order.outlet,
+            'items': [],
+        }
+        for order_item in order.order_item_set.all():
+            item_data = {
+                'item': order_item.item,
+                'quantity': order_item.quantity,
+                'materials': [],
+            }
+            for item_textile in order_item.item.item_textile_set.all():
+                material_data = {
+                    'type': 'textile',
+                    'material': item_textile.textile,
+                    'bespoke_rate': item_textile.bespoke_rate,
+                    'quantity': item_textile.quantity,
+                }
+                item_data['materials'].append(material_data)
+            for item_accessory in order_item.item.item_accessory_set.all():
+                material_data = {
+                    'type': 'accessory',
+                    'material': item_accessory.accessory,
+                    'bespoke_rate': item_accessory.bespoke_rate,
+                    'quantity': item_accessory.quantity,
+                }
+                item_data['materials'].append(material_data)
+            if item_data['materials']:
+                item_data['bespoke'] = 'yes'
+            else:
+                item_data['bespoke'] = 'no'
+            item_data['item_count'] = len(item_data['materials'])
+            order_data['items'].append(item_data)
+        order_data['item_count'] = len(order_data['items'])
+        order_list.append(order_data)
+    
+    if (request.method == "POST"):
+        action = request.POST.get("action")
+        print(request.POST)
+
+        file_date = request.POST.get("file_date") 
+        status = request.POST.get("status")
+        completion_date = request.POST.get("completion_date")
+        start_date = request.POST.get("start_date")
+        outlet = request.POST.get("outlet")
+        customer = request.POST.get("customer")
+
+        if action == 'add_form':
+            response = {}
+            response['status'] = True
+
+            with transaction.atomic():
+                outlet_object = Outlet.objects.get(pk=outlet)
+                new_order = Job_Order.objects.create(file_date=file_date, order_status=status, customer=customer, outlet=outlet_object)
+                if start_date:
+                    new_order.start_date = start_date
+                    new_order.save()
+                if completion_date:
+                    new_order.completion_date = completion_date
+                    new_order.save()
+                    print('completion-date')
+                    print(new_order.completion_date)
+
+                item_data = json.loads(request.POST.get("items"))
+                for item in item_data:
+                    product_id = item['order_item']
+                    if product_id == 'delete':
+                        pass
+                    else:
+                        product = Product.objects.get(pk = item['order_item'])
+                        quantity = item['quantity']
+                        if item['materials']:
+                            type = "bespoke"
+                        else:
+                            type = "regular"
+
+                        new_item = Item.objects.create(product=product, type=type)
+
+                        for material in item['materials']:
+                            material_type = material['material_type']
+                            item_material = material['item_material']
+                            bespoke_rate = material['bespoke_rate']
+                            quantity = material['quantity']
+                            print(quantity)
+                            if item_material == "delete":
+                                pass
+                            else:
+                                if material_type == 'textile':
+                                    textile_object = Textile.objects.get(material_key__material_key = item_material)
+                                    Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                                else:
+                                    accessory_object = Accessory.objects.get(material_key__material_key = item_material)
+                                    Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                        
+                        existing_item = new_item.is_duplicate()
+                        print(existing_item)
+                        if not existing_item:
+                            print('pass')
+                            Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
+                        else:
+                            new_item.delete()
+                            Order_Item.objects.create(order=new_order, item=existing_item, quantity=quantity)
+        
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('orders')
+
+            # return dict to ajax
+            return JsonResponse(response)
+        elif action == "edit_form":
+            outlet_object = Outlet.objects.get(pk=outlet)
+
+            pk = request.POST.get("pk")
+            order = Job_Order.objects.get(pk=pk)
+
+            if start_date:
+                order.start_date = start_date
+            if completion_date:
+                order.completion_date = completion_date
+
+            original_status = order.order_status
+            if original_status == "completed":
+                if status != "completed":
+                    order.rollback_stocks(order.get_stocks())
+            else:
+                if status == "completed":
+                    order.deduct_stocks(order.get_stocks())
+            
+            order.file_date=file_date
+            order.order_status=status
+            order.customer=customer
+            order.outlet=outlet_object
+
+            order.save()
+
+            Order_Item.objects.filter(order=order).delete()
+            
+            item_data = json.loads(request.POST.get("items"))
+            for item in item_data:
+                product_id = item['order_item']
+                if product_id == 'delete':
+                    pass
+                else:
+                    product = Product.objects.get(pk = item['order_item'])
+                    quantity = item['quantity']
+                    if item['materials']:
+                        type = "bespoke"
+                    else:
+                        type = "regular"
+
+                    new_item = Item.objects.create(product=product, type=type)
+
+                    for material in item['materials']:
+                        material_type = material['material_type']
+                        item_material = material['item_material']
+                        bespoke_rate = material['bespoke_rate']
+                        quantity = material['quantity']
+                        print(material_type)
+                        print(item_material)
+                        print(quantity)
+                        if item_material == "delete":
+                            pass
+                        else:
+                            if material_type == 'textile':
+                                print('textile')
+                                textile_object = Textile.objects.get(material_key__material_key = item_material)
+                                Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                            else:
+                                print('accessory')
+                                accessory_object = Accessory.objects.get(material_key__material_key = item_material)
+                                Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                    
+                    existing_item = new_item.is_duplicate()
+                    print(existing_item)
+                    if not existing_item:
+                        print('pass')
+                        Order_Item.objects.create(order=order, item=new_item, quantity=quantity)
+                    else:
+                        new_item.delete()
+                        Order_Item.objects.create(order=order, item=existing_item, quantity=quantity)
+            order.save() 
+            response = {}
+            response['status'] = True
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('orders')
+
+            # return dict to ajax
+            return JsonResponse(response)
+        elif 'delete_form' in request.POST:
+            pk = request.POST.get("pk")
+            Job_Order.objects.filter(pk=pk).delete()
+            return redirect('orders')
+        elif action == 'outlets':
+            print(request.POST)
+            outlet_data = json.loads(request.POST.get("outlets"))
+            print(outlet_data)
+
+            for outlet in outlet_data:
+                outlet_id = outlet['outlet_id']
+                outlet_name = outlet['outlet_name']
+                print(outlet_id)
+                if outlet_id:
+                    outlet_object = Outlet.objects.get(pk=outlet_id)
+                    print(outlet_id)
+                    if outlet_name == 'delete':
+                        outlet_object.delete()
+                        outlet_object.save()
+                    else:
+                        outlet_object.outlet_name = outlet_name
+                        outlet_object.save()
+                else:
+                    print('pass')
+                    Outlet.objects.create(outlet_name=outlet_name)
+            response = {}
+            response['status'] = True
+            response['msg'] = "Form submitted."
+            response['url'] = reverse('orders')
+
+            # return dict to ajax
+            return JsonResponse(response)  
+
+    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, "outlet_data": outlet_data, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count})
     
 
 # search and filter product
@@ -946,12 +1199,14 @@ def reports(request):
             table_data = []
             for product in products:
                 difference = product.retail_price - product.calc_price
+                days_since_last_update = (timezone.now().date() - product.last_update).days
                 table_data.append({
                     'product_pk': product.pk,
                     'product_name': product.name.title(),
                     'product_retailprice': product.retail_price,
                     'product_calcprice': product.calc_price,
                     'product_difference': difference,
+                    'product_dayslastupdate': days_since_last_update,
                 })
             
             # Sort table_data by product_difference
@@ -961,10 +1216,6 @@ def reports(request):
         elif reptype == 'shopping_list':
             return redirect('shopping_list_reports')  
     return render(request, 'CLEAR/reports.html')
-
-
-
-
 
 
 @login_required(login_url="/login")

@@ -47,9 +47,7 @@ Filter
                                 data-target="#editord-modal{{order_data.order.pk}}" 
                                 style="border-radius: 30px;">Edit</button> </td>
                         </tr>
-                    {% endfor %}
-
-                        
+                    {% endfor %}  
                 </tbody>
             </table>
         </div>
@@ -1015,7 +1013,12 @@ $(document).ready(function() {
         }
 });
 
-
+window.onload = function () {
+    const dateInput = document.querySelector('.file_date');
+    if (!dateInput.value) { // Check if there's no initial value
+        dateInput.value = new Date().toISOString().slice(0, 10);
+    }
+};
 </script>
 
 
