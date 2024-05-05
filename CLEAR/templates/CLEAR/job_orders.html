@@ -96,6 +96,7 @@ Filter
                             </div>
                         </div>
                         <div class="row mt-5" style="display: flex; justify-content: center;">
+                            <div class="col">
                                 <div class="orderItemContainer pl-3 pr-3" id="orderItemContainer{{order_data.order.pk}}" style="height:250px; overflow-y:scroll;">
                                 {% for item_data in order_data.items %}
                                     <div class="orderItem_instance" id="{{order_data.order.pk}}orderItem_instance{{forloop.counter}}">
@@ -172,11 +173,13 @@ Filter
                                     </div>
                                 {% endfor %}
                                 </div>
+
+                                <div class="row" style="display: flexbox; justify-content: center;">
+                                    <button type="button" class="addItem_edit btn dark-button x-button mt-1 ml-1 mb-5" data-order-id="{{order_data.order.pk}}"
+                                        data-counter="{{order_data.item_count}}">Add Item</button>
+                                </div>
                             </div>
-                            <div class="row" style="display: flexbox; justify-content: center;">
-                                <button type="button" class="addItem_edit btn dark-button x-button mt-1 ml-1 mb-5" data-order-id="{{order_data.order.pk}}"
-                                    data-counter="{{order_data.item_count}}">Add Item</button>
-                            </div>
+                        </div>
                             <div class="row" style="display: flex; justify-content: center;">
                                 <div class="col-5">
                                     <label for="status">Job Order Status</label>
