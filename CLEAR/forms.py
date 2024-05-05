@@ -3,10 +3,11 @@ from django.db import models
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import DateInput
+from .models import Account
 
 class RegisterForm(UserCreationForm):
-    CHOICES = [('owner', 'Owner'), ('product_manager', 'Product Manager')]
-    role = forms.ChoiceField(choices=CHOICES, required=True)
+    ROLE_CHOICES = [('Owner', 'Owner'), ('Product Manager', 'Product Manager')]
+    role = forms.ChoiceField(choices=ROLE_CHOICES, required=True)
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)
 

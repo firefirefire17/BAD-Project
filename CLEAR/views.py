@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Financial_Value, MaterialKey, Outlet
+from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Financial_Value, MaterialKey, Outlet, Account
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import RegisterForm, LoginForm
@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.functions import Cast
-from .decorators import owner_required, product_manager_required
+from .decorators import owner_required
+from django.contrib.auth.models import User
 
 from datetime import datetime, timedelta
 import pandas as pd
@@ -906,6 +907,7 @@ def job_orders(request):
 
 
 @login_required(login_url="/login")
+@owner_required
 def reports(request):
     print(request.POST)
     order_objects = Job_Order.objects.all()
@@ -1210,7 +1212,9 @@ def sign_up(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            role = form.cleaned_data['role']
+            account = Account.objects.create(user=user, role=role)
             return redirect('login')
 
     else:

@@ -2,6 +2,7 @@ from django.db import models, transaction
 from django.db.models.functions import Now
 from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator
 from django.db import models
+from django.contrib.auth.models import User
 import hashlib
 
 # Create your models here.
@@ -329,8 +330,7 @@ class Financial_Value(models.Model):
     value = models.IntegerField()
 
 class Account(models.Model):
-    username = models.CharField(max_length=50)
-    password = models.IntegerField()
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     ROLE_OWNER = 'Owner'
     ROLE_PRODUCT_MANAGER = 'Product Manager'
     ROLE_CHOICES = [
@@ -338,6 +338,9 @@ class Account(models.Model):
         (ROLE_PRODUCT_MANAGER, 'Product Manager'),
     ]
     role = models.CharField(max_length=50, choices=ROLE_CHOICES)
+
+    def __str__(self):
+        return self.user.username
 
 # function used in products to get cost of a product component
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost, buffer):
