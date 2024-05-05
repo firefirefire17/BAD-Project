@@ -594,7 +594,7 @@ def search_joborders(request):
 
 @login_required(login_url="/login")
 def job_orders(request):
-    product_objects = Product.objects.all()
+    product_objects = Product.objects.all().exclude(name="test_product_test_product_test")
     textile_objects = Textile.objects.all()
     accessory_objects = Accessory.objects.all()
     outlet_objects = Outlet.objects.all()
@@ -1142,8 +1142,8 @@ def dynamic_pricing(request):
 
             print(calc_price)
 
-        if response['status'] == False:
-            raise Exception("An error has occured during the transaction")
+            if response['status'] == False:
+                raise Exception("An error has occured during the transaction")
     except:
         print('failed')
         calc_price = ""
