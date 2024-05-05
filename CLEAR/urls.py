@@ -39,5 +39,8 @@ urlpatterns = [
     path('search_joborders', views.search_joborders, name="search_joborders"),
     path('chart_data/', views.chart_data, name='chart_data'),
     path('filter_stock_in/', views.filter_stock_in, name="filter_stock_in"),
+    path('manage_accounts/', views.manage_accounts, name="manage_accounts"),
+    path('delete_user/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('search_users/', views.search_users, name='search_users'),
 ]
 

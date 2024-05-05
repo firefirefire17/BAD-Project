@@ -1234,6 +1234,14 @@ def stock_in(request):
 
     return render(request, 'CLEAR/stock_in.html', {'textiles':textile_objects, 'accessories': accessory_objects, 'stock_ins':stockIn_material_list, 'job_orders': order_objects})
 
+
+@login_required(login_url="/login")
+@owner_required
+def manage_accounts(request):
+    account_objects = Account.objects.all()
+
+    return render(request, 'CLEAR/manage_accounts.html', {'account_objects' : account_objects})
+
 def sign_up(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -1263,8 +1271,45 @@ def login_view(request):
 
     return render(request, 'registration/login.html', {'form': form})
 
+
+def delete_user(request, user_id):
+    if request.method == 'POST':
+        user = User.objects.get(pk=user_id)
+        user.delete()
+
+    return redirect('manage_accounts') 
+
+
+def search_users(request):
+    account_objects = Account.objects.all()
+    search_query = request.GET.get('q')
+
+    if search_query:
+        account_objects = account_objects.filter(
+            Q(user__username__icontains=search_query) |
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(role__icontains=search_query)
+        )
+
+        table_data = []
+        for account in account_objects:
+            table_data.append({
+                'user_pk': account.user.pk,
+                'username': account.user.username,
+                'first_name': account.user.first_name,
+                'last_name': account.user.last_name,
+                'role': account.role
+            })
+    return JsonResponse({'table_data': table_data})
+
+
+
+
 def logout_view(request):
-    return render(request, 'registration/login.html')
+    logout(request)
+    return redirect('login')
+
 
 def get_material_options(request): # function used to change materials in stock-in upon material type change 
     material_type = request.GET.get('material_type') 

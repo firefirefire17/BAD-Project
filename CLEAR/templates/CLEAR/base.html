@@ -91,7 +91,19 @@
                                 class="nav-link text-white {% if 'reports' in request.path %} active {% endif %}"> 
                                 Reports 
                             </a> 
-                        </li> 
+                        </li>
+                        <li class="nav-item pb-3"> 
+                            <a id="navbars" href="{% url 'manage_accounts' %}"
+                                class="nav-link text-white {% if 'manage_accounts' in request.path %} active {% endif %}"> 
+                                Manage Accounts
+                            </a> 
+                        </li>  
+                        <li class="nav-item pb-3"> 
+                            <a id="navbars" href="{% url 'logout' %}"
+                                class="nav-link text-white {% if 'logout' in request.path %} active {% endif %}"> 
+                                Log Out
+                            </a> 
+                        </li>  
                     </ul> 
                 </div> 
             </div>

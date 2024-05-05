@@ -35,9 +35,9 @@
             <h5 style="color: #FF0000;"> {{error_message}}</h5>
         {%endif%}
         <div class="table-responsive card"
-            style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
-            <table id="materialTable" class="table table-hover table-striped" style="border-radius: 40px;">
-                <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
+        style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
+        <table id="materialTable" class="table table-hover table-striped" style="border-radius: 40px;">
+            <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Material # </th>
                     <th scope="col"> Name</th>
                     <th scope="col"> Material Type </th>
@@ -375,7 +375,6 @@
                 },
                 success: function(response) {
                     console.log("AJAX request successful.");
-                    $('#materialTable tbody').empty();
                     updateTable(response.table_data);
                 },
                 error: function(xhr, status, error) {
