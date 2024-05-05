@@ -160,6 +160,9 @@ class Job_Order(models.Model):
                     'type': 'textile',
                     'qty': final_quantity*order_itemQty,
                 } 
+                print(final_quantity)
+                print(order_itemQty)
+                print(temp['qty'])
                 qty_list.append(temp)
 
             
@@ -171,7 +174,11 @@ class Job_Order(models.Model):
                     'type': 'accessory',
                     'qty': quantity*order_itemQty,
                 } 
+                print(quantity)
+                print(order_itemQty)
+                print(temp['qty'])
                 qty_list.append(temp)
+                print(temp)
 
             if item.type == "bespoke":  
                 for item_accessory in item.item_accessory_set.all():
@@ -217,7 +224,6 @@ class Job_Order(models.Model):
                         accessory.save()
                     else:
                         insufficient_stock = True
-                print('pass1')
             if insufficient_stock:
                 print('insufficient')
                 raise InsufficientStockError

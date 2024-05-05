@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.functions import Cast
 
 from datetime import datetime, timedelta
 import pandas as pd
@@ -953,6 +954,8 @@ def job_orders(request):
                         
                         existing_item = new_item.is_duplicate()
                         print(existing_item)
+
+                        quantity = item['quantity']
                         if not existing_item:
                             print('pass')
                             Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
@@ -1030,6 +1033,7 @@ def job_orders(request):
                     
                     existing_item = new_item.is_duplicate()
                     print(existing_item)
+                    quantity = item['quantity']
                     if not existing_item:
                         print('pass')
                         Order_Item.objects.create(order=order, item=new_item, quantity=quantity)
@@ -1191,14 +1195,27 @@ def reports(request):
             print(regular_count)
             return render(request, 'CLEAR/production_report.html', {'orders': order_list})  
         elif reptype == 'pricing':
-            return redirect('pricing_reports')
+            products = Product.objects.exclude(name="test_product_test_product_test")
+            table_data = []
+            for product in products:
+                difference = product.retail_price - product.calc_price
+                days_since_last_update = (timezone.now().date() - product.last_update).days
+                table_data.append({
+                    'product_pk': product.pk,
+                    'product_name': product.name.title(),
+                    'product_retailprice': product.retail_price,
+                    'product_calcprice': product.calc_price,
+                    'product_difference': difference,
+                    'product_dayslastupdate': days_since_last_update,
+                })
+            
+            # Sort table_data by product_difference
+            table_data_sorted = sorted(table_data, key=lambda x: x['product_difference'])
+            
+            return render(request, 'CLEAR/pricing_report.html', {'table_data': table_data_sorted})
         elif reptype == 'shopping_list':
             return redirect('shopping_list_reports')  
     return render(request, 'CLEAR/reports.html')
-
-
-
-
 
 
 @login_required(login_url="/login")
