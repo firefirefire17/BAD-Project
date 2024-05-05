@@ -23,6 +23,14 @@ from django.template.defaultfilters import date as django_date
 
 import json
 
+def chart_data(request):
+    outlet_objects = Outlet.objects.all()
+    outlet_data = []
+    for outlet in outlet_objects:
+        job_order_count = outlet.job_order_set.count()
+        outlet_data.append({"y": job_order_count, "label": outlet.outlet_name})
+
+    return JsonResponse(outlet_data, safe=False)
 # Create your views here.
 @login_required(login_url="/login") # this is to restrict access if not logged in
 def dashboard(request): 
@@ -69,16 +77,9 @@ def dashboard(request):
         vat = vat_object.value
     except:
         vat_object = False
-
-    #per branch
-    outlet_objects = Outlet.objects.all()
-    outlet_data = []
-    for outlet in outlet_objects:
-        job_order_count = outlet.job_order_set.count()
-        outlet_data.append({"y": job_order_count, "label": outlet.outlet_name})
     
 
-    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, "outlet_data": outlet_data, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
+    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
     
 
 # search and filter product
@@ -490,9 +491,6 @@ def materials(request):
                 unit = unit + "s"
 
         material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
-
-        
-        
 
     if(request.method=="POST"):
         material_key = request.POST.get("material_key")

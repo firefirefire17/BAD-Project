@@ -145,22 +145,19 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <div class="card" style="border-radius: 20px;">
-                    <div class="card-body">
-                        <h5 class="card-title">Card 1</h5>
-                        <p class="card-text">{{outlet_data}}</p>
+            <div class="row">
+                <div class="col">
+                    <div class="card" style="border-radius: 20px;">
+                        <div class="card-body">
+                            <canvas id="myChart"></canvas>
+                        </div>
                     </div>
-                </div>
-            </div>
-    
                 </div>
             </div>
         </div>
     </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const currentTimeElement = document.getElementById("current-time");
 
@@ -184,5 +181,40 @@
 
         updateTime();
         setInterval(updateTime, 1000); // Update every second
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/chart_data/')
+                .then(response => response.json())
+                .then(data => {
+                    var ctx = document.getElementById('myChart').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(item => item.label),
+                            datasets: [{
+                                label: 'Job Order Count',
+                                data: data.map(item => item.y),
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Fetch error:", error);
+                });
+        });
+
+
 </script>
 {% endblock %}
