@@ -97,7 +97,7 @@
                                             <select class="product_textile input-select dynamic_pricing" data-product-pk="{{product_data.product.pk}}" id="{{product_data.product.pk}}product_textile{{forloop.counter}}">
                                                 <option value="delete">None</option>
                                                 {% for z in textiles %}
-                                                <option value="{{z.material_key.material_key}}" {% if z.material_key.material_key == textile_buffer.textile.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                <option value="{{z.material_key.material_key}}" {% if z.material_key.material_key == textile_buffer.textile.material_key.material_key %} selected {% endif %}>{{z.name|title}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -208,7 +208,7 @@
                                             <select class="product_accessory input-select" id="{{product_data.product.pk}}product_accessory{{forloop.counter}}">
                                                 <option value="delete">None</option>
                                                 {% for z in accessories %}
-                                                <option value="{{z.material_key.material_key}}" {% if z.material_key.material_key == accessory_data.accessory.material_key.material_key %}selected{% endif %}>{{z.name}}</option>
+                                                <option value="{{z.material_key.material_key}}" {% if z.material_key.material_key == accessory_data.accessory.material_key.material_key %}selected{% endif %}>{{z.name|title}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -445,7 +445,7 @@
                                     <select class="product_textile input-select dynamic_pricing" data-product-pk="" name="product_textile">
                                         <option value="delete">None</option>
                                         {% for z in textiles %}
-                                        <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+                                        <option value="{{z.material_key.material_key}}">{{z.name|title}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -479,7 +479,7 @@
                                     <select class="product_accessory input-select dynamic_pricing" data-product-pk="" name="product_accessory">
                                         <option value="delete">None</option>
                                         {% for z in accessories %}
-                                        <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+                                        <option value="{{z.material_key.material_key}}">{{z.name|title}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -518,7 +518,7 @@
 
             <div class="editTextileContainer">
                 <div class="modal-overlap-container fade-in" id="editTextile1">
-                    <div class="modal-overlap-content" style="width:50%; margin:10% auto;">
+                    <div class="modal-overlap-content" style="width:50%; margin:14% auto;">
                         <div class="container-fluid">
                             <div class="row" style="display: flexbox; justify-content: space-between;">
                                 <h4 style="text-align: text-left;"> Edit Textile Quantity</h4>
@@ -632,7 +632,7 @@
         <select class="product_textile input-select dynamic_pricing" data-product-pk=""  name="product_textile">
             <option value="delete">None</option>
             {% for z in textiles %}
-            <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+            <option value="{{z.material_key.material_key}}">{{z.name|title}}</option>
             {% endfor %}
         </select>
     </div>
@@ -655,7 +655,7 @@
         <select class="product_accessory input-select dynamic_pricing" data-product-pk="" name="product_accessory">
             <option value="delete">None</option>
             {% for z in accessories %}
-            <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+            <option value="{{z.material_key.material_key}}">{{z.name|title}}</option>
             {% endfor %}
         </select>
     </div>
