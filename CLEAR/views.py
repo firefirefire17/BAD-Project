@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Financial_Value, MaterialKey, Outlet
-from django.contrib.auth import authenticate, login, logout
+from .models import Textile, Accessory, Product, Product_Accessory, Component, Product_Component, Job_Order, Item, Item_Accessory, Item_Textile, Order_Item, StockIn, StockIn_Accessory, StockIn_Textile, Financial_Value, MaterialKey, Outlet, Account
 from django.contrib import messages
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse, FileResponse
+from django.http import JsonResponse, HttpResponse, FileResponse, HttpResponseForbidden
 from django.urls import reverse
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Q
+from .decorators import owner_required, product_manager_required
 
 import pandas as pd
 import io
@@ -26,6 +26,8 @@ import json
 
 # Create your views here.
 @login_required(login_url="/login") # this is to restrict access if not logged in
+@owner_required # requires owner role  [put this back once frontend is done]
+@product_manager_required # requires pm role
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
     
@@ -1022,7 +1024,11 @@ def sign_up(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            username = form.cleaned_data['username']
+            password1 = form.cleaned_data['password1']
+            role = form.cleaned_data['role']
+
+            user = Account.objects.create(username=username) # continue
             return redirect('login')
 
     else:
@@ -1255,4 +1261,3 @@ def save_pdf(pdf_bytes, output_filename):
     # Write PDF bytes to a file
     with open(output_filename, 'wb') as f:
         f.write(pdf_bytes)
-
