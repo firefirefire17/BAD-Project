@@ -40,25 +40,18 @@
                 <hr>
                 <div class="nav-item pb-3 profile" style="margin-bottom: 5px;">
                     <a href="#" class="nav-link text-white">
-                        <div class="text-left">
-                            <div class="row">
-                                <img class="pfp"
-                                    src="https://steamuserimages-a.akamaihd.net/ugc/98349535606942829/A061B4B921243C2CF7608D1C53BAD46530C0605E/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false">
-                                <div class="col-sm-7">
-                                    <p style="margin-bottom: 0; margin-left: 0; margin-top: -1.5px;"><b>
-                                        {% if user.is_authenticated %} 
-                                        {{ user.first_name }}
-                                    {% else %}
-                                        No Name
-                                    {% endif %}
-                                    </b></p>
-                                    <p style="margin:0; font-size: 11px; color: #cecece;">Product Manager</p>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                    <a href="{% url 'logout' %}"
-                        style="font-size: 14px; margin-left: 44%; background: none; color: white; padding-left: 0px;">Log Out</a>
+                        <p style="margin-bottom: 0;"><b>
+                                {% if user.is_authenticated %}
+                                {{ user.first_name }}
+                                {% else %}
+                                No Name
+                                {% endif %}
+                            </b></p>
+                        <p style="margin: 0; font-size: 11px; color: #cecece; margin-bottom: 15px;">Product Manager</p>
+                            <a href="{% url 'logout' %}" class="btn btn-link"
+                                style="font-size: 14px; color: #cecece; text-decoration: none; margin-left: 3px;">Log Out</a>
+
+                        </a>
                 </div>
                 <div class="mt-5"> 
                     <ul style="list-style-type: none; margin-top: 5%; padding: 0;"> 
