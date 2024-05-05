@@ -71,7 +71,7 @@
                     {% for material_data in materials %}
                         <tr style="height:70px;">
                             <td> {{ material_data.pk }} </td>
-                            <td> {{ material_data.name }} </td>
+                            <td> {{ material_data.name|title }} </td>
                             <td> {{ material_data.type|title }} </td>
                             <td> {{ material_data.stock|floatformat:2 }} {{material_data.unit}}</td>
                             <td> {{ material_data.cost }} </td>

@@ -700,6 +700,8 @@ def job_orders(request):
                         
                         existing_item = new_item.is_duplicate()
                         print(existing_item)
+
+                        quantity = item['quantity']
                         if not existing_item:
                             print('pass')
                             Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
@@ -777,6 +779,7 @@ def job_orders(request):
                     
                     existing_item = new_item.is_duplicate()
                     print(existing_item)
+                    quantity = item['quantity']
                     if not existing_item:
                         print('pass')
                         Order_Item.objects.create(order=order, item=new_item, quantity=quantity)

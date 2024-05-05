@@ -38,8 +38,8 @@ Filter
                     {% for order_data in orders %}
                         <tr style="height:70px;">
                             <td> {{ order_data.order.pk }} </td>
-                            <td> {{ order_data.order.customer}} </td>
-                            <td> {{ order_data.order.outlet.outlet_name }}</td>
+                            <td> {{ order_data.order.customer|title}} </td>
+                            <td> {{ order_data.order.outlet.outlet_name|title }}</td>
                             <td> {{ order_data.file_date }} </td>
                             <td> {{ order_data.status|title }} </td>
                             <td> {{ order_data.completion_date }}</td>
@@ -141,12 +141,12 @@ Filter
                                                         <option value="delete"> {{material_data.type}} </option>
                                                         {% if material_data.type == 'textile' %}
                                                             {% for z in textiles %}
-                                                            <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name|title}}</option>
                                                             {% endfor %}
 
                                                         {% elif material_data.type == 'accessory' %}
                                                             {% for z in accessories %}
-                                                            <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name}}</option>
+                                                            <option value="{{z.material_key.material_key}}" {% if material_data.material.material_key.material_key == z.material_key.material_key %} selected {% endif %}>{{z.name|title}}</option>
                                                             {% endfor %}
                                                         {% endif %}
                                                     </select>
@@ -494,7 +494,7 @@ Filter
             <select class="order_item input-select" id="order_item1">
                 <option value="delete">None</option>
                 {% for z in products %}
-                <option value="{{z.pk}}">{{z.name}}</option>
+                <option value="{{z.pk}}">{{z.name|title}}</option>
                 {% endfor %}
             </select>
         </div>
@@ -533,7 +533,7 @@ Filter
         <select class="item_material input-select" id="item_material">
             <option value="delete"> None </option>
             {% for z in textiles %}
-            <option value="{{z.material_key.material_key}}">{{z.name}}</option>
+            <option value="{{z.material_key.material_key}}">{{z.name|title}}</option>
             {% endfor %}
         </select>
     </div>
