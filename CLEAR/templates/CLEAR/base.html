@@ -119,23 +119,37 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form method="POST" action="{% url 'reports' %}"> {% csrf_token %}
+                <form method="POST"> {% csrf_token %} 
                     <div class="modal-body ml-4">
                         <div class="row" style="display: flexbox; align-items: baseline;">
                             <label for="reptype">Report type</label>
-                            <select class="reptype input-select" name="reptype" style="width: 150px; border-radius: 100px; margin-left: 20px;">
+                            <select class="reptype input-select" name="reptype" style="width: 150px; border-radius: 100px; margin-left: 20px; margin-bottom: 5px;">
                                 <option value="materials">Materials</option>
                                 <option value="production">Production</option>
                                 <option value="pricing">Pricing</option>
                                 <option value="shopping_list">Shopping List</option>
                             </select>
                         </div>
-                        <div class="editContainer">
+                        <div id="production_input" style="display:none;">
+                            <div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">
+                                <label for="startDate">Start Date</label>
+                                <input type="date" name="start_date" class="start_date form-control" style="width: 150px; border-radius: 100px; margin-left: 35px;">
+                            </div>
+                            <div class="row">
+                                <label for="endDate">End Date</label>
+                                <input type="date" name="end_date" class="end_date form-control" style="width: 150px; border-radius: 100px; margin-left: 40px;">
+                            </div>
+                        </div>
+                        <div id="shoplist_input" style="display:none;">
+                            <div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">
+                                <label for="startDate">Start Date</label>
+                                <input type="date" class="start_date form-control" style="width: 150px; border-radius: 100px; margin-left: 35px;">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer" style="display: flexbox; justify-content: space-between;">
                         <button type="button" class="btn dark-button" style="border-radius: 100px;" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn dark-button" >Generate</button>
+                        <button type="button" class="btn dark-button submit-btn" data-csrf="{% csrf_token %}">Generate</button>
                     </div>
                 </form>
             </div>
@@ -163,16 +177,6 @@
             </div>
         </div>
     </div>
-<div id="production_input" style="display:hidden;">
-    <div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">
-        <label for="reportDate">Date</label>
-        <input type="date" class="last_update form-control" style="width: 150px; border-radius: 100px; margin-left: 70px;">
-    </div>
-    <div class="row">
-        <label for="reportDate">Date</label>
-        <input type="date" class="last_update form-control" style="width: 150px; border-radius: 100px; margin-left: 70px;">
-    </div>
-</div>
     <script>
 
 
@@ -198,21 +202,80 @@
             rowElement.style.display = 'none';
         }
         $(document).ready(function() {
-            const editContainer = $('.editContainer');
+            const production_input = $('#production_input');
+            const shoplist_input = $('#shoplist_input');
+            const reptype = $('.reptype');
+            const start_date = $('.start_date');
+            const end_date = $('.end_date');
+            const jobord_container = $('#jobOrderContainer')
             $(document).on('change', '.reptype', function() {
                 console.log('pass');
-                let reptype = $(this).val();
+                let reptype_val = reptype.val();
         
                 if (reptype == "production") {
-                    editContainer.empty(); 
-                    editContainer.append();
+                    production_input.show(); 
+                    shoplist_input.hide();
                 } else if (reptype == "shopping_list") {
-                    editContainer.empty();
-                    editContainer.append('<div>Shopping list here</div>');
+                    production_input.hide();
+                    shoplist_input.show();
                 } else {
-                    editContainer.empty();
+                    production_input.hide();
+                    shoplist_input.hide()
                 }
             });
+            $(document).on('click', '.submit-btn', function() {
+                let reptype_val = reptype.val();
+                let csrf_token = $(this).data('csrf')
+
+                submit_data = {
+                    'reptype': reptype.val(),
+                    'start_date': start_date.val(),
+                    'end_date': end_date.val(),
+                }
+
+                $.ajax({
+                    method: "post",
+                    data: submit_data,
+                    success: function(data){
+                        console.log(data["status"])
+                        console.log(data)
+                        if (data["status"]){
+                            // redirect to returned url
+                            window.location = data["url"];
+                        } else{
+                            // controlled error, display message
+                            alert(data["error"]);
+                        }
+                    },
+                    error: function(xhr, textStatus, errorThrown){
+                        // Basic `xhr.status` Key
+                        // 0    = Server didn't Reply (Server Down)
+                        // 400  = Bad Request         (Syntax Error)
+                        // 403  = Forbidden           (Login Token Expired)
+                        // 403  = Not Found           (Invalid Url)
+                        // 500  = Server Error        (Django Crash)
+                        alert("something broke")  // uncontrolled error
+                    }
+                    beforeSend: function(xhr) {
+                        // Set the URL based on reptype
+                        let url;
+                        if (reptype_val === 'materials') {
+                            url = '/material_report/';
+                        } else if (reptype_val === 'production') {
+                            url = '/production_reports/';
+                        } else if (reptype_val === 'pricing') {
+                            url = '/pricing_reports/';
+                        } else if (reptype_val === 'shopping_list') {
+                            url = '/shopping_list_reports/';
+                        }
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}'); // Ensure CSRF token is set
+                        xhr.open("POST", url, true);
+                    }
+                });
+
+            })
         });
 
     </script>
