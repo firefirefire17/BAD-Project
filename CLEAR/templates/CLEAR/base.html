@@ -209,10 +209,10 @@
                 console.log('pass');
                 let reptype_val = reptype.val();
         
-                if (reptype == "production") {
+                if (reptype_val == "production") {
                     production_input.show(); 
                     shoplist_input.hide();
-                } else if (reptype == "shopping_list") {
+                } else if (reptype_val == "shopping_list") {
                     production_input.hide();
                     shoplist_input.show();
                 } else {
