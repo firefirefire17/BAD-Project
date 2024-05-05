@@ -15,8 +15,11 @@
 </head>
 <script src="{% static 'design.js' %}"></script>
 
+{% block navbar %}
 
-    
+{% endblock %}
+
+
 {% block content %}
         <!-- Your content here -->
         <div class="row pb-4 pt-3 ">
@@ -201,6 +204,11 @@
                             }]
                         },
                         options: {
+                            plugins: {
+                                legend: {
+                                    display: false,
+                                }
+                            },
                             scales: {
                                 y: {
                                     beginAtZero: true,
@@ -216,6 +224,7 @@
                     console.error("Fetch error:", error);
                 });
         });
+
 
 
 </script>
