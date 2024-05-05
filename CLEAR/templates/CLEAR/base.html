@@ -43,6 +43,7 @@
                         <p style="margin-bottom: 0;"><b>
                                 {% if user.is_authenticated %}
                                 {{ user.first_name }}
+                                {{user.last_name}}
                                 {% else %}
                                 No Name
                                 {% endif %}
