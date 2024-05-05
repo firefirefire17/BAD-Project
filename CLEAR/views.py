@@ -34,6 +34,28 @@ def dashboard(request):
     outlet_count = len(outlet_objects)
     order_list = []
 
+    textile_objects = Textile.objects.all()
+    accessory_objects = Accessory.objects.all()
+    material_objects = []
+    
+    for textile in textile_objects:
+        unit = textile.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        material_objects.append({'type': 'textile', 'material': textile, 'unit': unit})
+
+    for accessory in accessory_objects:
+        unit = accessory.get_unit_display()
+        unit = unit.removeprefix("per ")
+
+        if accessory.stock > 1:
+            if unit == 'inch':
+                unit = unit + "es"
+            else:
+                unit = unit + "s"
+
+        material_objects.append({'type': 'accessory', 'material': accessory, 'unit': unit})
+
     try:
         wage_object = Financial_Value.objects.get(name="labor_wage")
         wage = wage_object.value
@@ -279,7 +301,7 @@ def dashboard(request):
             # return dict to ajax
             return JsonResponse(response)  
 
-    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, "outlet_data": outlet_data, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count})
+    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, "outlet_data": outlet_data, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
     
 
 # search and filter product
