@@ -142,8 +142,10 @@
                         </div>
                         <div id="shoplist_input" style="display:none;">
                             <div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">
-                                <label for="startDate">Start Date</label>
-                                <input type="date" class="start_date form-control" style="width: 150px; border-radius: 100px; margin-left: 35px;">
+                                <div class="jobOrderContainer">
+                                    {% block order_filter %}
+                                    {% endblock %}
+                                </div>
                             </div>
                         </div>
                     </div>

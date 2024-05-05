@@ -98,11 +98,11 @@
                                 </thead>
                                 {% for order_data in orders %}
                                 <tbody>
-                                    {% if order_data.status|title == "In-Queue" %}
+                                    {% if order_data.order_status|title == "In-Queue" %}
                                     <tr style="height:70px;">
-                                        <td> {{ order_data.order.pk }} </td>
-                                        <td> {{ order_data.order.customer}} </td>
-                                        <td> {{ order_data.order.outlet.outlet_name }}</td>
+                                        <td> {{ order_data.pk }} </td>
+                                        <td> {{ order_data.customer}} </td>
+                                        <td> {{ order_data.outlet.outlet_name }}</td>
                                         <td> {{ order_data.file_date }} </td>
                                     </tr>
                                     {% endif %}
@@ -121,7 +121,7 @@
                         <div class="table-responsive"
                             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 80%; margin-bottom: 13px;">
                             <table id="materialTable" class="table table-hover table-striped">
-                                <thead class="table sticky-top table-hover table-striped"">
+                                <thead class="table sticky-top table-hover table-striped">
                                     <th scope="col" style="border: 0;"> Order # </th>
                                     <th scope="col" style="border: 0;"> Customer </th>
                                     <th scope="col" style="border: 0;"> Outlet Name </th>
@@ -129,11 +129,11 @@
                                 </thead>
                                 {% for order_data in orders %}
                                 <tbody>
-                                {% if order_data.status|title == "In-Progress" %}
+                                {% if order_data.order_status|title == "In-Progress" %}
                                 <tr style="height:70px;">
-                                    <td> {{ order_data.order.pk }} </td>
-                                    <td> {{ order_data.order.customer}} </td>
-                                    <td> {{ order_data.order.outlet.outlet_name }}</td>
+                                    <td> {{ order_data.pk }} </td>
+                                    <td> {{ order_data.customer}} </td>
+                                    <td> {{ order_data.outlet.outlet_name }}</td>
                                     <td> {{ order_data.file_date }} </td>
                                 </tr>
                                 {% endif %}
@@ -160,7 +160,10 @@
         </div>
     </div>
 
-
+{% block order_filter %}
+{% for order in job_order %}
+{% endfor %}
+{% endblock %}
 <script>
     const currentTimeElement = document.getElementById("current-time");
 

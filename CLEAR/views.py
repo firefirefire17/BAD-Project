@@ -79,7 +79,7 @@ def dashboard(request):
         outlet_data.append({"y": job_order_count, "label": outlet.outlet_name})
     
 
-    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, "outlet_data": outlet_data, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
+    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, "outlet_data": outlet_data, 'orders':order_objects, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
     
 
 # search and filter product
