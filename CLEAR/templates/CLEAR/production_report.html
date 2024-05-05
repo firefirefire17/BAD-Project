@@ -12,45 +12,50 @@
 {% block content %}
 <div class="row pb-2 pt-4">
     <div class="col" style="margin: 0px 30px 0px 30px">
-        <div class="card" style="height:150px;">
+        <div class="card" style="height:130px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center;">
             <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
                 <div class="m-0">     
                     <p class="m-0" style="font-size: 80px;"> {{material_count}} </p>
                 </div>
                 <div class="m-0">
-                    <p class="m-0" style="font-size: 20px;">Total Materials</p>
+                    <p class="m-0" style="font-size: 20px; color: gray;">Total Materials</p>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="col" style="margin: 0px 30px 0px 30px">
-        <div class="card" style="height:150px;">
+        <div class="card" style="height:130px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center;">
             <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
                 <div class="m-0">     
-                    <p class="m-0" style="font-size: 80px;"> {{stocked}} </p>
+                    <p class="m-0" style="font-size: 60px;"> {{stocked}} </p>
                 </div>
                 <div class="m-0">
-                    <p class="m-0" style="font-size: 20px;">Materials In-stock</p>
+                    <p class="m-0" style="font-size: 20px; color: gray;">Materials In-stock</p>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="col" style="margin: 0px 30px 0px 30px">
-        <div class="card" style="height:150px;">
+        <div class="card" style="height:130px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center;">
             <div class="card-body d-flex flex-column align-items-center justify-content-center" style="height:150px;">
                 <div class="m-0">     
-                    <p class="m-0" style="font-size: 80px;"> {{unstocked}} </p>
+                    {% if unstocked == 0 %}
+                        <p class="m-0" style="font-size: 60px; color: gray;"> {{unstocked}} </p>
+                    {% endif %}
+                    {% if unstocked > 0 %}
+                        <p class="m-0" style="font-size: 60px; color: rgb(115, 15, 15);"> {{unstocked}} </p>
+                    {% endif %}
                 </div>
                 <div class="m-0">
-                    <p class="m-0" style="font-size: 20px;">Materials Out-of-stock</p>
+                    <p class="m-0" style="font-size: 20px; color: gray;">Materials Out-of-stock</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div class="row pl-3 pt-3 pr-3" style="height:700px;">
+<div class="row pl-3 pt-3 pr-3" style="height:68%">
     <div class="card main-card">
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
@@ -77,7 +82,7 @@
         </div>
         <div class="row" style="margin-right: 15px;">
             <div class="col-2 ml-auto">
-                <button type="button" class="btn light-button download_button">
+                <button type="button" class="btn light-button download_button" style="display: flex; justify-content: right; margin-bottom: 15px;">
                     Download
                 </button>
             </div>
