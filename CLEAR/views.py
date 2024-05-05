@@ -1202,11 +1202,15 @@ def reports(request):
                         regular_count += 1
                     item_data['item_count'] = len(item_data['materials']) 
                     order_data['items'].append(item_data) 
-                    order_data['total_price'] += order_item.item.cost
+
+                    if order_item.item.cost:
+                        order_data['total_price'] += order_item.item.cost
                 order_data['item_count'] = len(order_data['items']) 
                 order_list.append(order_data) 
-            
-            order_list = sorted(order_list, key=lambda x: x['duration'])
+            try:
+                order_list = sorted(order_list, key=lambda x: x['duration'])
+            except:
+                pass
 
             if order_list:
                 total_duration = sum(order_data["duration"] for order_data in order_list if order_data["duration"])
@@ -1220,10 +1224,12 @@ def reports(request):
             for order in order_list:
                 if start_date <= order['file_date'] <= end_date:
                     file_count += 1
-                if start_date <= order['start_date'] <= end_date:
-                    start_count += 1
-                if start_date <= order['completion_date'] <= end_date:
-                    complete_count += 1
+                if order['start_date']:
+                    if start_date <= order['start_date'] <= end_date:
+                        start_count += 1
+                if order['completion_date']:
+                    if start_date <= order['completion_date'] <= end_date:
+                        complete_count += 1
 
             return render(request, 'CLEAR/production_report.html', {'orders': order_list, 'bespoke_count': bespoke_count, 'regular_count': regular_count, 'average_duration': average_duration, 'file_count': file_count, 'start_count': start_count, 'complete_count': complete_count, 'start_date': start_date, 'end_date': end_date})  
         elif reptype == 'pricing':
