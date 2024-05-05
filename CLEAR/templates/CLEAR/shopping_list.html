@@ -19,6 +19,7 @@
                     <th scope="col">Material #</th>
                     <th scope="col">Type</th>
                     <th scope="col">Name</th>
+                    <th scope="col">Unit</th>
                     <th scope="col">Total Need</th>
                     <th scope="col">In-Stock</th>
                     <th scope="col">For Purchase</th>
@@ -172,6 +173,7 @@
                         $('<td>').text(material.pk).appendTo(row);
                         $('<td>').text(material.type).appendTo(row);
                         $('<td>').text(material.name).appendTo(row);
+                        $('<td>').text(material.unit).appendTo(row);
                         $('<td>').text(material.total_need.toFixed(2)).appendTo(row);
                         $('<td>').text(material.in_stock.toFixed(2)).appendTo(row);
                         $('<td>').text(material.to_purchase.toFixed(2)).appendTo(row);

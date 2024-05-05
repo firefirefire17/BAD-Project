@@ -1070,7 +1070,80 @@ def reports(request):
             
             return render(request, 'CLEAR/pricing_report.html', {'table_data': table_data_sorted, 'job_orders': order_objects})
         elif reptype == 'shopping_list':
-            return redirect('shopping_list_reports')  
+            order_objects = Job_Order.objects.all()
+            in_queue = [order for order in order_objects if order.order_status != 'completed' and order.order_status != 'cancelled']
+
+            pks_str = request.POST.get("pks", "")
+
+            pks_list = pks_str.split(",")
+            pks_list = [int(pk) for pk in pks_list if pk]
+            
+            response = {}
+            total_qty_list = []
+            shoplist_data = {}
+
+            if pks_list:
+                filter_ordlist = [Job_Order.objects.get(pk=pk) for pk in pks_list]
+
+                for ord in filter_ordlist:
+                    qty_list = ord.get_stocks()
+                    total_qty_list.extend(qty_list)
+
+                for qty in total_qty_list:
+                    material_id = qty['id']
+                    qty_val = qty['qty']
+
+                    if material_id in shoplist_data:
+                        shoplist_data[material_id]['total_need'] += qty_val
+                    else:
+                        shoplist_data[material_id] = {'total_need': qty_val, 'type': qty['type']}
+                
+                for material_id in shoplist_data:
+                    if shoplist_data[material_id]['type'] == 'textile':
+                        material_object = Textile.objects.get(material_key__material_key = material_id)
+                        shoplist_data[material_id]['name'] = material_object.name
+                        unit = material_object.get_unit_display()
+                        unit = unit.removeprefix("per ")
+                        shoplist_data[material_id]['unit'] = unit
+
+                    else:
+                        material_object = Accessory.objects.get(material_key__material_key = material_id)
+                        shoplist_data[material_id]['name'] = material_object.name
+                        unit = material_object.get_unit_display()
+                        unit = unit.removeprefix("per ")
+                        shoplist_data[material_id]['unit'] = unit
+                    
+                    if material_object.stock >= shoplist_data[material_id]['total_need']:
+                        shoplist_data[material_id]['in_stock'] = shoplist_data[material_id]['total_need']
+                        shoplist_data[material_id]['to_purchase'] = 0
+                    else:
+                        shoplist_data[material_id]['in_stock'] = material_object.stock
+                        shoplist_data[material_id]['to_purchase'] = shoplist_data[material_id]['total_need'] - material_object.stock
+                    
+                    shoplist_data[material_id]['total_cost'] = shoplist_data[material_id]['to_purchase']*material_object.cost
+                
+                material_list = []
+                for material_id, material_data in shoplist_data.items():
+                    info = {
+                        'pk': material_id,
+                        'type': material_data['type'],
+                        'name': material_data['name'],
+                        'unit': material_data['unit'],
+                        'total_need': material_data['total_need'],
+                        'in_stock': material_data['in_stock'],
+                        'to_purchase': material_data['to_purchase'],
+                        'total_cost': material_data['total_cost'],
+                    }
+                    material_list.append(info)
+                
+                print(material_list)
+                material_list = sorted(material_list, key=lambda x: x['to_purchase'])
+                response['data'] = material_list
+                response['pks'] = pks_list
+                return JsonResponse(response)
+        
+            return render(request, 'CLEAR/shopping_list.html', {'orders': in_queue}) 
+
     return render(request, 'CLEAR/reports.html')
 
 
@@ -1095,48 +1168,6 @@ def filter_stock_in(request):
                 })
         return JsonResponse({'table_data' : stockin_data})
 
-                    if material_id in shoplist_data:
-                        shoplist_data[material_id]['total_need'] += qty_val
-                    else:
-                        shoplist_data[material_id] = {'total_need': qty_val, 'type': qty['type']}
-                
-                for material_id in shoplist_data:
-                    if shoplist_data[material_id]['type'] == 'textile':
-                        material_object = Textile.objects.get(material_key__material_key = material_id)
-                        shoplist_data[material_id]['name'] = material_object.name
-                    else:
-                        material_object = Accessory.objects.get(material_key__material_key = material_id)
-                        shoplist_data[material_id]['name'] = material_object.name
-                    
-                    if material_object.stock >= shoplist_data[material_id]['total_need']:
-                        shoplist_data[material_id]['in_stock'] = shoplist_data[material_id]['total_need']
-                        shoplist_data[material_id]['to_purchase'] = 0
-                    else:
-                        shoplist_data[material_id]['in_stock'] = material_object.stock
-                        shoplist_data[material_id]['to_purchase'] = shoplist_data[material_id]['total_need'] - material_object.stock
-                    
-                    shoplist_data[material_id]['total_cost'] = shoplist_data[material_id]['to_purchase']*material_object.cost
-                
-                material_list = []
-                for material_id, material_data in shoplist_data.items():
-                    info = {
-                        'pk': material_id,
-                        'type': material_data['type'],
-                        'name': material_data['name'],
-                        'total_need': material_data['total_need'],
-                        'in_stock': material_data['in_stock'],
-                        'to_purchase': material_data['to_purchase'],
-                        'total_cost': material_data['total_cost'],
-                    }
-                    material_list.append(info)
-                
-                print(material_list)
-                material_list = sorted(material_list, key=lambda x: x['to_purchase'])
-                response['data'] = material_list
-                response['pks'] = pks_list
-                return JsonResponse(response)
-        
-            return render(request, 'CLEAR/shopping_list.html', {'orders': in_queue}) 
 
 @login_required(login_url="/login")
 def stock_in(request):
@@ -1603,9 +1634,15 @@ def download_shoplist(request):
             if shoplist_data[material_id]['type'] == 'textile':
                 material_object = Textile.objects.get(material_key__material_key = material_id)
                 shoplist_data[material_id]['name'] = material_object.name
+                unit = material_object.get_unit_display()
+                unit = unit.removeprefix("per ")
+                shoplist_data[material_id]['unit'] = unit
             else:
                 material_object = Accessory.objects.get(material_key__material_key = material_id)
                 shoplist_data[material_id]['name'] = material_object.name
+                unit = material_object.get_unit_display()
+                unit = unit.removeprefix("per ")
+                shoplist_data[material_id]['unit'] = unit
 
             
             if material_object.stock >= shoplist_data[material_id]['total_need']:
@@ -1623,6 +1660,7 @@ def download_shoplist(request):
                 'pk': material_id,
                 'type': material_data['type'],
                 'name': material_data['name'],
+                'unit': material_data['unit'],
                 'total_need': material_data['total_need'],
                 'in_stock': material_data['in_stock'],
                 'to_purchase': material_data['to_purchase'],
