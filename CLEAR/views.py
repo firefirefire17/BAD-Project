@@ -1231,8 +1231,7 @@ def login_view(request):
     return render(request, 'registration/login.html', {'form': form})
 
 def logout_view(request):
-    logout(request)
-    return redirect('login')
+    return redirect(request, 'login')
 
 def get_material_options(request): # function used to change materials in stock-in upon material type change 
     material_type = request.GET.get('material_type') 
