@@ -19,7 +19,7 @@
                     <th scope="col">Product #</th>
                     <th scope="col">Name</th>
                     <th scope="col">Retail Price</th>
-                    <th scope="col">Last Update</th>
+                    <th scope="col">Calculated Price</th>
                     <th scope="col">Price Difference</th>
                     <th scope="col">Days since Last Update</th>
                 </thead>
@@ -37,7 +37,31 @@
                 </tbody>
             </table>
         </div>
+        <div class="row" style="display: flex; justify-content: right; margin-bottom: 15px;">
+            <div class="col-2 ml-auto">
+                <button type="button" class="btn light-button download_button">
+                    Download
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
+<script>
+    $(document).ready(function() {
+        
+        $(".download_button").click(function() {
+            let link = $('<a href="/download_pricerep/" style="display: none;"></a>');
+    
+            // Append the link to the body
+            $('body').append(link);
+            
+            // Trigger a click event on the link
+            link[0].click();
+            
+            // Remove the link from the DOM
+            link.remove();
+        });
+    });
+</script>
 {% endblock %}

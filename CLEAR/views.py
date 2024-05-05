@@ -1259,7 +1259,7 @@ def reports(request):
             table_data = []
             for product in products:
                 difference = product.retail_price - product.calc_price
-                days_since_last_update = (timezone.now().date() - product.last_update).days
+                days_since_last_update = (product.last_update - timezone.now().date()).days
                 table_data.append({
                     'product_pk': product.pk,
                     'product_name': product.name.title(),
@@ -1554,7 +1554,7 @@ def download_matrep(request):
         unit = textile.get_unit_display()
         unit = unit.removeprefix("per ")
 
-        material_data.append({'type': 'textile', 'pk': textile.material_key.material_key, 'name': textile.name, 'cost': textile.cost, 'stock': textile.stock, 'unit': unit})
+        material_data.append({'pk': textile.material_key.material_key, 'type': 'textile', 'name': textile.name, 'cost': textile.cost, 'stock': textile.stock, 'unit': unit})
 
     for accessory in accessory_objects:
         unit = accessory.get_unit_display()
@@ -1566,10 +1566,9 @@ def download_matrep(request):
             else:
                 unit = unit + "s"
 
-        material_data.append({'type': 'accessory', 'pk': accessory.material_key.material_key, 'name': accessory.name, 'cost': accessory.cost, 'stock': accessory.stock, 'unit': unit})
+        material_data.append({'pk': accessory.material_key.material_key, 'type': 'accessory', 'name': accessory.name, 'cost': accessory.cost, 'stock': accessory.stock, 'unit': unit})
 
     df = pd.DataFrame(material_data)
-    df.set_index('pk', inplace=True)
 
     excel_filename = 'material_data.xlsx'
 
@@ -1634,6 +1633,38 @@ def download_prodrep(request):
     response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
     print(response)
     return response
+
+def download_pricerep(request):
+    products = Product.objects.exclude(name="test_product_test_product_test")
+    table_data = []
+    for product in products:
+        difference = product.retail_price - product.calc_price
+        days_since_last_update = (product.last_update - timezone.now().date()).days
+        table_data.append({
+            'pk': product.pk,
+            'name': product.name.title(),
+            'retailprice': product.retail_price,
+            'calcprice': product.calc_price,
+            'difference': difference,
+            'dayslastupdate': days_since_last_update,
+        })
+    
+    # Sort table_data by product_difference
+    table_data_sorted = sorted(table_data, key=lambda x: x['difference'])
+
+    df = pd.DataFrame(table_data_sorted)
+
+    excel_filename = 'production_report.xlsx'
+
+    excel_buffer = io.BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
+
+    print(df)
+
+    response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
+    return response
+
  
 # this is a function used in products to get the cost of each product component 
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost): 
