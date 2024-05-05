@@ -12,26 +12,26 @@
 {% block content %}
 <div class="row pb-2 pt-4">
     <div class="col-7" style="margin: 0px 30px 0px 30px">
-        <div class="card" style="height:130px; border-radius: 10px;">
-            <div class="card-body" style="height:130px;">
+        <div class="card" style="height:190px; border-radius: 10px;">
+            <div class="card-body" style="height:190px;">
                 <div class="card-title">
                     <h4>Order Summary</h4>
                 </div>
                 <div class="card-text">
                     <div class="row">
-                        <div class="col d-flex justify-content-center">
-                            s
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
                         </div>
-                        <div class="col d-flex justify-content-center">
-                            s
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
                         </div>
                     </div>
                     <div class="row mt-2">
-                        <div class="col d-flex justify-content-center">
-                            s
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
                         </div>
-                        <div class="col d-flex justify-content-center">
-                            s
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
                         </div>
                     </div>
                 </div>
@@ -40,18 +40,20 @@
     </div>
 
     <div class="col" style="margin: 0px 30px 0px 30px">
-        <div class="card" style="height:130px; border-radius: 10px;">
-            <div class="card-body" style="height:130px;">
+        <div class="card" style="height:190px; border-radius: 10px;">
+            <div class="card-body" style="height:190px;">
                 <div class="card-title">
                     <h4>Material Distribution</h4>
                 </div>
                 <div class="card-text">
                     <div class="row mt-3">
-                        <div class="col d-flex justify-content-center">
-                            s
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
                         </div>
-                        <div class="col d-flex justify-content-center">
-                            s
+                    </div>
+                    <div class="row">
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
                         </div>
                     </div>
                 </div>
@@ -65,22 +67,26 @@
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
             <table class="table table-hover table-striped" style="border-radius: 40px;">
                 <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
-                    <th scope="col"> Material # </th>
-                    <th scope="col"> Name</th>
-                    <th scope="col"> Material Type </th>
-                    <th scope="col"> Stock</th>
-                    <th scope="col"> Cost </th>
+                    <th scope="col"> Job Order # </th>
+                    <th scope="col"> Customer Name </th>
+                    <th scope="col"> Outlet</th>
+                    <th scope="col"> Status </th>
+                    <th scope="col"> File Date</th>
+                    <th scope="col"> Start Date</th>
+                    <th scope="col"> Completion Date</th>
                 </thead>
                 <tbody>
-                    {% for material_data in materials %}
-                        <tr style="height:70px;">
-                            <td> {{ material_data.pk }} </td>
-                            <td> {{ material_data.name }} </td>
-                            <td> {{ material_data.type|title }} </td>
-                            <td> {{ material_data.stock|floatformat:2 }} {{material_data.unit}}</td>
-                            <td> {{ material_data.cost }} </td>
-                        </tr>
-                    {%endfor%}
+                    {% for order_data in orders %}
+                    <tr style="height:70px;">
+                        <td> {{ order_data.order.pk }} </td>
+                        <td> {{ order_data.order.customer}} </td>
+                        <td> {{ order_data.order.outlet.outlet_name }}</td>
+                        <td> {{ order_data.status|title }} </td>
+                        <td> {{ order_data.file_date }} </td>
+                        <td> {{ order_data.order.start_date }}</td>
+                        <td> {{ order_data.completion_date }}</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

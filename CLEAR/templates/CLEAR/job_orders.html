@@ -105,7 +105,7 @@ Filter
                                                 <select class="order_item input-select" id="order_item1">
                                                     <option value="delete">None</option>
                                                     {% for z in products %}
-                                                    <option value="{{z.pk}}"{% if item_data.item.product.pk == z.pk %} selected {% endif %}>{{z.name}}</option>
+                                                    <option value="{{z.pk}}"{% if item_data.item.product.pk == z.pk %} selected {% endif %}>{{z.name|title}}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -314,7 +314,7 @@ Filter
                                             <select class="order_item input-select" id="order_item1">
                                                 <option value="delete">None</option>
                                                 {% for z in products %}
-                                                <option value="{{z.pk}}">{{z.name}}</option>
+                                                <option value="{{z.pk}}">{{z.name|title}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>

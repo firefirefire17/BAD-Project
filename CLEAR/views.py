@@ -10,16 +10,13 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models import Q
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import io
 import openpyxl
 from django.db.models import F, ExpressionWrapper, FloatField, Sum  #used expwrapper for reports - dane
 import matplotlib.pyplot as plt
 from io import BytesIO
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 import matplotlib.backends.backend_pdf
 from django.template.defaultfilters import date as django_date
 
@@ -883,15 +880,20 @@ def reports(request):
                 Q(start_date__range=(start_date, end_date)) | 
                 Q(completion_date__range=(start_date, end_date)) 
                 ) 
+            completed_orders = Job_Order.objects.filter(order_status="completed")
  
             order_list = [] 
  
- 
-            for order in Job_Order.objects.all(): 
+            bespoke_count = 0
+            regular_count = 0
+            for order in order_objects: 
+                duration = datetime.strptime(order.completion_date, '%Y-%m-%d').date() - datetime.strptime(order.start_date, '%Y-%m-%d')
                 order_data = { 
                     'order': order, 
                     'file_date': order.file_date, 
+                    'start_date': order.start_date,
                     'completion_date': order.completion_date, 
+                    'duration': duration.days,
                     'status': order.order_status, 
                     'customer': order.customer, 
                     'outlet': order.outlet, 
@@ -921,14 +923,20 @@ def reports(request):
                         item_data['materials'].append(material_data) 
                     if item_data['materials']: 
                         item_data['bespoke'] = 'yes' 
+                        bespoke_count += 1
                     else: 
                         item_data['bespoke'] = 'no' 
+                        regular_count += 1
                     item_data['item_count'] = len(item_data['materials']) 
                     order_data['items'].append(item_data) 
                 order_data['item_count'] = len(order_data['items']) 
                 order_list.append(order_data) 
-         
-            return render(request, 'CLEAR/production_report.html')  
+            
+            order_list = sorted(order_list, key=lambda x: x['duration'])
+            print(order_list)
+            print(bespoke_count)
+            print(regular_count)
+            return render(request, 'CLEAR/production_report.html', {'orders': order_list})  
         elif reptype == 'pricing':
             return redirect('pricing_reports')
         elif reptype == 'shopping_list':
