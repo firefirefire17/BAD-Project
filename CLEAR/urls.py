@@ -34,6 +34,7 @@ urlpatterns = [
     path('filter_materials/', views.filter_materials, name="filter_materials"),
     path('search_products/', views.search_products, name="search_products"),
     path('download_matrep/', views.download_matrep, name="download_matrep"),
-    path('download_prodrep/', views.download_matrep, name="download_matrep"),
+    path('download_prodrep/', views.download_prodrep, name="download_prodrep"),
+    path('download_pricerep/', views.download_prodrep, name="download_prodrep"),
     path('search_joborders', views.search_joborders, name="search_joborders"),
 ]

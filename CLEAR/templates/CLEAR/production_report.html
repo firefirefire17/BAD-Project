@@ -20,18 +20,18 @@
                 <div class="card-text">
                     <div class="row">
                         <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
+                            <p class="m-0" style="font-size: 40px;"> {{file_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
                         </div>
                         <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
+                            <p class="m-0" style="font-size: 40px;"> {{start_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Started</p>
                         </div>
                     </div>
                     <div class="row mt-2">
                         <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
+                            <p class="m-0" style="font-size: 40px;"> {{complete_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Completed </p>
                         </div>
                         <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
+                            <p class="m-0" style="font-size: 40px;"> {{average_duration|floatformat:0}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Average Duration </p>
                         </div>
                     </div>
                 </div>
@@ -43,17 +43,17 @@
         <div class="card" style="height:190px; border-radius: 10px;">
             <div class="card-body" style="height:190px;">
                 <div class="card-title">
-                    <h4>Material Distribution</h4>
+                    <h4>Item Distribution</h4>
                 </div>
                 <div class="card-text">
                     <div class="row mt-3">
                         <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
+                            <p class="m-0" style="font-size: 40px;"> {{bespoke_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Bespoke Items </p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col d-flex justify-content-center align-items-center">
-                            <p class="m-0" style="font-size: 40px;"> 5 </p><p class="ml-2 m-0" style="font-size: 15px;"> Job Orders Filed </p>
+                            <p class="m-0" style="font-size: 40px;"> {{regular_count}} </p><p class="ml-2 m-0" style="font-size: 15px;"> Regular Items </p>
                         </div>
                     </div>
                 </div>
@@ -74,6 +74,7 @@
                     <th scope="col"> File Date</th>
                     <th scope="col"> Start Date</th>
                     <th scope="col"> Completion Date</th>
+                    <th scope="col"> Duration </th>
                 </thead>
                 <tbody>
                     {% for order_data in orders %}
@@ -85,6 +86,7 @@
                         <td> {{ order_data.file_date }} </td>
                         <td> {{ order_data.order.start_date }}</td>
                         <td> {{ order_data.completion_date }}</td>
+                        <td> {{ order_data.duration }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -92,9 +94,11 @@
         </div>
         <div class="row" style="margin-right: 15px;">
             <div class="col-2 ml-auto">
-                <button type="button" class="btn light-button download_button" style="display: flex; justify-content: right; margin-bottom: 15px;">
-                    Download
-                </button>
+                <form method="POST">{% csrf_token %}
+                    <button type="button" class="btn light-button download_button" style="display: flex; justify-content: right; margin-bottom: 15px;" data-start-date="{{start_date}}" data-end-date="{{end_date}}">
+                        Download
+                    </button>
+                </form>
             </div>
         </div>
         
@@ -106,35 +110,32 @@
 <script>
     $(document).ready(function() {
         const editContainer = $('.editContainer');
-        $(document).on('change', '.reptype', function() {
-            console.log('pass');
-            let reptype = $(this).val();
-    
-            if (reptype == "production") {
-                editContainer.empty(); 
-                editContainer.append('<div class="row form-group" style="display: flexbox; align-items: baseline; margin-top: 10px;">' +
-                    '<label for="reportDate">Date</label>' +
-                    '<input type="date" class="last_update form-control"' +
-                    'style="width: 150px; border-radius: 100px; margin-left: 70px;">' +
-                    '</div>');
-            } else if (reptype == "shopping_list") {
-                editContainer.empty();
-                editContainer.append('<div>Shopping list here</div>');
-            } else {
-                editContainer.empty();
-            }
-        });
         $(".download_button").click(function() {
-            let link = $('<a href="/download_matrep/" style="display: none;"></a>');
-    
-            // Append the link to the body
-            $('body').append(link);
-            
-            // Trigger a click event on the link
-            link[0].click();
-            
-            // Remove the link from the DOM
-            link.remove();
+            let start_date = $(this).data("start-date");
+            let end_date = $(this).data("end-date");
+
+            $.ajax({
+                url: "/download_prodrep/",
+                type: "POST", // Ensure data is sent using POST for security
+                data: {
+                  start_date: start_date,
+                  end_date: end_date,
+                  csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val()
+
+                },
+                dataType: "binary", // Specify binary data for download
+                success: function(data) {
+                  const blob = new Blob([data], { type: "application/octet-stream" });
+                  const link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.download = "production_report.xlsx"; // Set desired filename
+                  link.click();
+                },
+                error: function(error) {
+                  console.error("Error downloading file:", error);
+                  // Handle potential errors gracefully, e.g., display an error message to the user
+                }
+              });
         });
     });
 </script>

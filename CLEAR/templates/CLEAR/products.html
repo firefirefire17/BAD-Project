@@ -36,7 +36,7 @@
                     <!-- check views to see full breakdown of product_data -->
                     <tr style="height: 75px;">
                         <td>{{ product_data.product.pk}}</td>
-                        <td>{{ product_data.product.name }}</td>
+                        <td>{{ product_data.product.name|title }}</td>
                         <td>{{ product_data.product.retail_price|floatformat:2 }}</td>
                         <td>{{ product_data.product.last_update}}
                         <td>

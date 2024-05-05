@@ -869,6 +869,7 @@ def job_orders(request):
                 'quantity': order_item.quantity,
                 'materials': [],
             }
+            print(order_item.item.cost)
             for item_textile in order_item.item.item_textile_set.all():
                 material_data = {
                     'type': 'textile',
@@ -936,6 +937,7 @@ def job_orders(request):
 
                         new_item = Item.objects.create(product=product, type=type)
 
+                        bespoke_cost = 0
                         for material in item['materials']:
                             material_type = material['material_type']
                             item_material = material['item_material']
@@ -951,7 +953,11 @@ def job_orders(request):
                                 else:
                                     accessory_object = Accessory.objects.get(material_key__material_key = item_material)
                                     Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                                bespoke_cost += float(bespoke_rate)
                         
+                        new_item.cost = new_item.product.retail_price + bespoke_cost
+                        new_item.save()
+
                         existing_item = new_item.is_duplicate()
                         print(existing_item)
 
@@ -1011,14 +1017,13 @@ def job_orders(request):
 
                     new_item = Item.objects.create(product=product, type=type)
 
+                    bespoke_cost = 0
                     for material in item['materials']:
                         material_type = material['material_type']
                         item_material = material['item_material']
                         bespoke_rate = material['bespoke_rate']
                         quantity = material['quantity']
-                        print(material_type)
-                        print(item_material)
-                        print(quantity)
+
                         if item_material == "delete":
                             pass
                         else:
@@ -1030,7 +1035,11 @@ def job_orders(request):
                                 print('accessory')
                                 accessory_object = Accessory.objects.get(material_key__material_key = item_material)
                                 Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                            bespoke_cost += float(bespoke_rate)
                     
+                    new_item.cost = new_item.product.retail_price + bespoke_cost
+                    new_item.save()
+
                     existing_item = new_item.is_duplicate()
                     print(existing_item)
                     quantity = item['quantity']
@@ -1137,24 +1146,29 @@ def reports(request):
                 Q(start_date__range=(start_date, end_date)) | 
                 Q(completion_date__range=(start_date, end_date)) 
                 ) 
-            completed_orders = Job_Order.objects.filter(order_status="completed")
  
             order_list = [] 
  
             bespoke_count = 0
             regular_count = 0
-            for order in order_objects: 
-                duration = datetime.strptime(order.completion_date, '%Y-%m-%d').date() - datetime.strptime(order.start_date, '%Y-%m-%d')
+            for order in order_objects:
+                try:
+                    difference = order.completion_date - order.start_date
+                    duration = difference.days
+                    print(duration)
+                except:
+                    duration = None
                 order_data = { 
                     'order': order, 
                     'file_date': order.file_date, 
                     'start_date': order.start_date,
                     'completion_date': order.completion_date, 
-                    'duration': duration.days,
+                    'duration': duration,
                     'status': order.order_status, 
                     'customer': order.customer, 
                     'outlet': order.outlet, 
                     'items': [], 
+                    'total_price': 0
                 } 
                 for order_item in order.order_item_set.all(): 
                     item_data = { 
@@ -1170,6 +1184,7 @@ def reports(request):
                             'quantity': item_textile.quantity, 
                         } 
                         item_data['materials'].append(material_data) 
+
                     for item_accessory in order_item.item.item_accessory_set.all(): 
                         material_data = { 
                             'type': 'accessory', 
@@ -1178,6 +1193,7 @@ def reports(request):
                             'quantity': item_accessory.quantity, 
                         } 
                         item_data['materials'].append(material_data) 
+
                     if item_data['materials']: 
                         item_data['bespoke'] = 'yes' 
                         bespoke_count += 1
@@ -1186,14 +1202,30 @@ def reports(request):
                         regular_count += 1
                     item_data['item_count'] = len(item_data['materials']) 
                     order_data['items'].append(item_data) 
+                    order_data['total_price'] += order_item.item.cost
                 order_data['item_count'] = len(order_data['items']) 
                 order_list.append(order_data) 
             
             order_list = sorted(order_list, key=lambda x: x['duration'])
-            print(order_list)
-            print(bespoke_count)
-            print(regular_count)
-            return render(request, 'CLEAR/production_report.html', {'orders': order_list})  
+
+            if order_list:
+                total_duration = sum(order_data["duration"] for order_data in order_list if order_data["duration"])
+                average_duration = total_duration / len(order_list)
+            else:
+                average_duration = None
+
+            file_count = 0
+            start_count = 0
+            complete_count = 0
+            for order in order_list:
+                if start_date <= order['file_date'] <= end_date:
+                    file_count += 1
+                if start_date <= order['start_date'] <= end_date:
+                    start_count += 1
+                if start_date <= order['completion_date'] <= end_date:
+                    complete_count += 1
+
+            return render(request, 'CLEAR/production_report.html', {'orders': order_list, 'bespoke_count': bespoke_count, 'regular_count': regular_count, 'average_duration': average_duration, 'file_count': file_count, 'start_count': start_count, 'complete_count': complete_count, 'start_date': start_date, 'end_date': end_date})  
         elif reptype == 'pricing':
             products = Product.objects.exclude(name="test_product_test_product_test")
             table_data = []
@@ -1522,40 +1554,36 @@ def download_matrep(request):
     return response
 
 def download_prodrep(request):
-    textile_objects = Textile.objects.all()
-    accessory_objects = Accessory.objects.all()
-    material_data = []
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+    print(request.POST)
 
-    for textile in textile_objects:
-        unit = textile.get_unit_display()
-        unit = unit.removeprefix("per ")
+    start_date = datetime.strptime(start_date, '%Y-%m-%d').date() 
+    end_date = datetime.strptime(end_date, '%Y-%m-%d').date() 
 
-        material_data.append({'type': 'textile', 'pk': textile.material_key.material_key, 'name': textile.name, 'cost': textile.cost, 'stock': textile.stock, 'unit': unit})
+    # get all objects where either file_date, start_date, or completion_date fall under the range of input dates 
+    order_objects = Job_Order.objects.filter( 
+        Q(file_date__range=(start_date, end_date)) | 
+        Q(start_date__range=(start_date, end_date)) | 
+        Q(completion_date__range=(start_date, end_date)) 
+        ) 
 
-    for accessory in accessory_objects:
-        unit = accessory.get_unit_display()
-        unit = unit.removeprefix("per ")
+    order_list = [] 
+    
 
-        if accessory.stock > 1:
-            if unit == 'inch':
-                unit = unit + "es"
-            else:
-                unit = unit + "s"
 
-        material_data.append({'type': 'accessory', 'pk': accessory.material_key.material_key, 'name': accessory.name, 'cost': accessory.cost, 'stock': accessory.stock, 'unit': unit})
+    # df = pd.DataFrame(material_data)
+    # df.set_index('pk', inplace=True)
 
-    df = pd.DataFrame(material_data)
-    df.set_index('pk', inplace=True)
+    # excel_filename = 'material_data.xlsx'
 
-    excel_filename = 'material_data.xlsx'
-
-    excel_buffer = io.BytesIO()
-    df.to_excel(excel_buffer, index=False)
-    excel_buffer.seek(0)
+    #excel_buffer = io.BytesIO()
+    #df.to_excel(excel_buffer, index=False)
+    #excel_buffer.seek(0)
 
     # Set response headers
-    response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
-    return response
+    #response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
+    #return response
  
 # this is a function used in products to get the cost of each product component 
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost): 
