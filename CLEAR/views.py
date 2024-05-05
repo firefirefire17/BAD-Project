@@ -14,7 +14,6 @@ from django.db.models.functions import Cast
 from datetime import datetime, timedelta
 import pandas as pd
 import io
-import openpyxl
 from django.db.models import F, ExpressionWrapper, FloatField, Sum  #used expwrapper for reports - dane
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -1231,7 +1230,7 @@ def login_view(request):
     return render(request, 'registration/login.html', {'form': form})
 
 def logout_view(request):
-    return redirect(request, 'login')
+    return render(request, 'registration/login.html')
 
 def get_material_options(request): # function used to change materials in stock-in upon material type change 
     material_type = request.GET.get('material_type') 
