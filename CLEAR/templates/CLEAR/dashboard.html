@@ -18,8 +18,6 @@
 
     
 {% block content %}
-
-    <div class="container-fluid">
         <!-- Your content here -->
         <div class="row pb-4 pt-3 ">
             <div class="col-md-6">
@@ -66,10 +64,22 @@
                 <div class="card" style="border-radius: 20px;">
                     <div class="card-body">
                         <h6 class="card-title text-center mb-3" style="color: rgb(160, 160, 160);">Out-of-Stock Items</h5>
+                        
                         <table class="table table-hover table-striped">
                             <thead>
-                                <th scope="col" style="display: flex; justify-content: center; border-top:0;"> Material Name </th>
+                                <th scope="col" style="display: flex; justify-content: center; border-top:0; margin-top: -10px;"> Material Name </th>
                             </thead>
+                            <tbody>
+                                {% for material_data in materials %}
+                                    {% if material_data.material.stock|floatformat:2 <= 0 %}
+                                        <tr>
+                                            <td> {{ material_data.material.name|title }} </td>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {%endfor%}
+                            </tbody>
+                            
                         </table>
                     </div>
                 </div>
