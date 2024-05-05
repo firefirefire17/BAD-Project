@@ -8,7 +8,12 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
 </head>
-
+{% block filter %} 
+<button class="button btn btn-secondary filterbutton" data-toggle="modal" data-target="#filtermodal" 
+style="height: fit-content; display: flexbox; align-items: center; opacity: 60%; border-radius: 35px; margin-right: 5px;">
+Filter
+</button>
+{% endblock %}
 
 {% block content %}
 
@@ -16,7 +21,7 @@
     <div class="card main-card">
         <div class="table-responsive card"
             style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 90%; margin-bottom: 13px;">
-            <table class="table table-hover table-striped" style="border-radius: 40px; width: auto;">
+            <table id="stockin_table"class="table table-hover table-striped" style="border-radius: 40px; width: auto;">
                 <thead class="sticky-top" style="background-color: #3f3e3e; color: #ffffff;">
                     <th scope="col"> Stock-in #</th>
                     <th scope="col"> Date</th>
@@ -27,7 +32,7 @@
                     {% for stockIn_data in stock_ins %}
                         <tr style="height:70px;">
                             <td> {{ stockIn_data.stock_in.pk }} </td>
-                            <td> {{ stockIn_data.stock_in.transaction_date|date:"Y-m-d" }} </td>
+                            <td>{{ stockIn_data.stock_in.transaction_date|date:"F j, Y" }}</td>
                             <td> {{ stockIn_data.stock_in.total_cost }} </td>
                             <td> <button type="button" class="btn btn-outline-secondary" data-toggle="modal"
                                     data-target="#editstock-modal{{stockIn_data.stock_in.pk}}" style="border-radius: 30px;">Edit</button>
@@ -302,6 +307,33 @@
     </div>
 </form>
 
+<!--FILTER MODAL-->
+<div class="modal" id="filtermodal" style="width: 600px; position: absolute;
+    top: -90px;
+    right: 0;
+    bottom: 0;
+    left: 60%;">
+    <div class="modal-content">
+        <div class="modal-body">
+            <div class="container">
+                <button type="button" class="close btn-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control">
+                </div>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <div class="materialRow row mt-1" id="materialRow_temp" style="display:none;">
     <div class="col-3">
@@ -472,9 +504,63 @@
             addMaterial_edit(counter, button, stockId);
         });
 
+        $('#start_date, #end_date').on('input', function() {
+            var startDate = $('#start_date').val();
+            var endDate = $('#end_date').val();
+
+            if (startDate !== '' && endDate !== '') {
+                // Both dates are filled up, trigger the update
+                $.ajax({
+                    url: '/filter_stock_in/',
+                    type: 'GET',
+                    data: {
+                        'start_date': startDate,
+                        'end_date': endDate
+                    },
+                    success: function(response) {
+                        console.log("AJAX request successful.");
+                        updateTable(response);
+                    },
+                    error: function(error) {
+                        console.error("AJAX request failed:", error);
+                    }
+                });
+            }
+        });
+
+
+
 
     
     });
+function updateTable(data) {
+    $('#stockin_table tbody').empty();
+
+    $.each(data.table_data, function(index, item) {
+        var row = $('<tr>');
+
+        var stockinIdCell = $('<td>').text(item.stockin_pk);
+        var stockinTransactionDateCell = $('<td>').text(item.stockin_trans_date);
+        var stockinTotalCostCell = $('<td>').text(item.stockin_total_cost);
+        var actionsCell = $('<td>');
+
+        var editButton = $('<button>').addClass('btn btn-outline-secondary')
+            .attr('data-toggle', 'modal')
+            .attr('data-target', '#editstock-modal' + item.stockin_pk)
+            .css('border-radius', '30px')
+            .text('Edit');
+
+        actionsCell.append(editButton);
+
+        row.append(stockinIdCell);
+        row.append(stockinTransactionDateCell);
+        row.append(stockinTotalCostCell);
+        row.append(actionsCell);
+
+        $('#stockin_table tbody').append(row);
+    });
+}
+
 </script>
 
 {% endblock %}

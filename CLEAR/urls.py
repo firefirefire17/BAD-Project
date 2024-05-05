@@ -38,5 +38,6 @@ urlpatterns = [
     path('download_pricerep/', views.download_pricerep, name="download_pricerep"),
     path('search_joborders', views.search_joborders, name="search_joborders"),
     path('chart_data/', views.chart_data, name='chart_data'),
+    path('filter_stock_in/', views.filter_stock_in, name="filter_stock_in"),
 ]
 

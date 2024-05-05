@@ -164,7 +164,7 @@ def products(request):
                 data = {
                     'textile':textile,
                     'buffer': buffer,
-                }
+                }   
                 textile_buffer_list.append(data)
 
         for textile_buffer in textile_buffer_list:
@@ -1072,6 +1072,28 @@ def reports(request):
         elif reptype == 'shopping_list':
             return redirect('shopping_list_reports')  
     return render(request, 'CLEAR/reports.html')
+
+
+def filter_stock_in(request):
+    stock_in_objects = StockIn.objects.all()
+
+    if request.method == "GET":
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+        stockin_data = []
+        for stockin in stock_in_objects:
+            if start_date <= stockin.transaction_date <= end_date:
+                formatted_date = stockin.transaction_date.strftime("%B %e, %Y").replace("  ", " ")
+                stockin_data.append({
+                    'stockin_pk': stockin.pk,
+                    'stockin_trans_date': formatted_date,
+                    'stockin_total_cost': stockin.total_cost,
+                })
+        return JsonResponse({'table_data' : stockin_data})
 
 
 @login_required(login_url="/login")
