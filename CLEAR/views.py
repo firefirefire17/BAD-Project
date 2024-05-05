@@ -79,7 +79,7 @@ def dashboard(request):
         vat_object = False
     
 
-    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, 'orders':order_list, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
+    return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, 'orders':order_objects, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
     
 
 # search and filter product
