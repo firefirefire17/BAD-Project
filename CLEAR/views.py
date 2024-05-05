@@ -27,8 +27,8 @@ import json
 
 # Create your views here.
 @login_required(login_url="/login") # this is to restrict access if not logged in
-@owner_required # requires owner role  [put this back once frontend is done]
-@product_manager_required # requires pm role
+#@owner_required # requires owner role  [put this back once frontend is done]
+#@product_manager_required # requires pm role
 def dashboard(request):
     return render(request, 'CLEAR/dashboard.html')
     
