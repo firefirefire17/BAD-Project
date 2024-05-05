@@ -71,12 +71,9 @@
                             </thead>
                             <tbody>
                                 {% for material_data in materials %}
-                                    {% if material_data.material.stock|floatformat:2 <= 0 %}
                                         <tr>
                                             <td> {{ material_data.material.name|title }} </td>
-                                            </td>
                                         </tr>
-                                    {% endif %}
                                 {%endfor%}
                             </tbody>
                             
