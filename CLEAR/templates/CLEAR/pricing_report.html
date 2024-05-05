@@ -21,6 +21,7 @@
                     <th scope="col">Retail Price</th>
                     <th scope="col">Last Update</th>
                     <th scope="col">Price Difference</th>
+                    <th scope="col">Days since Last Update</th>
                 </thead>
                 <tbody>
                     {% for product_data in table_data %}
@@ -30,6 +31,7 @@
                         <td>PHP {{ product_data.product_retailprice|floatformat:2 }}</td>
                         <td>PHP {{ product_data.product_calcprice|floatformat:2 }}</td>
                         <td>PHP {{ product_data.product_difference|floatformat:2 }}</td>
+                        <td>{{ product_data.product_dayslastupdate }} days </td>
                     </tr>
                     {% endfor %}                    
                 </tbody>

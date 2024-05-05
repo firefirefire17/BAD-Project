@@ -946,12 +946,14 @@ def reports(request):
             table_data = []
             for product in products:
                 difference = product.retail_price - product.calc_price
+                days_since_last_update = (timezone.now().date() - product.last_update).days
                 table_data.append({
                     'product_pk': product.pk,
                     'product_name': product.name.title(),
                     'product_retailprice': product.retail_price,
                     'product_calcprice': product.calc_price,
                     'product_difference': difference,
+                    'product_dayslastupdate': days_since_last_update,
                 })
             
             # Sort table_data by product_difference
@@ -961,10 +963,6 @@ def reports(request):
         elif reptype == 'shopping_list':
             return redirect('shopping_list_reports')  
     return render(request, 'CLEAR/reports.html')
-
-
-
-
 
 
 @login_required(login_url="/login")
