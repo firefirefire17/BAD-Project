@@ -75,6 +75,7 @@
                     <th scope="col"> Start Date</th>
                     <th scope="col"> Completion Date</th>
                     <th scope="col"> Duration </th>
+                    <th scope="col"> Total Price </th>
                 </thead>
                 <tbody>
                     {% for order_data in orders %}
@@ -87,6 +88,7 @@
                         <td> {{ order_data.order.start_date }}</td>
                         <td> {{ order_data.completion_date }}</td>
                         <td> {{ order_data.duration }}</td>
+                        <td> {{ order_data.total_price}}
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -116,26 +118,31 @@
 
             $.ajax({
                 url: "/download_prodrep/",
-                type: "POST", // Ensure data is sent using POST for security
+                type: "GET", // Ensure data is sent using POST for security
                 data: {
                   start_date: start_date,
                   end_date: end_date,
                   csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val()
 
                 },
-                dataType: "binary", // Specify binary data for download
+                xhrFields:{
+                    responseType: 'blob'
+                },
                 success: function(data) {
-                  const blob = new Blob([data], { type: "application/octet-stream" });
-                  const link = document.createElement("a");
-                  link.href = URL.createObjectURL(blob);
-                  link.download = "production_report.xlsx"; // Set desired filename
-                  link.click();
+                    console.log(data)
+                    var blob = data;
+                    var downloadUrl = URL.createObjectURL(blob);
+                    var a = document.createElement("a");
+                    a.href = downloadUrl;
+                    a.download = "production_report.xlsx";
+                    document.body.appendChild(a);
+                    a.click();
                 },
                 error: function(error) {
                   console.error("Error downloading file:", error);
                   // Handle potential errors gracefully, e.g., display an error message to the user
                 }
-              });
+            });
         });
     });
 </script>

@@ -1226,7 +1226,7 @@ def reports(request):
                     order_data['items'].append(item_data) 
 
                     if order_item.item.cost:
-                        order_data['total_price'] += order_item.item.cost
+                        order_data['total_price'] += order_item.item.cost*order_item.quantity
                 order_data['item_count'] = len(order_data['items']) 
                 order_list.append(order_data) 
             try:
@@ -1584,10 +1584,11 @@ def download_matrep(request):
 def download_prodrep(request):
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
-    print(request.POST)
 
-    start_date = datetime.strptime(start_date, '%Y-%m-%d').date() 
-    end_date = datetime.strptime(end_date, '%Y-%m-%d').date() 
+    print(request.GET)
+
+    start_date = datetime.strptime(start_date, '%B %d, %Y').date() 
+    end_date = datetime.strptime(end_date, '%B %d, %Y').date() 
 
     # get all objects where either file_date, start_date, or completion_date fall under the range of input dates 
     order_objects = Job_Order.objects.filter( 
@@ -1597,21 +1598,42 @@ def download_prodrep(request):
         ) 
 
     order_list = [] 
-    
+    for order in order_objects:
+        try:
+            difference = order.completion_date - order.start_date
+            duration = difference.days
+            print(duration)
+        except:
+            duration = "None"
+        order_data = { 
+            'pk': order.pk, 
+            'file_date': str(order.file_date), 
+            'start_date': str(order.start_date),
+            'completion_date': str(order.completion_date), 
+            'duration': duration,
+            'status': order.order_status, 
+            'customer': order.customer, 
+            'outlet': order.outlet.outlet_name, 
+            'total_price': 0
+        } 
+        for order_item in order.order_item_set.all(): 
+            if order_item.item.cost:
+                order_data['total_price'] += order_item.item.cost*order_item.quantity
+        order_list.append(order_data)
 
+    df = pd.DataFrame(order_list)
 
-    # df = pd.DataFrame(material_data)
-    # df.set_index('pk', inplace=True)
+    excel_filename = 'production_report.xlsx'
 
-    # excel_filename = 'material_data.xlsx'
+    excel_buffer = io.BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
 
-    #excel_buffer = io.BytesIO()
-    #df.to_excel(excel_buffer, index=False)
-    #excel_buffer.seek(0)
+    print(df)
 
-    # Set response headers
-    #response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
-    #return response
+    response = FileResponse(excel_buffer, as_attachment=True, filename=excel_filename)
+    print(response)
+    return response
  
 # this is a function used in products to get the cost of each product component 
 def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost): 
