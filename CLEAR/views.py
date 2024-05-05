@@ -836,9 +836,40 @@ def reports(request):
     if request.method == "POST":
         reptype = request.POST.get("reptype")
         if reptype == 'materials':
-            return redirect('material_report') 
+            textile_objects = Textile.objects.all()
+            accessory_objects = Accessory.objects.all()
+            material_data = []
+
+            
+            for textile in textile_objects:
+                unit = textile.get_unit_display()
+                unit = unit.removeprefix("per ")
+
+                material_data.append({'type': 'textile', 'pk': textile.material_key.material_key, 'name': textile.name, 'unit': unit, 'stock': textile.stock, 'cost': textile.cost})
+
+            for accessory in accessory_objects:
+                unit = accessory.get_unit_display()
+                unit = unit.removeprefix("per ")
+
+                if accessory.stock > 1:
+                    if unit == 'inch':
+                        unit = unit + "es"
+                    else:
+                        unit = unit + "s"
+
+                material_data.append({'type': 'accessory', 'pk': accessory.material_key.material_key, 'name': accessory.name, 'unit': unit, 'stock': accessory.stock, 'cost': accessory.cost})
+
+            print(material_data)
+
+
+            material_data = sorted(material_data, key=lambda x: x['stock'])
+            inStock_count = sum(1 for item in material_data if item['stock'] > 0)
+            material_count = len(material_data)
+            outStock_count = material_count - inStock_count
+            datenow = timezone.now().date()
+            return render(request, 'CLEAR/material_report.html', {'materials':material_data, 'today': datenow, 'stocked': inStock_count, 'unstocked': outStock_count, 'material_count': material_count})
         elif reptype == 'production':
-            return redirect('production_reports')  
+            return render(request, 'CLEAR/production_report.html')  
         elif reptype == 'pricing':
             return redirect('pricing_reports')
         elif reptype == 'shopping_list':
