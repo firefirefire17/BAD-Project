@@ -42,16 +42,20 @@
     
             <div class="col-md-3">
                 <div class="card" style="border-radius: 10px;">
-                    <div class="card-body">
-                        <h5 class="card-title text-center">Pending Orders</h5>
+                    <div class="card-body" style="display: flex; flex-direction: column; justify-content: space-evenly;">
+                        <h6 class="card-title text-center mb-3" style="color: rgb(160, 160, 160);">Current Financial Values</h5>
                         <div class="row">
-                            <div class="col-6 text-center">
-                                <p> Sufficient Materials</p>
-                                <h3> 25 </h3>
+                            <div class="text-center" style="margin-left: 33px;">
+                                <p><b>Labor Wage</b></p>
+                                <p style="color: gray; margin-top: -20px;">per hour</p>
+                                <h3> {{wage}} </h3>
                             </div>
-                            <div class="col-6 text-center">
-                                <p> Insufficient Materials</p>
-                                <h3> 25 </h3>
+                            <div class="text-center" style="margin-left: 50px;">
+                                <p style="margin-top: 13px; margin-bottom: 23px;"><b>VAT</b></p>
+                                <div class="row" style="display: flex; justify-content: baseline;">
+                                    <h3> {{vat}} </h3>
+                                    <h3>%</h3>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -61,28 +65,75 @@
             <div class="col-md-3">
                 <div class="card" style="border-radius: 10px;">
                     <div class="card-body">
-                        <h5 class="card-title">Card 3</h5>
-                        <p class="card-text">Some content for Card 3.</p>
+                        <h6 class="card-title text-center mb-3" style="color: rgb(160, 160, 160);">Out-of-Stock Items</h5>
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <th scope="col" style="display: flex; justify-content: center; border-top:0;"> Material Name </th>
+                            </thead>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row pb-4">
-            <div class="col-md-9">
-                <div class="card" style="border-radius: 10px;">
+            <div class="col">
+                <div class="card" style="border-radius: 10px; height: 350px;">
                     <div class="card-body">
-                        <h5 class="card-title">Card 1</h5>
-                        <p class="card-text">Some content for Card 1.</p>
+                        <h5 style="display: flex; justify-content: center; margin-bottom: 20px;">In-Queue Job Orders</h5>
+                        <div class="table-responsive"
+                            style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 80%; margin-bottom: 13px;">
+                            <table id="materialTable" class="table table-hover table-striped">
+                                <thead class="table sticky-top table-hover table-striped">
+                                    <th scope="col" style="border: 0;"> Order # </th>
+                                    <th scope="col" style="border: 0;"> Customer </th>
+                                    <th scope="col" style="border: 0;"> Outlet Name </th>
+                                    <th scope="col" style="border: 0;"> File Date </th>
+                                </thead>
+                                {% for order_data in orders %}
+                                <tbody>
+                                    {% if order_data.status|title == "In-Queue" %}
+                                    <tr style="height:70px;">
+                                        <td> {{ order_data.order.pk }} </td>
+                                        <td> {{ order_data.order.customer}} </td>
+                                        <td> {{ order_data.order.outlet.outlet_name }}</td>
+                                        <td> {{ order_data.file_date }} </td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                                {% endfor %}
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
     
-    
-            <div class="col-md-3">
-                <div class="card" style="border-radius: 10px;">
+            <div class="col">
+                <div class="card" style="border-radius: 10px; height: 350px;">
                     <div class="card-body">
-                        <h5 class="card-title">Card 3</h5>
-                        <p class="card-text">Some content for Card 3.</p>
+                        <h5 class="card-title" style="display: flex; justify-content: center; margin-bottom: 20px;">In-Progress Job Orders</h5>
+                        <div class="table-responsive"
+                            style="overflow-y: scroll; border-radius: 15px; box-shadow: none; height: 80%; margin-bottom: 13px;">
+                            <table id="materialTable" class="table table-hover table-striped">
+                                <thead class="table sticky-top table-hover table-striped"">
+                                    <th scope="col" style="border: 0;"> Order # </th>
+                                    <th scope="col" style="border: 0;"> Customer </th>
+                                    <th scope="col" style="border: 0;"> Outlet Name </th>
+                                    <th scope="col" style="border: 0;"> File Date </th>
+                                </thead>
+                                {% for order_data in orders %}
+                                <tbody>
+                                {% if order_data.status|title == "In-Progress" %}
+                                <tr style="height:70px;">
+                                    <td> {{ order_data.order.pk }} </td>
+                                    <td> {{ order_data.order.customer}} </td>
+                                    <td> {{ order_data.order.outlet.outlet_name }}</td>
+                                    <td> {{ order_data.file_date }} </td>
+                                </tr>
+                                {% endif %}
+                                </tbody>
+                                {% endfor %}
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -92,7 +143,7 @@
                 <div class="card" style="border-radius: 10px;">
                     <div class="card-body">
                         <h5 class="card-title">Card 1</h5>
-                        <p class="card-text">Some content for Card 1.</p>
+                        <p class="card-text">{{outlet_data}}</p>
                     </div>
                 </div>
             </div>
