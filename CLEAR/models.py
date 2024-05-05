@@ -1,6 +1,7 @@
 from django.db import models, transaction
 from django.db.models.functions import Now
 from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator
+from django.db import models
 import hashlib
 
 # Create your models here.
@@ -193,7 +194,9 @@ class Job_Order(models.Model):
                     }
                     qty_list.append(temp)
         print(qty_list)
+
         return qty_list
+    
     def deduct_stocks(self, qty_list):
         insufficient_stock = False
         with transaction.atomic():
@@ -344,4 +347,3 @@ def get_prodComponentCost(height, width, quantity, textile_unit, textile_cost, b
     final_quantity = final_unit*float(quantity)
     final_cost = final_quantity*float(textile_cost)
     return final_cost
-
