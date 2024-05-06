@@ -47,11 +47,11 @@
                             <p style="font-size: 15px;"> Started </p>
                         </div>
                         <div class="col" style="display: flex; flex-direction: column;">
-                            {% if average_duration|floatformat:0 == '0' %}
+                            {% if average_duration == 0 %}
                             <p class="m-0" style="font-size: 40px; color: gray;"> {{average_duration|floatformat:0}}
                             </p>
                             {% endif %}
-                            {% if average_duration|floatformat:0 > 0 %}
+                            {% if average_duration > 0 %}
                             <p class="m-0" style="font-size: 40px;"> {{average_duration|floatformat:0}} </p>
                             {% endif %}
                             <p style="font-size: 15px;"> Average Duration </p>

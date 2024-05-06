@@ -213,6 +213,34 @@ def products(request):
                     retail_price = request.POST.get("retail")
                     last_update = request.POST.get("last_update")
 
+                    if not name:
+                        response['status'] = False
+                        response['error'] = "Please input a product name"
+                        raise ValueError("Please input a date")
+                    if not prod_margin:
+                        response['status'] = False
+                        response['error'] = "Please input a prod margin"
+                        raise ValueError("Please input a date")
+                    if prod_margin <= 0:
+                        response['status'] = False
+                        response['error'] = "Please input a valid prod margin"
+                        raise ValueError("Please input a date")
+                    if not misc_margin:
+                        response['status'] = False
+                        response['error'] = "Please input a misc margin"
+                        raise ValueError("Please input a date")
+                    if misc_margin <= 0:
+                        response['status'] = False
+                        response['error'] = "Please input a valid misc margin"
+                        raise ValueError("Please input a date")
+                    if not labor_time:
+                        response['status'] = False
+                        response['error'] = "Please input a labor time"
+                        raise ValueError("Please input a date")
+                    if labor_time <= 0:
+                        response['status'] = False
+                        response['error'] = "Please input a valid labor time"
+                        raise ValueError("Please input a date")
 
                     new_product = Product.objects.create(name=name, 
                                                     prod_margin=prod_margin, 
@@ -234,8 +262,9 @@ def products(request):
                                 if component_name == 'delete':
                                     pass
                                 elif not component_name:
-                                    response['error'] = "Please input a valid component name"
                                     response['status'] = False
+                                    response['error'] = "Please input a component name"
+                                    raise ValueError("Please input a date")
                                 else: 
                                     height = component['height']
                                     width = component['width']
@@ -279,10 +308,8 @@ def products(request):
 
                     new_product.save()
 
-                    if response['status'] == False:
-                        raise Exception("An error has occured during the transaction")
-            except:
-                pass
+            except ValueError as e:
+                print('An error occurred:', str(e))
             # return dict to ajax
             response['url'] = reverse('products')  # URL to direct is str
             return JsonResponse(response)
@@ -1031,7 +1058,9 @@ def reports(request):
 
             if order_list:
                 total_duration = sum(order_data["duration"] for order_data in order_list if order_data["duration"])
-                average_duration = total_duration / len(order_list)
+                count = sum(1 for order_data in order_list if order_data["duration"])
+                average_duration = total_duration / count
+                print(average_duration)
             else:
                 average_duration = None
 
