@@ -221,7 +221,7 @@ def products(request):
                         response['status'] = False
                         response['error'] = "Please input a prod margin"
                         raise ValueError("Please input a date")
-                    if prod_margin <= 0:
+                    if float(prod_margin) <= 0:
                         response['status'] = False
                         response['error'] = "Please input a valid prod margin"
                         raise ValueError("Please input a date")
@@ -229,7 +229,7 @@ def products(request):
                         response['status'] = False
                         response['error'] = "Please input a misc margin"
                         raise ValueError("Please input a date")
-                    if misc_margin <= 0:
+                    if float(misc_margin) <= 0:
                         response['status'] = False
                         response['error'] = "Please input a valid misc margin"
                         raise ValueError("Please input a date")
@@ -237,7 +237,7 @@ def products(request):
                         response['status'] = False
                         response['error'] = "Please input a labor time"
                         raise ValueError("Please input a date")
-                    if labor_time <= 0:
+                    if float(labor_time) <= 0:
                         response['status'] = False
                         response['error'] = "Please input a valid labor time"
                         raise ValueError("Please input a date")
@@ -271,6 +271,31 @@ def products(request):
                                     component_quantity = component['quantity']
                                     buffer = component['buffer'] or 0
 
+                                    if not height:
+                                        response['status'] = False
+                                        response['error'] = "Please input a component height"
+                                        raise ValueError("Please input a date")
+                                    if float(height) <= 0:
+                                        response['status'] = False
+                                        response['error'] = "Please input a valid component height"
+                                        raise ValueError("Please input a date")
+                                    if not width:
+                                        response['status'] = False
+                                        response['error'] = "Please input a component width"
+                                        raise ValueError("Please input a date")
+                                    if float(width) <= 0:
+                                        response['status'] = False
+                                        response['error'] = "Please input a valid component width"
+                                        raise ValueError("Please input a date")
+                                    if not component_quantity:
+                                        response['status'] = False
+                                        response['error'] = "Please input a component quantity"
+                                        raise ValueError("Please input a date")
+                                    if float(component_quantity) <= 0:
+                                        response['status'] = False
+                                        response['error'] = "Please input a valid component quantity"
+                                        raise ValueError("Please input a date")
+                                    
                                     existing_component = Component.objects.filter(component_name=component_name).first()
 
                                     if existing_component:
@@ -288,9 +313,19 @@ def products(request):
                         if accessory_id == "delete":
                             pass
                         else:
+                            if not quantity:
+                                response['status'] = False
+                                response['error'] = "Please input an accessory quantity"
+                                raise ValueError("Please input a date")
+                            if float(quantity) <= 0:
+                                response['status'] = False
+                                response['error'] = "Please input a valid accessory quantity"
+                                raise ValueError("Please input a date")
+                        
                             accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
                             Product_Accessory.objects.create(product=new_product, accessory=accessory_object, accessory_quantity=quantity)
                     
+
                     if retail_price:
                         print('pass')
                         print('retail')
@@ -315,93 +350,151 @@ def products(request):
             return JsonResponse(response)
 
         elif action == "edit_form": # updating products
-            product_id = request.POST.get("pk")
-            product = Product.objects.get(pk=product_id)
-
-            name = request.POST.get("name")
-            prod_margin = request.POST.get("margin")
-            labor_time = request.POST.get("labor")
-            misc_margin = request.POST.get("misc")
-            retail_price = request.POST.get("retail")
-            last_update = request.POST.get("last_update")
-
-
-            #update product attributes
-            product.name = name
-            product.prod_margin = prod_margin
-            product.labor_time = labor_time
-            product.misc_margin = int(misc_margin)
-            product.last_update = last_update
-
-            if float(retail_price) != product.retail_price:
-                print("diff retail")
-                product.retail_price = retail_price
-                product.last_update = timezone.now().date()
-
-            product.save()
-
-            #update textiles
-            Product_Component.objects.filter(product=product).delete()
-
-            textile_data = json.loads(request.POST.get("textile_data"))
-            for textile in textile_data:
-                textile_id = textile['textile_id']
-
-                if textile_id == "delete":
-                    pass
-                else:
-                    textile_object = Textile.objects.get(material_key__material_key = textile_id)
-                    
-                    for component in textile['components']:
-                        component_name = component['component_name'].lower()
-
-                        if component_name == 'delete':
-                            pass
-                        elif not component_name:
-                            error_message = "Please input component name"
-                            return render(request, 'CLEAR/products.html', {'products':product_objects, 
-                                                   'product_material_list':product_material_list,
-                                                   'accessories':accessory_objects,
-                                                   'textiles':textile_objects,
-                                                   'VAT':vat,
-                                                   'wage': wage,
-                                                   })
-                        else: 
-                            height = component['height']
-                            width = component['width']
-                            component_quantity = component['quantity']
-                            buffer = component['buffer'] or 0
-
-                            existing_component = Component.objects.filter(component_name=component_name).first()
-
-                            if existing_component:
-                                Product_Component.objects.create(product=product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
-                            else:
-                                new_component = Component.objects.create(component_name=component_name)
-                                Product_Component.objects.create(product=product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
-
-            #update accs
-            Product_Accessory.objects.filter(product=product).delete()       
-            accessory_data = json.loads(request.POST.get("accessory_data"))
-            for accessory in accessory_data:
-                accessory_id = accessory['accessory_id']
-                quantity = accessory['quantity']
-
-                if accessory_id == "delete":
-                    pass
-                else:
-                    accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
-                    Product_Accessory.objects.create(product=product, accessory=accessory_object, accessory_quantity=quantity)
-
-            product.updateCost('update')
-            product.save()
-
             response = {}
             response['status'] = True
-            response['msg'] = "Form submitted."
-            response['url'] = reverse('products')
+            try:
+                with transaction.atomic():
+                    product_id = request.POST.get("pk")
+                    product = Product.objects.get(pk=product_id)
 
+                    name = request.POST.get("name")
+                    prod_margin = request.POST.get("margin")
+                    labor_time = request.POST.get("labor")
+                    misc_margin = request.POST.get("misc")
+                    retail_price = request.POST.get("retail")
+                    last_update = request.POST.get("last_update")
+
+                    if not name:
+                        response['status'] = False
+                        response['error'] = "Please input a product name"
+                        raise ValueError("Please input a date")
+                    if not prod_margin:
+                        response['status'] = False
+                        response['error'] = "Please input a prod margin"
+                        raise ValueError("Please input a date")
+                    if float(prod_margin) <= 0:
+                        response['status'] = False
+                        response['error'] = "Please input a valid prod margin"
+                        raise ValueError("Please input a date")
+                    if not misc_margin:
+                        response['status'] = False
+                        response['error'] = "Please input a misc margin"
+                        raise ValueError("Please input a date")
+                    if float(misc_margin) <= 0:
+                        response['status'] = False
+                        response['error'] = "Please input a valid misc margin"
+                        raise ValueError("Please input a date")
+                    if not labor_time:
+                        response['status'] = False
+                        response['error'] = "Please input a labor time"
+                        raise ValueError("Please input a date")
+                    if float(labor_time) <= 0:
+                        response['status'] = False
+                        response['error'] = "Please input a valid labor time"
+                        raise ValueError("Please input a date")
+                    
+                    #update product attributes
+                    product.name = name
+                    product.prod_margin = prod_margin
+                    product.labor_time = labor_time
+                    product.misc_margin = int(misc_margin)
+                    product.last_update = last_update
+
+                    if float(retail_price) != product.retail_price:
+                        print("diff retail")
+                        product.retail_price = retail_price
+                        product.last_update = timezone.now().date()
+
+                    product.save()
+
+                    #update textiles
+                    Product_Component.objects.filter(product=product).delete()
+
+                    textile_data = json.loads(request.POST.get("textile_data"))
+                    for textile in textile_data:
+                        textile_id = textile['textile_id']
+
+                        if textile_id == "delete":
+                            pass
+                        else:
+                            textile_object = Textile.objects.get(material_key__material_key = textile_id)
+                            
+                            for component in textile['components']:
+                                component_name = component['component_name'].lower()
+
+                                if component_name == 'delete':
+                                    pass
+                                elif not component_name:
+                                    response['status'] = False
+                                    response['error'] = "Please input a component name"
+                                    raise ValueError("Please input a date")
+                                else: 
+                                    height = component['height']
+                                    width = component['width']
+                                    component_quantity = component['quantity']
+                                    buffer = component['buffer'] or 0
+
+                                    if not height:
+                                        response['status'] = False
+                                        response['error'] = "Please input a component height"
+                                        raise ValueError("Please input a date")
+                                    if float(height) <= 0:
+                                        response['status'] = False
+                                        response['error'] = "Please input a valid component height"
+                                        raise ValueError("Please input a date")
+                                    if not width:
+                                        response['status'] = False
+                                        response['error'] = "Please input a component width"
+                                        raise ValueError("Please input a date")
+                                    if float(width) <= 0:
+                                        response['status'] = False
+                                        response['error'] = "Please input a valid component width"
+                                        raise ValueError("Please input a date")
+                                    if not component_quantity:
+                                        response['status'] = False
+                                        response['error'] = "Please input a component quantity"
+                                        raise ValueError("Please input a date")
+                                    if float(component_quantity) <= 0:
+                                        response['status'] = False
+                                        response['error'] = "Please input a valid component quantity"
+                                        raise ValueError("Please input a date")
+
+                                    existing_component = Component.objects.filter(component_name=component_name).first()
+
+                                    if existing_component:
+                                        Product_Component.objects.create(product=product, textile=textile_object, component=existing_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
+                                    else:
+                                        new_component = Component.objects.create(component_name=component_name)
+                                        Product_Component.objects.create(product=product, textile=textile_object, component=new_component, height=height, width=width, quantity=component_quantity, buffer=buffer)
+
+                    #update accs
+                    Product_Accessory.objects.filter(product=product).delete()       
+                    accessory_data = json.loads(request.POST.get("accessory_data"))
+                    for accessory in accessory_data:
+                        accessory_id = accessory['accessory_id']
+                        quantity = accessory['quantity']
+
+                        if accessory_id == "delete":
+                            pass
+                        else:
+                            if not quantity:
+                                response['status'] = False
+                                response['error'] = "Please input an accessory quantity"
+                                raise ValueError("Please input a date")
+                            if float(quantity) <= 0:
+                                response['status'] = False
+                                response['error'] = "Please input a valid accessory quantity"
+                                raise ValueError("Please input a date")
+                        
+                            accessory_object = Accessory.objects.get(material_key__material_key=accessory_id)
+                            Product_Accessory.objects.create(product=product, accessory=accessory_object, accessory_quantity=quantity)
+
+                    product.updateCost('update')
+                    product.save()
+            except ValueError as e:
+                print('An error occurred:', str(e))
             # return dict to ajax
+            response['url'] = reverse('products')  # URL to direct is str
             return JsonResponse(response)
 
         elif 'delete_form' in request.POST: # deleting products
