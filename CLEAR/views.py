@@ -1209,35 +1209,68 @@ def stock_in(request):
         action = request.POST.get("action")
         print(request.POST)
         if action == "add_form":
-            date = request.POST.get("date")
-
-            new_stockIn = StockIn.objects.create(transaction_date=date)
-            material_data = json.loads(request.POST.get("materials"))
-
-            for material in material_data:
-                material_id = material['stock_material']
-                material_type = material['material_type']
-                quantity = material['quantity']
-                cost = material['cost']
-
-                if material_id == "delete":
-                    pass
-                else: 
-                    if material_type == "textile":
-                        material_object = Textile.objects.get(material_key__material_key = material_id)
-                        StockIn_Textile.objects.create(textile=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)
-                        material_object.stock += float(quantity)
-                    else:
-                        material_object = Accessory.objects.get(material_key__material_key = material_id)
-                        StockIn_Accessory.objects.create(accessory=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)   
-                        material_object.stock += int(quantity)
-                    material_object.save()
-
-            new_stockIn.updateCost()
-            new_stockIn.save()
-
             response = {}
             response['status'] = True
+            today = datetime.today()
+
+            try:
+                with transaction.atomic():
+                    date = request.POST.get("date")
+                    if not date:
+                        response['status'] = False
+                        response['error'] = "Please input a date"
+                        raise ValueError("Please input a date")
+                    if datetime.strptime(date, '%Y-%m-%d') > today:
+                        response['status'] = False
+                        response['error'] = "Please input a valid date"
+                        raise ValueError("Please input a valid date")
+
+                    new_stockIn = StockIn.objects.create(transaction_date=date)
+                    material_data = json.loads(request.POST.get("materials"))
+
+                    for material in material_data:
+                        material_id = material['stock_material']
+                        material_type = material['material_type']
+                        quantity = material['quantity']
+                        cost = material['cost']
+
+                        if material_id == "delete":
+                            pass
+                        else: 
+                            if not quantity:
+                                response['status'] = False
+                                response['error'] = "Please input a quantity"
+                                raise ValueError("Please input a date")
+                            if int(quantity) == 0:
+                                response['status'] = False
+                                response['error'] = "Please input a quantity other than zero"
+                                raise ValueError("Please input a date")
+                            if not cost:
+                                response['status'] = False
+                                response['error'] = "Please input a cost"
+                                raise ValueError("Please input a date")
+                            if int(cost) < 0:
+                                response['status'] = False
+                                response['error'] = "Please input a non-negative cost"
+                                raise ValueError("Please input a date")
+
+                            if material_type == "textile":
+                                material_object = Textile.objects.get(material_key__material_key=material_id)
+                                StockIn_Textile.objects.create(textile=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)
+                                material_object.stock += float(quantity)
+                            else:
+                                material_object = Accessory.objects.get(material_key__material_key=material_id)
+                                StockIn_Accessory.objects.create(accessory=material_object, stock_in=new_stockIn, quantity=quantity, cost=cost)   
+                                material_object.stock += int(quantity)
+                            material_object.save()
+
+                    new_stockIn.updateCost()
+                    new_stockIn.save()
+
+            except ValueError as e:
+                print('An error occurred:', str(e))
+
+
             response['msg'] = "Form submitted."
             response['url'] = reverse('stock_in')
 
@@ -1245,56 +1278,86 @@ def stock_in(request):
             return JsonResponse(response)
         
         elif action == 'edit_form':
-            date = request.POST.get("date")
-            pk = request.POST.get("pk")
-
-            stockIn_object = StockIn.objects.get(pk=pk)
-            material_data = json.loads(request.POST.get("materials"))
-
-            stockIn_object.transaction_date = date
-
-            acc_to_delete = StockIn_Accessory.objects.filter(stock_in=stockIn_object)
-            textile_to_delete = StockIn_Textile.objects.filter(stock_in=stockIn_object)
-
-            for stock_material in textile_to_delete:
-                stock_material.textile.stock -= stock_material.quantity
-                stock_material.textile.save()
-                stock_material.delete()
-            for stock_material in acc_to_delete:
-                stock_material.accessory.stock -= stock_material.quantity
-                stock_material.accessory.save()
-                stock_material.delete()
-
-
-            for material in material_data:  
-                print("pass")
-                material_id = material['stock_material']
-                material_type = material['material_type']
-                quantity = material['quantity']
-                cost = material['cost']
-
-                if material_id == "delete":
-                    pass
-                else: 
-                    if material_type == "textile":
-                        quantity = float(quantity)
-                        material_object = Textile.objects.get(material_key__material_key = material_id)
-                        StockIn_Textile.objects.create(textile=material_object, stock_in=stockIn_object, quantity=quantity, cost=cost)
-                        material_object.stock += quantity
-                    else:
-                        print('accessory')
-                        material_object = Accessory.objects.get(material_key__material_key = material_id)
-                        StockIn_Accessory.objects.create(accessory=material_object, stock_in=stockIn_object, quantity=quantity, cost=cost)   
-                        material_object.stock += int(quantity)
-                    material_object.save()
-            stockIn_object.updateCost()
-            stockIn_object.save()
-
             response = {}
             response['status'] = True
+            today = datetime.today()
+            print('edit')
+            try:
+                with transaction.atomic():
+                    date = request.POST.get("date")
+                    pk = request.POST.get("pk")
+                    if not date:
+                        response['status'] = False
+                        response['error'] = "Please input a date"
+                        raise ValueError("Please input a date")
+                    if datetime.strptime(date, '%Y-%m-%d') > today:
+                        response['status'] = False
+                        response['error'] = "Please input a valid date"
+                        raise ValueError("Please input a valid date")
+
+                    stockIn_object = StockIn.objects.get(pk=pk)
+                    material_data = json.loads(request.POST.get("materials"))
+
+                    stockIn_object.transaction_date = date
+
+                    acc_to_delete = StockIn_Accessory.objects.filter(stock_in=stockIn_object)
+                    textile_to_delete = StockIn_Textile.objects.filter(stock_in=stockIn_object)
+
+                    for stock_material in textile_to_delete:
+                        stock_material.textile.stock -= stock_material.quantity
+                        stock_material.textile.save()
+                        stock_material.delete()
+                    for stock_material in acc_to_delete:
+                        stock_material.accessory.stock -= stock_material.quantity
+                        stock_material.accessory.save()
+                        stock_material.delete()
+
+
+                    for material in material_data:  
+                        print("pass")
+                        material_id = material['stock_material']
+                        material_type = material['material_type']
+                        quantity = material['quantity']
+                        cost = material['cost']
+
+                        if material_id == "delete":
+                            pass
+                        else: 
+                            if not quantity:
+                                response['status'] = False
+                                response['error'] = "Please input a quantity"
+                                raise ValueError("Please input a date")
+                            if int(quantity) == 0:
+                                response['status'] = False
+                                response['error'] = "Please input a quantity other than zero"
+                                raise ValueError("Please input a date")
+                            if not cost:
+                                response['status'] = False
+                                response['error'] = "Please input a cost"
+                                raise ValueError("Please input a date")
+                            if int(cost) < 0:
+                                response['status'] = False
+                                response['error'] = "Please input a non-negative cost"
+                                raise ValueError("Please input a date")
+                            if material_type == "textile":
+                                quantity = float(quantity)
+                                material_object = Textile.objects.get(material_key__material_key = material_id)
+                                StockIn_Textile.objects.create(textile=material_object, stock_in=stockIn_object, quantity=quantity, cost=cost)
+                                material_object.stock += quantity
+                            else:
+                                print('accessory')
+                                material_object = Accessory.objects.get(material_key__material_key = material_id)
+                                StockIn_Accessory.objects.create(accessory=material_object, stock_in=stockIn_object, quantity=quantity, cost=cost)   
+                                material_object.stock += int(quantity)
+                            material_object.save()
+                    stockIn_object.updateCost()
+                    stockIn_object.save()
+
+            except ValueError as e:
+                print('An error occurred:', str(e))
+
             response['msg'] = "Form submitted."
             response['url'] = reverse('stock_in')
-            print(reverse('stock_in'))
 
             # return dict to ajax
             return JsonResponse(response)
