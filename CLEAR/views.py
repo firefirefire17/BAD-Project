@@ -79,13 +79,13 @@ def dashboard(request):
         wage_object = Financial_Value.objects.get(name="labor_wage")
         wage = wage_object.value
     except: # if the global value doesn't exist, assign it to false to flag it for creation later
-        wage_object = False
+        wage = False
 
     try:
         vat_object = Financial_Value.objects.get(name="vat")
         vat = vat_object.value
     except:
-        vat_object = False
+        vat = False
     
     return render(request, 'CLEAR/dashboard.html', {'wage' : wage, 'vat': vat, 'orders':order_objects, 'products':product_objects, 'accessories':accessory_objects, 'textiles':textile_objects, 'outlets':outlet_objects, 'outlet_count':outlet_count, 'materials': material_objects})
     
@@ -646,10 +646,13 @@ def materials(request):
                 error_message = "Please input a valid cost"
                 return render(request, 'CLEAR/materials.html', {'materials': material_objects, 'error_message': error_message,})
 
-            try:
-                stock = int(stock)
-            except:
-                stock = float(stock)
+            if stock == 0: 
+                pass
+            else:
+                try:
+                    stock = int(stock)
+                except:
+                    stock = float(stock)
 
             if len(name) > 50:
                 error_message = "Input cannot be more than 50 characters"
@@ -842,69 +845,73 @@ def job_orders(request):
         if action == 'add_form':
             response = {}
             response['status'] = True
+            try: 
+                with transaction.atomic():
 
-            with transaction.atomic():
-                outlet_object = Outlet.objects.get(pk=outlet)
-                new_order = Job_Order.objects.create(file_date=file_date, order_status=status, customer=customer, outlet=outlet_object)
-                if start_date:
-                    new_order.start_date = start_date
-                    new_order.save()
-                if completion_date:
-                    new_order.completion_date = completion_date
-                    new_order.save()
-                    print('completion-date')
-                    print(new_order.completion_date)
 
-                item_data = json.loads(request.POST.get("items"))
-                for item in item_data:
-                    product_id = item['order_item']
-                    if product_id == 'delete':
-                        pass
-                    else:
-                        product = Product.objects.get(pk = item['order_item'])
-                        quantity = item['quantity']
-                        if item['materials']:
-                            type = "bespoke"
+                    outlet_object = Outlet.objects.get(pk=outlet)
+                    new_order = Job_Order.objects.create(file_date=file_date, order_status=status, customer=customer, outlet=outlet_object)
+                    if start_date:
+                        new_order.start_date = start_date
+                        new_order.save()
+                    if completion_date:
+                        new_order.completion_date = completion_date
+                        new_order.save()
+                        print('completion-date')
+                        print(new_order.completion_date)
+
+                    item_data = json.loads(request.POST.get("items"))
+                    for item in item_data:
+                        product_id = item['order_item']
+                        if product_id == 'delete':
+                            pass
                         else:
-                            type = "regular"
-
-                        new_item = Item.objects.create(product=product, type=type)
-
-                        bespoke_cost = 0
-                        for material in item['materials']:
-                            material_type = material['material_type']
-                            item_material = material['item_material']
-                            bespoke_rate = material['bespoke_rate']
-                            quantity = material['quantity']
-                            print(quantity)
-                            if item_material == "delete":
-                                pass
+                            product = Product.objects.get(pk = item['order_item'])
+                            quantity = item['quantity']
+                            if item['materials']:
+                                type = "bespoke"
                             else:
-                                if material_type == 'textile':
-                                    textile_object = Textile.objects.get(material_key__material_key = item_material)
-                                    Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                                type = "regular"
+
+                            new_item = Item.objects.create(product=product, type=type)
+
+                            bespoke_cost = 0
+                            for material in item['materials']:
+                                material_type = material['material_type']
+                                item_material = material['item_material']
+                                bespoke_rate = material['bespoke_rate']
+                                quantity = material['quantity']
+                                print(quantity)
+                                if item_material == "delete":
+                                    pass
                                 else:
-                                    accessory_object = Accessory.objects.get(material_key__material_key = item_material)
-                                    Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
-                                bespoke_cost += float(bespoke_rate)
-                        
-                        new_item.cost = new_item.product.retail_price + bespoke_cost
-                        new_item.save()
+                                    if material_type == 'textile':
+                                        textile_object = Textile.objects.get(material_key__material_key = item_material)
+                                        Item_Textile.objects.create(item=new_item, textile=textile_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                                    else:
+                                        accessory_object = Accessory.objects.get(material_key__material_key = item_material)
+                                        Item_Accessory.objects.create(item=new_item, accessory=accessory_object, bespoke_rate=bespoke_rate, quantity=quantity)
+                                    bespoke_cost += float(bespoke_rate)
+                            
+                            new_item.cost = new_item.product.retail_price + bespoke_cost
+                            new_item.save()
 
-                        existing_item = new_item.is_duplicate()
-                        print(existing_item)
+                            existing_item = new_item.is_duplicate()
+                            print(existing_item)
 
-                        quantity = item['quantity']
-                        if not existing_item:
-                            print('pass')
-                            Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
-                        else:
-                            new_item.delete()
-                            Order_Item.objects.create(order=new_order, item=existing_item, quantity=quantity)
+                            quantity = item['quantity']
+                            if not existing_item:
+                                print('pass')
+                                Order_Item.objects.create(order=new_order, item=new_item, quantity=quantity)
+                            else:
+                                new_item.delete()
+                                Order_Item.objects.create(order=new_order, item=existing_item, quantity=quantity)
 
-            if status == "completed":
-                new_order.deduct_stocks(new_order.get_stocks())
-        
+                if status == "completed":
+                    new_order.deduct_stocks(new_order.get_stocks())
+            except ValueError as e:
+                print('An error occurred:', str(e))
+                
             response['msg'] = "Form submitted."
             response['url'] = reverse('orders')
 
