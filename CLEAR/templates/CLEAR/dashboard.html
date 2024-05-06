@@ -22,6 +22,11 @@
 
 {% block content %}
         <!-- Your content here -->
+        {% if messages %}
+            {% for message in messages %}
+                <h5 style="color: #FF0000;">{{ message }}</h5>
+            {% endfor %}
+        {% endif %}
         <div class="row pb-4 pt-3 ">
             <div class="col-md-6">
                 <div class="card" style="border-radius: 20px;">

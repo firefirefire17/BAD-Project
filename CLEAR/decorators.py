@@ -1,6 +1,8 @@
 from django.http import HttpResponseForbidden
 from functools import wraps
 from .models import Account
+from django.shortcuts import redirect
+from django.contrib import messages
 
 def owner_required(view_func):
     @wraps(view_func)
@@ -11,9 +13,12 @@ def owner_required(view_func):
                 if account.role == Account.ROLE_OWNER:
                     return view_func(request, *args, **kwargs)
                 else:
-                    return HttpResponseForbidden("You don't have permission to access this page.")
+                    messages.error(request, "You don't have permission to access this page.")
+                    return redirect('dashboard')
             except Account.DoesNotExist:
-                return HttpResponseForbidden("You don't have permission to access this page.")
+                messages.error(request, "You don't have permission to access this page.")
+                return redirect('dashboard')
         else:
-            return HttpResponseForbidden("You don't have permission to access this page.")
+            messages.error(request, "You don't have permission to access this page.")
+            return redirect('dashboard')
     return wrapped_view
